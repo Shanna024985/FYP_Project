@@ -5,7 +5,7 @@ const path = require('path');
 
 let app = express();
 app.use(cors({
-    origin: ["https://google-drive-folder-creation.onrender.com","http://localhost:5173","http://localhost:5174","http://localhost:3000","https://game-for-cny.vercel.app"]
+    origin: ["http://localhost:5173","http://localhost:5174","http://localhost:3000"]
 }))
 app.use(express.json())
 app.use(express.urlencoded({extended: false}))
