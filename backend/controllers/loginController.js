@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto")
+const jose = require("jose")
 // let model = require("../models/memberModel")
 let model = require("../models/userModel")
 module.exports.checkWhetherUserIsInside = (req, res, next) => {
@@ -56,9 +57,11 @@ const singpassAppID = process.env.SINGPASS_APP_ID;
 const options = {
     algorithm: 'ES256'
 };
-const privateKey = JSON.parse(process.env.SINGPASS_PRIVATE_KEY_SIG);
+const privateKey = JSON.parse(process.env.PRIVATE_KEY_SIG);
 const privateKeyPem = crypto.createPrivateKey({key: privateKey, format: 'jwk'}).export({type: 'pkcs8', format: 'pem'})
-const publicKey = JSON.parse(process.env.SINGPASS_PUBLIC_KEY_SIG);
+const publicKey = JSON.parse(process.env.PUBLIC_KEY_SIG);
+const publicKeySingpass = JSON.parse(process.env.SINGPASS_PUBLIC_KEY_SIG);
+const publicKeySingpassPem = crypto.createPublicKey({key: publicKeySingpass, format: 'jwk'}).export({type: 'spki', format: 'pem'})
 const generateCode = () => {
     let codeVerifier = ''
     for (let i = 0; i < 128; i ++) {
@@ -69,10 +72,11 @@ const generateCode = () => {
 }
 const timeInSeconds = () => parseInt(Date.now() / 1000)
 const secretKey = process.env.JWT_SECRET_KEY.trim();
-const redirectURI = 'localhost:3000/login';
+const redirectURI = 'http://localhost:3000/api/auth/token';
 const generateClientAssertion = endpoint => jwt.sign({
     sub: singpassAppID,
     aud: `https://stg-id.singpass.gov.sg/fapi/${endpoint}`,
+    
     iss: singpassAppID,
     iat: timeInSeconds(),
     exp: timeInSeconds() + 120,
@@ -80,6 +84,8 @@ const generateClientAssertion = endpoint => jwt.sign({
 }, privateKeyPem, {
     ...options,
     header: {
+        alg: 'ES256',
+        typ: 'JWT',
         kid: privateKey.kid
     }
 });
@@ -110,28 +116,26 @@ module.exports.createSingpassURL = (req, res, next) => {
     const nonce = generateUUIDV4();
     const code = generateCode();
     
-    const body = {
-        response_type: 'code',
-        scope: 'openid', // scope to be discussed
-        state,
-        nonce,
-        client_id: singpassAppID,
-        redirect_uri: redirectURI, // redirect_uri to be discussed
-        client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
-        client_assertion: generateClientAssertion('par'),
-        code_challenge: code.codeChallenge,
-        code_challenge_method: 'S256',
-        authentication_context_type: 'APP_AUTHENTICATION_DEFAULT',
-        authentication_context_message: 'Authentication using Singpass to login to Microjobs.Shop'
-    }
-    
     fetch('https://stg-id.singpass.gov.sg/fapi/par', {
         method: "POST",
         headers: generateHeaders('par'),
-        body: new URLSearchParams(body)
+        body: new URLSearchParams({
+            response_type: 'code',
+            scope: 'openid', // scope to be discussed
+            state,
+            nonce,
+            client_id: singpassAppID,
+            redirect_uri: redirectURI, // redirect_uri to be discussed
+            client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
+            client_assertion: generateClientAssertion('par'),
+            code_challenge: code.codeChallenge,
+            code_challenge_method: 'S256',
+            authentication_context_type: 'APP_AUTHENTICATION_DEFAULT',
+            authentication_context_message: 'Authentication using Singpass to login to Microjobs.Shop'
+        })
     })
     .then((response) => {
-        if (response.status != 200) {
+        if (response.status != 201) {
             console.log('Error!');
             console.log(response);
             return response.json();
@@ -146,9 +150,9 @@ module.exports.createSingpassURL = (req, res, next) => {
         } else {
             // Redirect the user to the Singpass auth page (https://stg-id.singpass.gov.sg/fapi/auth)
             // {state, nonce, codeVerifier} needs to be stored as a session for later
-            req.session = {state, nonce, codeVerifier: code.codeVerifier}
-            res.status(200).json({singpassAuthURL: `https://stg-id.singpass.gov.sg/fapi/auth?client_id=${singpassAppID}&request_uri=${value.request_uri}`});
-            // res.status(200).redirect(`https://stg-id.singpass.gov.sg/fapi/auth?client_id=${singpassAppID}&request_uri=${value.request_uri}`);
+            req.session.singpassSessionData = {state, nonce, codeVerifier: code.codeVerifier}
+            // res.status(200).json({singpassAuthURL: `https://stg-id.singpass.gov.sg/fapi/auth?client_id=${singpassAppID}&request_uri=${value.request_uri}`});
+            res.status(200).redirect(`https://stg-id.singpass.gov.sg/fapi/auth?client_id=${singpassAppID}&request_uri=${value.request_uri}`);
         }
     })
     .catch((error) => console.error(error));
@@ -156,12 +160,12 @@ module.exports.createSingpassURL = (req, res, next) => {
 
 // 2: Check redirect params are valid
 module.exports.checkRedirectIsValid = (req, res, next) => {
-    // req.body needs code and state
-    if (!req.body.code) {
+    // req.params needs code and state
+    if (!req.query.code) {
         res.status(400).json({message: `code is missing`});
-    } else if (!req.body.state) {
+    } else if (!req.query.state) {
         res.status(400).json({message: `state is missing`});
-    } else if (req.body.state != req.session.state) {
+    } else if (req.query.state != req.session.singpassSessionData.state) {
         res.status(403).json({message: `state does not match`});
     } else {
         next();
@@ -176,10 +180,10 @@ module.exports.getSingpassToken = (req, res, next) => {
         body: new URLSearchParams({
             redirect_uri: redirectURI,
             grant_type: 'authorization_code',
-            code: req.body.code,
+            code: req.query.code,
             client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
             client_assertion: generateClientAssertion('token'),
-            code_verifier: req.session.codeVerifier
+            code_verifier: req.session.singpassSessionData.codeVerifier
         })
     })
     .then((response) => {
@@ -209,19 +213,20 @@ module.exports.getSingpassToken = (req, res, next) => {
                     res.status(403).json({message: 'ID Token is invalid'})
                 } else if (decoded.exp < timeInSeconds()) {
                     res.status(403).json({message: 'ID Token is invalid'})
-                } else if (decoded.nonce != req.session.nonce) {
+                } else if (decoded.nonce != req.session.singpassSessionData.nonce) {
                     res.status(403).json({message: 'ID Token is invalid'})
                 } else {
                     // clear session, this will no longer be needed
                     req.session.destroy((err) => {
                         res.locals.singpassId = decoded.sub;
-                        res.status(200).json({singpassId: decoded.sub})
-                        // next();
+                        next();
                     });
                 }
             };
 
-            const idToken = jwt.verify(value.id_token, privateKey, callback);
+            jose.compactDecrypt(value.id_token, JSON.parse(process.env.PRIVATE_KEY_ENC)).then((result, key) => {
+                jwt.verify(new TextDecoder().decode(result.plaintext), publicKeySingpassPem, callback);
+            })
         }
     })
     .catch((error) => console.error(error));

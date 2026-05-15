@@ -10,20 +10,14 @@ app.use(cors({
 }))
 app.use(express.json())
 app.use(express.urlencoded({extended: false}))
+// Singpass also needs session data
+app.use(session({secret: 'singpassSessionData', resave: false, saveUninitialized: true, cookie: {secure: false, maxAge: 120000}}))
 let pathForServingHtmlFile = path.join(__dirname,"dist")
 console.log(pathForServingHtmlFile)
 app.use("/",express.static(pathForServingHtmlFile))
 
 let mainRoutes = require("./routers/mainRoutes")
 app.use("/api",mainRoutes)
-
-// For Singpass, the app needs to show public keys
-app.use("/.well-known/jwks.json", (req, res) => {
-    res.status(200).json({keys: [JSON.parse(process.env.SINGPASS_PUBLIC_KEY_SIG), JSON.parse(process.env.SINGPASS_PUBLIC_KEY_ENC)]})
-});
-
-// Singpass also needs session data
-app.use(session({secret: 'singpassSessionData', cookie: {maxAge: 120000}}))
 
 // Catch-all for React Router
 app.use((req, res) => {

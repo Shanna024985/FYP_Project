@@ -15,7 +15,7 @@ module.exports.insertNewUser = singpassId => {
 }
 
 module.exports.getUserDetailById = id => {
-    let sql = "SELECT id FROM user_ JOIN user_detail ON user_.id = user_detail.user_id WHERE user_.id = $1;";
+    let sql = "SELECT user_.id FROM user_ JOIN user_detail ON user_.id = user_detail.user_id WHERE user_.id = $1;";
     return query(sql, [id]).then(function (result) {
         return result.rows;
     });
