@@ -119,12 +119,13 @@
 // }
 import { Routes, Route } from "react-router-dom";
 import BrowseJobs from "./pages/BrowseJobs";
-
+import EditProfile from "./pages/EditProfile";
 function App() {
   return (
     <Routes>
       <Route path="/" element={<h1>Home</h1>} />
       <Route path="/browse-jobs" element={<BrowseJobs />} />
+      <Route path="/edit-profile" element={<EditProfile />} />
     </Routes>
   );
 }

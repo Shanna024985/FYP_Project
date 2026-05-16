@@ -1,0 +1,169 @@
+.page {
+  background-color: #f2e9d9;
+  min-height: 100vh;
+  padding: 20px 40px;
+  font-family: Arial, sans-serif;
+}
+
+/* TOP BAR */
+.topBar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.title {
+  font-weight: 700;      /* bold */
+  font-size: 24px;       /* bigger */
+  color: #000000;        /* black */
+}
+
+.saveButton {
+  position: absolute;
+  right: 0;
+  background-color: #2a88e0;
+  color: #f2e9d9;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.saveIcon {
+  width: 18px;
+  height: 18px;
+  margin-right: 6px;
+}
+
+/* PROFILE */
+.center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.avatarPlaceholder {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background-color: #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.uploadButton {
+  background-color: #2a88e0;
+  color: #f2e9d9;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* FORM */
+.formGroup {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* change from space-between */
+  gap: 20px;
+  margin-bottom: 12px;
+}
+.formGroup label {
+  min-width: 120px;   /* keeps labels aligned */
+  font-weight: 500;
+  color: #000;
+}
+
+.input {
+  flex: 1;            /* makes input take remaining space */
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+/* SECTION TITLES */
+.sectionTitle {
+  text-align: center;
+  font-weight: bold;
+  margin-top: 20px;
+}
+
+/* LINK BUTTONS */
+.buttonRow {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.linkButton {
+  background-color: transparent;
+  border: 1px solid #2a88e0;
+  color: #2a88e0;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* SECTION HEADER */
+.sectionHeader {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  font-weight: bold;
+}
+
+/* ADD BUTTON */
+.circleAddButton {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid #2a88e0;
+  background-color: transparent;
+  color: #2a88e0;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 18px;
+}
+
+/* PLACEHOLDER CARDS */
+.cardPlaceholder {
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px dashed #aaa;
+  text-align: center;
+  border-radius: 6px;
+}
+
+
+.sectionTitle,
+.sectionHeader {
+  color: #000000;
+}
+.sectionHeader h3 {
+  color: #000000;
+}
+
+
+.divider {
+  width: 100%;
+  height: 1px;
+  background-color: #c9c1b5; /* slightly darker than background */
+  margin: 20px 0;
+  border: none;
+}
+
+.page {
+  text-align: left;
+}
+
+
