@@ -1,4 +1,5 @@
 const express = require("express")
+var session = require('express-session')
 require("dotenv").config();
 let cors = require("cors")
 const path = require('path');
@@ -9,6 +10,8 @@ app.use(cors({
 }))
 app.use(express.json())
 app.use(express.urlencoded({extended: false}))
+// Singpass also needs session data
+app.use(session({secret: 'singpassSessionData', resave: false, saveUninitialized: true, cookie: {secure: false, maxAge: 120000}}))
 let pathForServingHtmlFile = path.join(__dirname,"dist")
 console.log(pathForServingHtmlFile)
 app.use("/",express.static(pathForServingHtmlFile))
