@@ -4,6 +4,6 @@ const jwtMiddleware = require('../middlewares/jwtMiddleware');
 const router = express.Router();
 
 router.get('/', loginController.createSingpassURL);
-router.get('/token', loginController.checkRedirectIsValid, loginController.getSingpassToken, loginController.checkSingpassIdExists, jwtMiddleware.generateToken, loginController.processJSON, jwtMiddleware.sendToken);
+router.get('/token', loginController.checkRedirectIsValid, loginController.getSingpassToken, loginController.checkSingpassIdExists, jwtMiddleware.generateToken, loginController.processJSON, jwtMiddleware.redirectUserToLogin);
 
 module.exports = router;

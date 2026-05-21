@@ -272,3 +272,8 @@ module.exports.processJSON = (req, res, next) => {
         return res.status(500).json({ error: error.message });
     });
 }
+
+// redirect user to login page
+module.exports.redirectUserToLogin = (req, res, next) => {
+    res.status(200).redirect(`https://localhost:3000/login?token=${res.locals.token}&onboardingNeeded=${res.locals.onboardingNeeded}`);
+}
