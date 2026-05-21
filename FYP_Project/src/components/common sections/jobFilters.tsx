@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Search, MapPin, ChevronDown, ChevronUp } from "lucide-react";
-
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -21,6 +21,7 @@ export default function JobFilters() {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [salaryType, setSalaryType] = useState("negotiable");
 
+  const navigate = useNavigate();
   return (
     <div className="w-full rounded-2xl border bg-background p-6 shadow-sm space-y-5">
       {/* ROW 1 */}
@@ -43,7 +44,9 @@ export default function JobFilters() {
           <InputGroupInput placeholder="Enter city..." />
         </InputGroup>
 
-        <Button className="h-11 px-8">Find Jobs</Button>
+        <Button className="h-11 px-8" onClick={() => navigate("/browsejobs")}>
+          Find Jobs
+        </Button>
       </div>
 
       {/* Advanced Toggle */}
