@@ -6,8 +6,8 @@ router.get("/",(req,res,next)=>{
 });
 
 // routers
-const loginRouter = require('./loginRouter');
-router.use("/auth", loginRouter);
+const loginRouter = require('./loginRoutes');
+router.use("/auth", loginRoutes);
 
 const jobRoutes = require("./jobRoutes");
 router.use("/jobs", jobRoutes);
