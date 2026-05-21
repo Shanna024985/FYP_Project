@@ -21,3 +21,7 @@ Afterwards, the backend will redirect the user to `/login` with these URL parame
 | - | - |
 | token | A JWT token that is used for authenticating the user. |
 | onboardingNeeded | Returns `true` or `false`. If the parameter value is `true` you should redirect the user to the onboarding page, otherwise redirect the user to the dashboard. |
+
+Example redirect URL:
+
+`http://localhost:3000/login?token=<token>&onboardingNeeded=true`
