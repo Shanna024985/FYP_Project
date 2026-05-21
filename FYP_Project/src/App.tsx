@@ -6,7 +6,7 @@ import JobPostings from './JobPostings'
 import EditJobs from './EditJobs'
 import ViewApplicants from './ViewApplicants'
 
-const linkForBackend = "http://localhost:3421"
+const linkForBackend = "http://localhost:3000"
 
 function App() {
   return (
