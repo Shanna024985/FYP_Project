@@ -12,7 +12,7 @@ app.use(express.json())
 app.use(express.urlencoded({extended: false}))
 // Singpass also needs session data
 app.use(session({secret: 'singpassSessionData', resave: false, saveUninitialized: true, cookie: {secure: false, maxAge: 120000}}))
-let pathForServingHtmlFile = path.join(__dirname,"dist")
+let pathForServingHtmlFile = path.join(__dirname,"../FYP_Project")
 console.log(pathForServingHtmlFile)
 app.use("/",express.static(pathForServingHtmlFile))
 
