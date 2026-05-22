@@ -9,6 +9,9 @@ router.post("/company", jwtMiddleware.verifyToken, jobController.createCompany);
 router.get("/my/companies", jwtMiddleware.verifyToken, jobController.getMyCompanies);
 router.get("/my/jobs", jwtMiddleware.verifyToken, jobController.getMyJobs);
 
+// update application
+router.put("/application/:id/:status", jwtMiddleware.verifyToken, applicationController.getJobIdByApplicationId, applicationController.verifyJobOwnership, applicationController.updateStatusById);
+
 // Public job routes
 router.get("/", jobController.getAllJobs);
 

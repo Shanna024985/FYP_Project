@@ -114,3 +114,30 @@ module.exports.getAwaitingResponsesByJobIdAndName = (req, res, next) => {
         return res.status(500).json({ error: error.message });
     });
 }
+
+// update job ID by application ID
+module.exports.getJobIDByApplicationId = (req, res, next) => {
+    return model.getJobIDByApplicationId(req.params.id)
+    .then((jobId) => {
+        if (jobId.length == 0) {
+            return res.status(404).json({ message: 'id is not found' });
+        } else {
+            req.params.jobId = jobId[0].job_id
+            next();
+        }
+    }).catch(function (error) {
+        console.error(error);
+        return res.status(500).json({ error: error.message });
+    });
+}
+
+// update status by ID
+module.exports.updateStatusById = (req, res, next) => {
+    return model.updateStatusById(req.params.status, req.params.id)
+    .then((applications) => {
+        return res.status(200).json(applications);
+    }).catch(function (error) {
+        console.error(error);
+        return res.status(500).json({ error: error.message });
+    });
+}

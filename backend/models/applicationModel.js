@@ -20,7 +20,7 @@ module.exports.getResponseDetailsByStage = jobId => {
     });
 }
 
-const responsesColumns = `SELECT first_name || ' ' || last_name candidate,
+const responsesColumns = `SELECT a.id, first_name || ' ' || last_name candidate,
 date_applied, file_name resume_name,
 file_url resume_url, status, phone_number, email
 FROM application a JOIN user_ u ON u.id = a.user_id
@@ -59,6 +59,20 @@ module.exports.getActiveCandidatesByJobIdAndName = (jobId, name) => {
 module.exports.getAwaitingResponsesByJobIdAndName = (jobId, name) => {
     let sql = responsesColumns + `WHERE job_id = $1 AND status = 'Reviewing' AND first_name || ' ' || last_name ILIKE $2;`;
     return query(sql, [jobId, name + '%']).then(function(result) {
+        return result.rows;
+    });
+}
+
+module.exports.updateStatusById = (status, id) => {
+    let sql = `UPDATE application SET status = $1 WHERE id = $2;`;
+    return query(sql, [status, id]).then(function(result) {
+        return result.rows;
+    });
+}
+
+module.exports.getJobIdByApplicationId = (id) => {
+    let sql = `GET job_id FROM application WHERE id = $1;`;
+    return query(sql, [id]).then(function(result) {
         return result.rows;
     });
 }
