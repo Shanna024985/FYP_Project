@@ -29,14 +29,14 @@ JOIN resume r ON r.id = a.resume_id
 `;
 
 module.exports.getActiveCandidatesByJobId = jobId => {
-    let sql = responsesColumns + `WHERE job_id = $1 AND status <> 'Reviewing';`;
+    let sql = responsesColumns + `WHERE job_id = $1 AND status IN ('Interviewing', 'Offered', 'Rejected');`;
     return query(sql, [jobId]).then(function(result) {
         return result.rows;
     });
 }
 
 module.exports.getAwaitingResponsesByJobId = jobId => {
-    let sql = responsesColumns + `WHERE job_id = $1 AND status = 'Reviewing';`;
+    let sql = responsesColumns + `WHERE job_id = $1 AND status NOT IN ('Interviewing', 'Offered', 'Rejected');`;
     return query(sql, [jobId]).then(function(result) {
         return result.rows;
     });
