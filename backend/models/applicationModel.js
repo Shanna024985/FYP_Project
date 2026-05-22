@@ -1,5 +1,13 @@
 const { query } = require("../services/dbConnection");
 
+module.exports.getJobCompanyOwnershipById = jobId => {
+    let sql = `SELECT user_id FROM job j JOIN company c ON j.company_id = c.id
+    JOIN company_ownership o ON o.company_id = c.id`;
+    return query(sql, [jobId]).then(function(result) {
+        return result.rows;
+    });
+}
+
 module.exports.getResponseDetailsByStage = jobId => {
     let sql = `WITH responses AS (SELECT status FROM application WHERE job_id = $1)
 	SELECT (SELECT COUNT(*) from responses r1 WHERE r1.status = 'Screening') screening,
@@ -12,9 +20,45 @@ module.exports.getResponseDetailsByStage = jobId => {
     });
 }
 
-module.exports.getResponsesById = jobId => {
-    let sql = `SELECT * FROM application WHERE job_id = $1;`;
+const responsesColumns = `SELECT first_name || ' ' || last_name candidate,
+date_applied, file_name resume_name,
+file_url resume_url, status, phone_number, email
+FROM application a JOIN user_ u ON u.id = a.user_id
+JOIN user_detail d ON u.id = d.user_id
+JOIN resume r ON r.id = a.resume_id
+`;
+
+module.exports.getActiveCandidatesByJobId = jobId => {
+    let sql = responsesColumns + `WHERE job_id = $1 AND status <> 'Reviewing';`;
     return query(sql, [jobId]).then(function(result) {
+        return result.rows;
+    });
+}
+
+module.exports.getAwaitingResponsesByJobId = jobId => {
+    let sql = responsesColumns + `WHERE job_id = $1 AND status = 'Reviewing';`;
+    return query(sql, [jobId]).then(function(result) {
+        return result.rows;
+    });
+}
+
+module.exports.getApplicationsByJobId = jobId => {
+    let sql = responsesColumns + `WHERE job_id = $1;`;
+    return query(sql, [jobId]).then(function(result) {
+        return result.rows;
+    });
+}
+
+module.exports.getActiveCandidatesByJobIdAndName = (jobId, name) => {
+    let sql = responsesColumns + `WHERE job_id = $1 AND status <> 'Reviewing' AND first_name || ' ' || last_name ILIKE $2;`;
+    return query(sql, [jobId, name + '%']).then(function(result) {
+        return result.rows;
+    });
+}
+
+module.exports.getAwaitingResponsesByJobIdAndName = (jobId, name) => {
+    let sql = responsesColumns + `WHERE job_id = $1 AND status = 'Reviewing' AND first_name || ' ' || last_name ILIKE $2;`;
+    return query(sql, [jobId, name + '%']).then(function(result) {
         return result.rows;
     });
 }

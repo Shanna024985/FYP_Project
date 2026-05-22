@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const jobController = require("../controllers/jobController");
+const applicationController = require("../controllers/applicationController");
 const jwtMiddleware = require('../middlewares/jwtMiddleware');
 
 // Company routes (SPECIFIC routes first)
@@ -20,6 +21,6 @@ router.patch("/:id/close", jwtMiddleware.verifyToken, jobController.closeJob);
 
 // Application routes
 const applicationRoutes = require('./applicationRoutes');
-router.use("/:id/application", jwtMiddleware.verifyToken, applicationRoutes);
+router.use("/:id/application", jwtMiddleware.verifyToken, applicationController.verifyJobId, applicationController.verifyJobExists, applicationController.verifyJobOwnership, applicationRoutes);
 
 module.exports = router;
