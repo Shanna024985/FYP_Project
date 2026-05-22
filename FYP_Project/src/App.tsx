@@ -10,6 +10,7 @@ import JobPostings from './JobPostings'
 import EditJobs from './EditJobs'
 import ViewApplicants from './ViewApplicants'
 import BrowseJobs from './BrowseJobs'
+import Profile from './EditProfile'
 const linkForBackend = "http://localhost:3421"
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
         <Route path='/editjobs' element={<EditJobs currentUrl={linkForBackend}/>} />
         <Route path='/jobApplicants' element={<ViewApplicants currentUrl={linkForBackend}/>}/>
         <Route path='/browsejobs' element={<BrowseJobs />}/>
+        <Route path='/profile' element={<Profile />}/>
       </Routes>
     </>
   )
