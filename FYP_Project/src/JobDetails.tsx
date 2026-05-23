@@ -145,7 +145,7 @@ Requirements:
               <div className="grid gap-6 lg:grid-cols-3">
                 {/* JOB INFO */}
                 <div className="rounded-2xl border bg-muted/20 p-6 lg:col-span-2">
-                  <h2 className="mb-5 text-xl font-semibold">Job Info</h2>
+                  <h2 className="mb-5 text-xl font-semibold title-black">Job Info</h2>
 
                   <div className="space-y-4 text-sm">
                     <div className="flex items-center gap-3">
