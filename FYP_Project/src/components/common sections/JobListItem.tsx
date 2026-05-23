@@ -1,6 +1,6 @@
 import { Bookmark, MapPin, Eye } from "lucide-react"
 import { useState } from "react"
-
+import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 
@@ -24,7 +24,7 @@ export default function JobListItem({
   companyLogo,
 }: JobListItemProps) {
   const [bookmarked, setBookmarked] = useState(false)
-
+  const navigate = useNavigate();
   return (
     <Card className="relative flex gap-4 p-4 hover:shadow-md transition">
       {/* LEFT: LOGO */}
@@ -88,7 +88,7 @@ export default function JobListItem({
 
       {/* BOTTOM RIGHT: VIEW BUTTON */}
       <div className="absolute bottom-3 right-3">
-        <Button size="sm">View</Button>
+        <Button size="sm" onClick={() => navigate("/jobDetails")}>View</Button>
       </div>
     </Card>
   )
