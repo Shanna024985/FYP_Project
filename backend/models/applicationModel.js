@@ -50,14 +50,14 @@ module.exports.getApplicationsByJobId = jobId => {
 }
 
 module.exports.getActiveCandidatesByJobIdAndName = (jobId, name) => {
-    let sql = responsesColumns + `WHERE job_id = $1 AND status <> 'Reviewing' AND first_name || ' ' || last_name ILIKE $2;`;
+    let sql = responsesColumns + `WHERE job_id = $1 AND status IN ('Interviewing', 'Offered', 'Rejected') AND first_name || ' ' || last_name ILIKE $2;`;
     return query(sql, [jobId, name + '%']).then(function(result) {
         return result.rows;
     });
 }
 
 module.exports.getAwaitingResponsesByJobIdAndName = (jobId, name) => {
-    let sql = responsesColumns + `WHERE job_id = $1 AND status = 'Reviewing' AND first_name || ' ' || last_name ILIKE $2;`;
+    let sql = responsesColumns + `WHERE job_id = $1 AND status NOT IN ('Interviewing', 'Offered', 'Rejected') AND first_name || ' ' || last_name ILIKE $2;`;
     return query(sql, [jobId, name + '%']).then(function(result) {
         return result.rows;
     });
@@ -73,6 +73,13 @@ module.exports.updateStatusById = (status, id) => {
 module.exports.getJobIdByApplicationId = (id) => {
     let sql = `GET job_id FROM application WHERE id = $1;`;
     return query(sql, [id]).then(function(result) {
+        return result.rows;
+    });
+}
+
+module.exports.insertSingleApplication = (jobId, userId, resumeId) => {
+    let sql = `INSERT INTO application (job_id, user_id, resume_id) VALUES ($1, $2, $3) RETURNING id;`;
+    return query(sql, [jobId, userId, resumeId]).then(function(result) {
         return result.rows;
     });
 }

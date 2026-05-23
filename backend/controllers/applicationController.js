@@ -1,5 +1,6 @@
 let model = require("../models/applicationModel");
 let jobModel = require("../models/jobModel");
+let resumeModel = require("../models/resumeModel");
 
 // APPLICANT OVERVIEW
 // verify job ID
@@ -115,7 +116,7 @@ module.exports.getAwaitingResponsesByJobIdAndName = (req, res, next) => {
     });
 }
 
-// update job ID by application ID
+// get job ID by application ID
 module.exports.getJobIDByApplicationId = (req, res, next) => {
     return model.getJobIDByApplicationId(req.params.id)
     .then((jobId) => {
@@ -133,9 +134,57 @@ module.exports.getJobIDByApplicationId = (req, res, next) => {
 
 // update status by ID
 module.exports.updateStatusById = (req, res, next) => {
-    return model.updateStatusById(req.params.status, req.params.id)
+    return model.updateStatusById(req.body.status, req.params.id)
     .then((applications) => {
         return res.status(200).json(applications);
+    }).catch(function (error) {
+        console.error(error);
+        return res.status(500).json({ error: error.message });
+    });
+}
+
+// verify that provided status exists
+module.exports.verifyStatus = (req, res, next) => {
+    if (!req.body.status) {
+        return res.status(400).json({ message: 'status is undefined' });
+    } else if (!['Reviewing', 'Screening', 'Testing', 'Interviewing', 'Offered', 'Onboarded', 'Rejected'].includes(req.body.status)) {
+        return res.status(400).json({ message: 'status is not one of the following: Reviewing, Screening, Testing, Interviewing, Offered, Onboarded, Rejected' });
+    } else {
+        next();
+    }
+}
+
+// verify provided resume exists
+module.exports.verifyResumeExists = (req, res, next) => {
+    if (!req.body.resumeId) {
+        return res.status(400).json({ message: 'resumeId is undefined' });
+    } else {
+        next();
+    }
+}
+
+// verify user owns the provided resume
+module.exports.verifyResumeOwnership = (req, res, next) => {
+    return resumeModel.getResumeById(req.body.resumeId)
+    .then((resume) => {
+        if (resume.length == 0) {
+            return res.status(404).json({ message: 'resumeId is not found' });
+        } else if (resume[0].user_id != res.locals.userId) {
+            return res.status(403).json({ message: 'You are not the owner of this resume' });
+        } else {
+            next();
+        }
+    }).catch(function (error) {
+        console.error(error);
+        return res.status(500).json({ error: error.message });
+    });
+}
+
+// create an application
+module.exports.createApplication = (req, res, next) => {
+    return model.insertSingleApplication(req.params.id, res.locals.userId, req.body.resumeId)
+    .then((application) => {
+        return res.status(201).json({ message: 'Successfully applied for job.', id: application[0].id});
     }).catch(function (error) {
         console.error(error);
         return res.status(500).json({ error: error.message });

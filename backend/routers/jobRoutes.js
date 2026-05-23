@@ -10,7 +10,7 @@ router.get("/my/companies", jwtMiddleware.verifyToken, jobController.getMyCompan
 router.get("/my/jobs", jwtMiddleware.verifyToken, jobController.getMyJobs);
 
 // update application
-router.put("/application/:id/:status", jwtMiddleware.verifyToken, applicationController.getJobIdByApplicationId, applicationController.verifyJobOwnership, applicationController.updateStatusById);
+router.put("/application/:id", jwtMiddleware.verifyToken, applicationController.verifyStatus, applicationController.getJobIdByApplicationId, applicationController.verifyJobOwnership, applicationController.updateStatusById);
 
 // Public job routes
 router.get("/", jobController.getAllJobs);
@@ -23,6 +23,8 @@ router.delete("/:id", jwtMiddleware.verifyToken, jobController.deleteJob);
 router.patch("/:id/close", jwtMiddleware.verifyToken, jobController.closeJob);
 
 // Application routes
+router.post("/:id/apply", jwtMiddleware.verifyToken, applicationController.verifyJobId, applicationController.verifyJobExists, applicationController.verifyResumeExists, applicationController.verifyResumeOwnership);
+
 const applicationRoutes = require('./applicationRoutes');
 router.use("/:id/application", jwtMiddleware.verifyToken, applicationController.verifyJobId, applicationController.verifyJobExists, applicationController.verifyJobOwnership, applicationRoutes);
 
