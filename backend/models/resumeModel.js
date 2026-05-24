@@ -6,3 +6,24 @@ module.exports.getResumeById = id => {
         return result.rows;
     });
 }
+
+// module.exports.insertSingleResume = (userId, resumeName, resumeURL) => {
+//     let sql = `INSERT INTO resume (user_id, resume_name, resume_url) VALUES (?, ?, ?) RETURNING id;`;
+//     return query(sql, [userId, resumeName, resumeURL]).then(function(result) {
+//         return result.rows;
+//     });
+// }
+
+module.exports.insertSingleResume = (userId, resumeName, resumeData) => {
+    let sql = `INSERT INTO resume (user_id, resume_name, resume_data) VALUES (?, ?, ?) RETURNING id;`;
+    return query(sql, [userId, resumeName, resumeData]).then(function(result) {
+        return result.rows;
+    });
+}
+
+module.exports.updateDefaultResume = (resumeId, userId) => {
+    let sql = `UPDATE user SET default_resume_id = ? WHERE id = ?;`;
+    return query(sql, [resumeId, userId]).then(function(result) {
+        return result.rows;
+    });
+}

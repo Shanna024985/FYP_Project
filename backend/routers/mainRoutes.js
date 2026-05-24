@@ -6,10 +6,16 @@ router.get("/",(req,res,next)=>{
 });
 
 // routers
-const loginRouter = require('./loginRoutes');
+const loginRoutes = require('./loginRoutes');
 router.use("/auth", loginRoutes);
 
 const jobRoutes = require("./jobRoutes");
 router.use("/jobs", jobRoutes);
+
+const resumeRoutes = require("./resumeRoutes");
+router.use("/resume", resumeRoutes);
+
+const userRoutes = require("./userRoutes");
+router.use("/user", userRoutes);
 
 module.exports = router;
