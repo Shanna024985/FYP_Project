@@ -159,7 +159,9 @@ export default function JobSeekerDashboard() {
                   <h2 className="mt-2 text-4xl font-bold title-black">12</h2>
                 </div>
 
-                <Button variant="outline">View Details</Button>
+                <Button variant="outline" onClick={() => navigate("/jobSeeker/applications")}>
+                  View Details
+                </Button>
               </CardContent>
             </Card>
 
