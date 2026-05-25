@@ -22,7 +22,7 @@ module.exports.insertSingleResume = (userId, resumeName, resumeData) => {
 }
 
 module.exports.updateDefaultResume = (resumeId, userId) => {
-    let sql = `UPDATE user SET default_resume_id = ? WHERE id = ?;`;
+    let sql = `UPDATE user_detail SET default_resume_id = ? WHERE user_id = ?;`;
     return query(sql, [resumeId, userId]).then(function(result) {
         return result.rows;
     });
