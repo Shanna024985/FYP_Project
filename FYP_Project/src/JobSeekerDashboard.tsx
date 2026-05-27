@@ -218,7 +218,7 @@ export default function JobSeekerDashboard() {
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-semibold title-black">Jobs Applied</h2>
 
-            <Button variant="outline">View All</Button>
+            <Button variant="outline" onClick={() => navigate("/jobSeeker/applications")}>View All</Button>
           </div>
 
           <Card>

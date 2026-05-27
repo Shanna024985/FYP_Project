@@ -13,11 +13,10 @@ export default function Sidebar() {
     role === "jobseeker"
       ? [
           { label: "Dashboard", path: "/jobSeeker/Dashboard" },
-
+          { label: "Profile", path: "/profile" }
           // TODO: Jobseeker future features:
           // { label: "Applications", path: "/jobSeeker/applications" },
           // { label: "Saved Jobs", path: "/jobSeeker/saved" },
-          // { label: "Profile", path: "/profile" },
         ]
       : [
           { label: "Dashboard", path: "/employer" },
