@@ -16,8 +16,10 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-
-export default function JobFilters() {
+type Props = {
+  currentUrl: string;
+};
+export default function JobFilters({ currentUrl }: Props) {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [salaryType, setSalaryType] = useState("negotiable");
 

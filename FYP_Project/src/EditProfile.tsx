@@ -9,8 +9,10 @@ import {
   InputGroupInput,
   InputGroupText,
 } from "@/components/ui/input-group";
-
-export default function EditProfilePage() {
+type Props = {
+  currentUrl: string;
+};
+export default function EditProfilePage({ currentUrl }: Props) {
   const [profileImage, setProfileImage] = useState<string | null>(null);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {

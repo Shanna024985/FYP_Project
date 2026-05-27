@@ -1,7 +1,9 @@
 import JobCard from "./components/common sections/JobCard";
 import './title.css'
-
-export default function NewestJobsSection() {
+type Props = {
+  currentUrl: string;
+};
+export default function NewestJobsSection({ currentUrl }: Props) {
   const dummyJobs = Array.from({ length: 6 }).map((_, i) => ({
     title: `Frontend Developer ${i + 1}`,
     companyName: "Tech Company",

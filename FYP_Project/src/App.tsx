@@ -64,21 +64,19 @@ import LoginPage from "./Login";
 import LoginCallbackPage from "./LoginCallback";
 import ProtectedLayout from "./ProtectedLayout";
 const linkForBackend = "http://localhost:3421";
-
 function App() {
   const [count, setCount] = useState(0);
 
   return (
     <>
       <Routes>
-        <Route path="/" element={<Homepage />} />
-        <Route path="/browsejobs" element={<BrowseJobs />} />
-        <Route path="/jobDetails" element={<JobDetails />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/login/callback" element={<LoginCallbackPage />} />
+        <Route path="/" element={<Homepage currentUrl={linkForBackend} />} />
+        <Route path="/browsejobs" element={<BrowseJobs currentUrl={linkForBackend}/>} />
+        <Route path="/jobDetails" element={<JobDetails currentUrl={linkForBackend} />} />
+        <Route path="/login" element={<LoginPage currentUrl={linkForBackend} />} />
+        <Route path="/login/callback" element={<LoginCallbackPage currentUrl={linkForBackend}/>} />
         {/* PROTECTED AREA */}
         <Route element={<ProtectedLayout />}>
-          <Route path="/jobSeeker/Dashboard" element={<JobSeekerDashboard />} />
           <Route
             path="/employer"
             element={<Employer currentUrl={linkForBackend} />}
@@ -95,11 +93,14 @@ function App() {
             path="/jobApplicants"
             element={<ViewApplicants currentUrl={linkForBackend} />}
           />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/jobSeeker/Dashboard" element={<JobSeekerDashboard />} />
+          <Route path="/profile" element={<Profile currentUrl={linkForBackend} />} />
+          <Route
+            path="/jobSeeker/Dashboard"
+            element={<JobSeekerDashboard currentUrl={linkForBackend} />}
+          />
           <Route
             path="/jobSeeker/applications"
-            element={<JobSeekerApplications />}
+            element={<JobSeekerApplications currentUrl={linkForBackend} />}
           />
         </Route>
       </Routes>
@@ -108,3 +109,5 @@ function App() {
 }
 
 export default App;
+
+

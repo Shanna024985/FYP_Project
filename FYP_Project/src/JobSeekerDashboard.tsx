@@ -43,7 +43,11 @@ type SavedJob = {
   savedDate: string;
 };
 
-export default function JobSeekerDashboard() {
+type Props = {
+  currentUrl: string;
+};
+
+export default function JobSeekerDashboard({ currentUrl }: Props) {
   // ---------------------------------------
   // Dummy Recommended Jobs
   // ---------------------------------------

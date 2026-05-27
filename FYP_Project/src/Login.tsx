@@ -1,7 +1,10 @@
 import singpassLogin from "./assets/singpass_logo.png";
 import NavigationMenus from "./NavigationMenu";
 import './title.css'
-export default function LoginPage() {
+type Props = {
+  currentUrl: string;
+};
+export default function LoginPage({ currentUrl }: Props) {
   const handleSingpassLogin = () => {
     window.location.href = "http://localhost:3000/api/auth";
   };

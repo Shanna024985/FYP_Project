@@ -48,8 +48,10 @@ const mockApplications: Application[] = [
 const tabs = ["All", "Reviewing", "Accepted", "Rejected"] as const;
 
 const ITEMS_PER_PAGE = 9;
-
-export default function MyApplicationsPage() {
+type Props = {
+  currentUrl: string;
+};
+export default function MyApplicationsPage({ currentUrl }: Props) {
   const [selectedTab, setSelectedTab] = useState<(typeof tabs)[number]>("All");
 
   const [currentPage, setCurrentPage] = useState(1);

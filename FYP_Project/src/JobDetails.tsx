@@ -13,9 +13,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import NavigationMenus from "./NavigationMenu";
-export default function JobDetailsPage() {
+import Sidebar from "./Sidebar"
+type Props = {
+  currentUrl: string;
+};
+export default function JobDetailsPage({ currentUrl }: Props) {
   const [bookmarked, setBookmarked] = useState(false);
-
+  const token = localStorage.getItem("token");
   // Temporary mock data (replace with backend later)
   const job = {
     title: "Frontend Developer Intern",
@@ -54,7 +58,10 @@ Requirements:
   };
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex">
+        {token && <Sidebar />}
+        <div className="flex-1 p-4">
+
         <NavigationMenus />
       <div className="mx-auto max-w-7xl">
         {/* MAIN CARD */}
@@ -249,6 +256,7 @@ Requirements:
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }

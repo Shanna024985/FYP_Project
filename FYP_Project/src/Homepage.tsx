@@ -1,17 +1,27 @@
-import React from 'react'
+import React from "react";
 import NavigationMenus from "./NavigationMenu";
 import JobFilters from "./components/common sections/jobFilters";
-import NewestJobsSection from './NewestJobsSection';
-import Top3company from './components/common sections/top3company';
-const Homepage = () => {
-  return (
-    <div className="flex flex-col gap-6">
-        <NavigationMenus />
-        <JobFilters />
-        <NewestJobsSection />
-        <Top3company />
-    </div>
-  )
-}
+import NewestJobsSection from "./NewestJobsSection";
+import Top3company from "./components/common sections/top3company";
+import Sidebar from "./Sidebar";
+type Props = {
+  currentUrl: string;
+};
 
-export default Homepage
+const Homepage = ({ currentUrl }: Props) => {
+  const token = localStorage.getItem("token");
+  return (
+    <div className="flex">
+    {token && <Sidebar />}
+    <div className="flex-1 p-4">
+
+      <NavigationMenus />
+      <JobFilters currentUrl={currentUrl} />
+      <NewestJobsSection currentUrl={currentUrl} />
+      <Top3company currentUrl={currentUrl} />
+    </div>
+    </div>
+  );
+};
+
+export default Homepage;

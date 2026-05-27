@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-
+import './title.css'
 export default function Sidebar() {
   const navigate = useNavigate();
 
@@ -45,7 +45,7 @@ export default function Sidebar() {
       <Separator />
 
       {/* Role Title */}
-      <h2 className="text-lg font-semibold capitalize">
+      <h2 className="text-lg font-semibold capitalize title-black">
         {role} Panel
       </h2>
 
