@@ -94,7 +94,7 @@ const NavigationMenus = () => {
             hover:underline
           "
         >
-          Login/Register
+          Login With Singpass
         </Link>
       ) : (
         // LOGGED IN

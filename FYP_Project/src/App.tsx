@@ -63,7 +63,7 @@ import JobSeekerApplications from "./JobSeekerApplications";
 import LoginPage from "./Login";
 import LoginCallbackPage from "./LoginCallback";
 import ProtectedLayout from "./ProtectedLayout";
-const linkForBackend = "http://localhost:3421";
+const linkForBackend = "http://localhost:3000";
 function App() {
   const [count, setCount] = useState(0);
 
