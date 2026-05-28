@@ -6,9 +6,7 @@ const tokenAlgorithm = process.env.JWT_ALGORITHM;
 module.exports.generateToken = (req, res, next) => {
   const payload = {
     userId: res.locals.userId,      // traditional login/register
-      username: res.locals.username,              // google login
-    timestamp: new Date(),
-    role: res.locals.role
+    timestamp: new Date()
   } // payload is for the user id and timestamp
   console.log("payload: ", payload)
   const options = {
@@ -39,8 +37,9 @@ module.exports.sendToken = (req, res, next) => {
     maxAge: 24 * 60 * 60 * 1000
   });
 
-  return res.status(200).json({
+  return res.status((res.locals.status) ? res.locals.status : 200).json({
     message: "User logged in successfully",
+    onboardingNeeded: res.locals.onboardingNeeded,
     token: res.locals.token,
   });
 };
