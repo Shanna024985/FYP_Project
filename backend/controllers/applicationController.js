@@ -59,7 +59,7 @@ module.exports.getResponseDetailsByStage = (req, res, next) => {
 
 // get active candidates by job ID
 module.exports.getActiveCandidatesByJobId = (req, res, next) => {
-    return model.getActiveCandidatesById(req.params.jobId)
+    return model.getActiveCandidatesByJobId(req.params.jobId)
     .then((applications) => {
         if (res.locals.responseDetails) {
             return res.status(200).json({responses: res.locals.responses, responseDetails: res.locals.responseDetails, activeCandidates: applications});
@@ -74,7 +74,7 @@ module.exports.getActiveCandidatesByJobId = (req, res, next) => {
 
 // get responses by job ID
 module.exports.getResponsesByJobId = (req, res, next) => {
-    return model.getApplicationsById(req.params.jobId)
+    return model.getApplicationsByJobId(req.params.jobId)
     .then((applications) => {
         return res.status(200).json(applications);
     }).catch(function (error) {
@@ -85,7 +85,7 @@ module.exports.getResponsesByJobId = (req, res, next) => {
 
 // get responses awaiting action by job ID
 module.exports.getAwaitingResponsesByJobId = (req, res, next) => {
-    return model.getAwaitingResponsesById(req.params.jobId)
+    return model.getAwaitingResponsesByJobId(req.params.jobId)
     .then((applications) => {
         return res.status(200).json(applications);
     }).catch(function (error) {
@@ -96,7 +96,7 @@ module.exports.getAwaitingResponsesByJobId = (req, res, next) => {
 
 // get active candidates by job ID
 module.exports.getActiveCandidatesByJobIdAndName = (req, res, next) => {
-    return model.getActiveCandidatesByIdAndName(req.params.jobId, req.params.name)
+    return model.getActiveCandidatesByJobIdAndName(req.params.jobId, req.params.name)
     .then((applications) => {
         return res.status(200).json(applications);
     }).catch(function (error) {
@@ -107,7 +107,7 @@ module.exports.getActiveCandidatesByJobIdAndName = (req, res, next) => {
 
 // get responses awaiting action by job ID
 module.exports.getAwaitingResponsesByJobIdAndName = (req, res, next) => {
-    return model.getAwaitingResponsesByIdAndName(req.params.jobId, req.params.name)
+    return model.getAwaitingResponsesByJobIdAndName(req.params.jobId, req.params.name)
     .then((applications) => {
         return res.status(200).json(applications);
     }).catch(function (error) {
@@ -117,8 +117,8 @@ module.exports.getAwaitingResponsesByJobIdAndName = (req, res, next) => {
 }
 
 // get job ID by application ID
-module.exports.getJobIDByApplicationId = (req, res, next) => {
-    return model.getJobIDByApplicationId(req.params.id)
+module.exports.getJobIdByApplicationId = (req, res, next) => {
+    return model.getJobIdByApplicationId(req.params.id)
     .then((jobId) => {
         if (jobId.length == 0) {
             return res.status(404).json({ message: 'id is not found' });
