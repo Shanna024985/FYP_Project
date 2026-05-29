@@ -1,12 +1,4 @@
 import './App.css'
-import { Route, Routes } from 'react-router-dom'
-import Employer from './employer'
-import Homepage from './Homepage'
-import JobPostings from './JobPostings'
-import EditJobs from './EditJobs'
-import ViewApplicants from './ViewApplicants'
-
-const linkForBackend = "http://localhost:3000"
 // import { useState } from 'react'
 // import reactLogo from './assets/react.svg'
 // import viteLogo from './assets/vite.svg'
@@ -54,9 +46,6 @@ const linkForBackend = "http://localhost:3000"
 // export default App
 
 import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "./assets/vite.svg";
-import heroImg from "./assets/hero.png";
 import "./App.css";
 import { Route, Routes } from "react-router-dom";
 import Employer from "./employer";
@@ -74,7 +63,6 @@ import LoginCallbackPage from "./LoginCallback";
 import ProtectedLayout from "./ProtectedLayout";
 const linkForBackend = "http://localhost:3000/api";
 function App() {
-  const [count, setCount] = useState(0);
 
   return (
     <>
