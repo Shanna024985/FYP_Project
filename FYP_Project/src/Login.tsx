@@ -6,7 +6,7 @@ type Props = {
 };
 export default function LoginPage({ currentUrl }: Props) {
   const handleSingpassLogin = () => {
-    window.location.href = `${currentUrl}/api/auth`;
+    window.location.href = `${currentUrl}/auth`;
   };
 
   return (
