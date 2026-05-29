@@ -62,9 +62,41 @@ const StepOneOfJobPostings = (props: stages) => {
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectItem value={"fullTime"}>Accounting</SelectItem>
-                  <SelectItem value={"partTime"}>Techology</SelectItem>
-                  <SelectItem value={"contract"}>Healthcare</SelectItem>
+                  <SelectItem value={"admin"}>Admin & Secretarial</SelectItem>
+                  <SelectItem value={"business"}>Business & Finance</SelectItem>
+                  <SelectItem value={"engineering"}>Engineering</SelectItem>
+                  <SelectItem value={"customersupport"}>Customer Support</SelectItem>
+                  <SelectItem value={"it"}>IT & Software</SelectItem>
+                  <SelectItem value="design">
+                    Design & Creatives
+                  </SelectItem>
+                  <SelectItem value="education">
+                    Education & Training
+                  </SelectItem>
+                  <SelectItem value="science">
+                    Healthcare & Science
+                  </SelectItem>
+                  <SelectItem value="security">
+                    Legal & Security
+                  </SelectItem>
+                  <SelectItem value="transportation">
+                    Logistics & Transportation
+                  </SelectItem>
+                  <SelectItem value="marketing">
+                    Marketing & Advertising
+                  </SelectItem>
+                  <SelectItem value="parttimer">
+                    Part-time & Freelance
+                  </SelectItem>
+                  <SelectItem value="sales">
+                    Sales & Retail
+                  </SelectItem>
+                  <SelectItem value="trading">
+                    Trades & Services 
+                  </SelectItem>
+                  <SelectItem value="writing">
+                    Writing & Translation
+                  </SelectItem>
                 </SelectGroup>
               </SelectContent>
             </Select>
