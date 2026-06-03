@@ -96,7 +96,10 @@
 
   --sidebar-ring: oklch(0.709 0.01 56.259)
 }
-
+::selection {
+  background-color: blue;
+  color: white;
+}
 @media (prefers-color-scheme: dark) {
   :root {
     --text: #9ca3af;
@@ -258,6 +261,10 @@ code {
   * {
     @apply border-border outline-ring/50;}
   body {
-    @apply bg-background text-foreground;}
+    @apply bg-background text-foreground;
+  }
+    
   html {
-    @apply font-sans;}}
+    @apply font-sans;
+  }
+  }

@@ -1,41 +1,280 @@
-let model = require("../models/memberModel")
-module.exports.checkWhetherUserIsInside = (req, res, next) => {
-    let username = req.body.username
-    return model.getUserByUsername(username)
-        .then((userDetails) => {
-            if (userDetails.length == 0) {
-                model.insertUsers(username)
-                    .then((usersInserted) => {
-                        res.locals.username = usersInserted[0].username
-                        res.locals.userId = usersInserted[0].id
-                        res.locals.role = usersInserted[0].role
-                        this.insertMoney(req, res, next)
-                    }).catch(function (error) {
-                        console.error(error);
+const jwt = require("jsonwebtoken");
+const crypto = require("crypto")
+const jose = require("jose")
+// let model = require("../models/memberModel")
+// let model = require("../models/userModel")
+// module.exports.checkWhetherUserIsInside = (req, res, next) => {
+//     let username = req.body.username
+//     return model.getUserByUsername(username)
+//         .then((userDetails) => {
+//             if (userDetails.length == 0) {
+//                 model.insertUsers(username)
+//                     .then((usersInserted) => {
+//                         res.locals.username = usersInserted[0].username
+//                         res.locals.userId = usersInserted[0].id
+//                         res.locals.role = usersInserted[0].role
+//                         this.insertMoney(req, res, next)
+//                     }).catch(function (error) {
+//                         console.error(error);
 
-                        return res.status(500).json({ error: error.message });
-                    })
-            } else {
-                res.locals.username = userDetails[0].username
-                res.locals.userId = userDetails[0].id
-                res.locals.role = userDetails[0].role
-                next()
-            }
-        }).catch(function (error) {
-            console.error(error);
-            return res.status(500).json({ error: error.message });
-        });
+//                         return res.status(500).json({ error: error.message });
+//                     })
+//             } else {
+//                 res.locals.username = userDetails[0].username
+//                 res.locals.userId = userDetails[0].id
+//                 res.locals.role = userDetails[0].role
+//                 next()
+//             }
+//         }).catch(function (error) {
+//             console.error(error);
+//             return res.status(500).json({ error: error.message });
+//         });
+// }
+// module.exports.insertMoney = (req, res, next) => {
+//     return model.insertMoney(res.locals.userId)
+//         .then((detais) => {
+//             console.log(detais)
+//             if (detais[0].id) {
+//                 next();
+//             }
+//         }).catch(function (error) {
+//             console.error(error);
+//             return res.status(500).json({ error: error.message });
+//         });
+// }
+
+// SINGPASS LOGIN INTEGRATION
+// Generate UUID V4 (this is for state and nonce)
+const generateRandomHex = length => {
+    let hex = Math.floor(Math.random() * (16 ** length)).toString(16);
+    while (hex.length < length) {
+        hex = '0' + hex;
+    }
+    return hex;
+};
+const generateUUIDV4 = () => generateRandomHex(8) + '-' + generateRandomHex(4) + '-' + generateRandomHex(4) + '-' + generateRandomHex(12);
+const singpassAppID = process.env.SINGPASS_APP_ID;
+const options = {
+    algorithm: 'ES256'
+};
+const privateKey = JSON.parse(process.env.PRIVATE_KEY_SIG);
+const privateKeyPem = crypto.createPrivateKey({key: privateKey, format: 'jwk'}).export({type: 'pkcs8', format: 'pem'})
+const publicKey = JSON.parse(process.env.PUBLIC_KEY_SIG);
+const publicKeySingpass = JSON.parse(process.env.SINGPASS_PUBLIC_KEY_SIG);
+const publicKeySingpassPem = crypto.createPublicKey({key: publicKeySingpass, format: 'jwk'}).export({type: 'spki', format: 'pem'})
+const generateCode = () => {
+    let codeVerifier = ''
+    for (let i = 0; i < 128; i ++) {
+        codeVerifier += 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_'.charAt(Math.floor(Math.random() * 64));
+    }
+    let codeChallenge = crypto.createHash('sha256').update(codeVerifier).digest('base64').replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '');
+    return {codeVerifier, codeChallenge}
 }
-module.exports.insertMoney = (req, res, next) => {
-    return model.insertMoney(res.locals.userId)
-        .then((detais) => {
-            console.log(detais)
-            if (detais[0].id) {
+const timeInSeconds = () => parseInt(Date.now() / 1000)
+const secretKey = process.env.JWT_SECRET_KEY.trim();
+const redirectURI = 'http://localhost:3000/api/auth/token';
+const generateClientAssertion = endpoint => jwt.sign({
+    sub: singpassAppID,
+    aud: `https://stg-id.singpass.gov.sg/fapi/${endpoint}`,
+    
+    iss: singpassAppID,
+    iat: timeInSeconds(),
+    exp: timeInSeconds() + 120,
+    jti: generateUUIDV4()
+}, privateKeyPem, {
+    ...options,
+    header: {
+        alg: 'ES256',
+        typ: 'JWT',
+        kid: privateKey.kid
+    }
+});
+const generateDpopJkt = endpoint => jwt.sign({
+    htm: 'POST',
+    htu: `https://stg-id.singpass.gov.sg/fapi/${endpoint}`,
+    iat: timeInSeconds(),
+    exp: timeInSeconds() + 120,
+    jti: generateUUIDV4()
+}, privateKeyPem, {
+    ...options,
+    header: {
+        typ: 'dpop+jwt',
+        jwk: publicKey
+    }
+});
+const generateHeaders = endpoint => {
+    let headers = new Headers();
+    headers.append("Content-Type", "application/x-www-form-urlencoded");
+    headers.append("DPoP", generateDpopJkt(endpoint));
+    return headers
+}
+
+// 1: Redirect user to Singpass login, to do this a authorization URL must be returned
+module.exports.createSingpassURL = (req, res, next) => {
+    // POST authorization request (https://stg-id.singpass.gov.sg/fapi/.well-known/openid-configuration)
+    const state = generateUUIDV4();
+    const nonce = generateUUIDV4();
+    const code = generateCode();
+    
+    fetch('https://stg-id.singpass.gov.sg/fapi/par', {
+        method: "POST",
+        headers: generateHeaders('par'),
+        body: new URLSearchParams({
+            response_type: 'code',
+            scope: 'openid', // scope to be discussed
+            state,
+            nonce,
+            client_id: singpassAppID,
+            redirect_uri: redirectURI, // redirect_uri to be discussed
+            client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
+            client_assertion: generateClientAssertion('par'),
+            code_challenge: code.codeChallenge,
+            code_challenge_method: 'S256',
+            authentication_context_type: 'APP_AUTHENTICATION_DEFAULT',
+            authentication_context_message: 'Authentication using Singpass to login to Microjobs.Shop'
+        })
+    })
+    .then((response) => {
+        if (response.status != 201) {
+            console.log('Error!');
+            console.log(response);
+            return response.json();
+        } else {
+            return response.json();
+        }
+    })
+    .then((value) => {
+        if (value.error) {
+            console.log(value);
+            res.status(500).json({message: 'Something wrong happened with the server!', errorDetails: value});
+        } else {
+            // Redirect the user to the Singpass auth page (https://stg-id.singpass.gov.sg/fapi/auth)
+            // {state, nonce, codeVerifier} needs to be stored as a session for later
+            req.session.singpassSessionData = {state, nonce, codeVerifier: code.codeVerifier}
+            // res.status(200).json({singpassAuthURL: `https://stg-id.singpass.gov.sg/fapi/auth?client_id=${singpassAppID}&request_uri=${value.request_uri}`});
+            res.status(200).redirect(`https://stg-id.singpass.gov.sg/fapi/auth?client_id=${singpassAppID}&request_uri=${value.request_uri}`);
+        }
+    })
+    .catch((error) => console.error(error));
+}
+
+// 2: Check redirect params are valid
+module.exports.checkRedirectIsValid = (req, res, next) => {
+    // req.params needs code and state
+    if (!req.query.code) {
+        res.status(400).json({message: `code is missing`});
+    } else if (!req.query.state) {
+        res.status(400).json({message: `state is missing`});
+    } else if (req.query.state != req.session.singpassSessionData.state) {
+        res.status(403).json({message: `state does not match`});
+    } else {
+        next();
+    }
+}
+
+// 3-4: Get and handle token (https://stg-id.singpass.gov.sg/fapi/token)
+module.exports.getSingpassToken = (req, res, next) => {
+    fetch('https://stg-id.singpass.gov.sg/fapi/token', {
+        method: "POST",
+        headers: generateHeaders('token'),
+        body: new URLSearchParams({
+            redirect_uri: redirectURI,
+            grant_type: 'authorization_code',
+            code: req.query.code,
+            client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
+            client_assertion: generateClientAssertion('token'),
+            code_verifier: req.session.singpassSessionData.codeVerifier
+        })
+    })
+    .then((response) => {
+        if (response.status != 200) {
+            console.log('Error!');
+            console.log(response);
+            return response.json();
+        } else {
+            return response.json();
+        }
+    })
+    .then((value) => {
+        if (value.error) {
+            console.log(value);
+            res.status(500).json({message: 'Something wrong happened with the server!', errorDetails: value});
+        } else {
+            // Decrypt the ID Token
+            const callback = (err, decoded) => {
+                if (err) {
+                    return res.status(401).json(err);
+                }
+
+                // verification checks, as stated by Singpass
+                if (decoded.iss != 'https://stg-id.singpass.gov.sg/fapi') {
+                    res.status(403).json({message: 'ID Token is invalid'})
+                } else if (decoded.aud != singpassAppID) {
+                    res.status(403).json({message: 'ID Token is invalid'})
+                } else if (decoded.exp < timeInSeconds()) {
+                    res.status(403).json({message: 'ID Token is invalid'})
+                } else if (decoded.nonce != req.session.singpassSessionData.nonce) {
+                    res.status(403).json({message: 'ID Token is invalid'})
+                } else {
+                    // clear session, this will no longer be needed
+                    req.session.destroy((err) => {
+                        res.locals.singpassId = decoded.sub;
+                        next();
+                    });
+                }
+            };
+
+            jose.compactDecrypt(value.id_token, JSON.parse(process.env.PRIVATE_KEY_ENC)).then((result, key) => {
+                jwt.verify(new TextDecoder().decode(result.plaintext), publicKeySingpassPem, callback);
+            })
+        }
+    })
+    .catch((error) => console.error(error));
+}
+
+// Login/Register section
+// Check if user's Singpass ID exists in user_ table
+// if it exists, perform login, else perform register
+module.exports.checkSingpassIdExists = (req, res, next) => {
+    return model.getUserBySingpassId(res.locals.singpassId)
+    .then((user) => {
+        if (user.length == 0) {
+
+            return model.insertNewUser(res.locals.singpassId)
+            .then((user) => {
+                res.locals.userId = user[0].id;
+                res.locals.status = 200;
                 next();
-            }
-        }).catch(function (error) {
-            console.error(error);
-            return res.status(500).json({ error: error.message });
-        });
+            }).catch(function (error) {
+                console.error(error);
+                return res.status(500).json({ error: error.message });
+            });
+
+        } else {
+            res.locals.userId = user[0].id;
+            res.locals.status = 201;
+            next();
+        }
+    }).catch(function (error) {
+        console.error(error);
+        return res.status(500).json({ error: error.message });
+    });
 }
 
+// process json for login and register
+module.exports.processJSON = (req, res, next) => {
+    return model.getUserDetailById(res.locals.userId)
+    .then((user) => {
+        res.locals.onboardingNeeded = user.length == 0;
+        next();
+    }).catch(function (error) {
+        console.error(error);
+        return res.status(500).json({ error: error.message });
+    });
+}
+
+// redirect user to login page
+module.exports.redirectUserToLogin = (req, res, next) => {
+    //res.status(200).redirect(`https://localhost:3000/login?token=${res.locals.token}&onboardingNeeded=${res.locals.onboardingNeeded}`);
+    res.redirect(`http://localhost:5173/login/callback?token=${res.locals.token}&onboardingNeeded=${res.locals.onboardingNeeded}`);
+}
