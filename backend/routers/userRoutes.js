@@ -1,0 +1,8 @@
+const express = require("express");
+const router = express.Router();
+const resumeController = require("../controllers/resumeController");
+const jwtMiddleware = require('../middlewares/jwtMiddleware');
+
+router.put("/resume", jwtMiddleware.verifyToken, resumeController.verifyResumeExists, resumeController.verifyResumeOwnership, resumeController.setDefaultResume);
+
+module.exports = router;
