@@ -18,4 +18,7 @@ router.use("/resume", resumeRoutes);
 const userRoutes = require("./userRoutes");
 router.use("/user", userRoutes);
 
+const messageRoutes = require("./messageRoutes");
+router.use("/message", messageRoutes);
+
 module.exports = router;
