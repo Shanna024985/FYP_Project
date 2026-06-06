@@ -20,9 +20,17 @@ module.exports.getResponseDetailsByStage = jobId => {
     });
 }
 
+// const responsesColumns = `SELECT a.id, first_name || ' ' || last_name candidate,
+// date_applied, file_name resume_name,
+// file_url resume_url, status, phone_number, email
+// FROM application a JOIN user_ u ON u.id = a.user_id
+// JOIN user_detail d ON u.id = d.user_id
+// JOIN resume r ON r.id = a.resume_id
+// `;
+
 const responsesColumns = `SELECT a.id, first_name || ' ' || last_name candidate,
 date_applied, file_name resume_name,
-file_url resume_url, status, phone_number, email
+file_data resume_data, status, phone_number, email
 FROM application a JOIN user_ u ON u.id = a.user_id
 JOIN user_detail d ON u.id = d.user_id
 JOIN resume r ON r.id = a.resume_id
