@@ -1,6 +1,7 @@
 import { MapPin } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
+import { Button } from "../ui/button";
+import { useNavigate } from "react-router-dom";
 type JobCardProps = {
   title: string;
   companyName: string;
@@ -20,6 +21,7 @@ export default function JobCard({
   tags = [],
   postedDate,
 }: JobCardProps) {
+  const navigate = useNavigate();
   return (
     <Card className="h-full hover:shadow-md transition">
       {/* ROW 1 */}
@@ -67,6 +69,15 @@ export default function JobCard({
         <p className="text-xs text-muted-foreground pt-2">
           Posted on {postedDate}
         </p>
+        {/* VIEW BUTTON */}
+        <div className="pt-3">
+          <Button
+            className="w-full"
+            onClick={() => navigate("/jobDetails")}
+          >
+            View Job
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

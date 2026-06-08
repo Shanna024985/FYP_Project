@@ -1,5 +1,5 @@
 import { Bookmark, MapPin } from "lucide-react";
-
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,7 @@ export default function SavedJobCard({
   onApply,
   onUnsave,
 }: Props) {
+  const navigate = useNavigate();
   const [isSaved, setIsSaved] = useState(true);
   const handleToggleSave = () => {
     setIsSaved((prev) => !prev);
@@ -79,7 +80,10 @@ export default function SavedJobCard({
             <Button variant="default" onClick={() => onApply(job.jobId)}>
               Apply Job
             </Button>
-            <Button variant="outline" onClick={() => onView(job.jobId)}>
+            <Button
+              variant="outline"
+              onClick={() => navigate(`/jobDetails`)}
+            >
               View
             </Button>
           </div>

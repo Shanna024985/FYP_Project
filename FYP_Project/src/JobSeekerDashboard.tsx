@@ -178,7 +178,9 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
                   <h2 className="mt-2 text-4xl font-bold title-black">14</h2>
                 </div>
 
-                <Button variant="outline">View Details</Button>
+                <Button variant="outline" onClick={() => navigate("/jobSeeker/savedJobs")}>
+                  View Details
+                </Button>
               </CardContent>
             </Card>
 
@@ -309,7 +311,9 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-semibold title-black">Saved Jobs</h2>
 
-            <Button variant="outline">View All</Button>
+            <Button variant="outline" onClick={() => navigate("/jobSeeker/savedJobs")}>
+              View All
+            </Button>
           </div>
 
           {/* SAVED JOB GRID */}
@@ -367,7 +371,9 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
 
                     <div className="flex gap-2">
                       <Button>Apply Now</Button>
-                      <Button variant="outline">View</Button>
+                      <Button variant="outline" onClick={() => navigate(`/jobDetails`)}>
+                        View
+                      </Button>
                     </div>
                   </div>
                 </CardContent>

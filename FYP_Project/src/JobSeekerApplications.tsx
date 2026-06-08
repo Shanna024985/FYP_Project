@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import NavigationMenus from "./NavigationMenu";
 import { Card, CardContent } from "@/components/ui/card";
 import "./title.css";
+import { useNavigate } from "react-router-dom";
 type ApplicationStatus = "Reviewing" | "Accepted" | "Rejected";
 
 interface Application {
@@ -52,6 +53,7 @@ type Props = {
   currentUrl: string;
 };
 export default function MyApplicationsPage({ currentUrl }: Props) {
+  const navigate = useNavigate();
   const [selectedTab, setSelectedTab] = useState<(typeof tabs)[number]>("All");
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -164,7 +166,9 @@ export default function MyApplicationsPage({ currentUrl }: Props) {
 
                 {/* ROW 6: button */}
                 <div className="pt-2">
-                  <Button className="w-full">View Job</Button>
+                  <Button className="w-full" onClick={() => navigate(`/jobDetails`)}>
+                    View Job
+                  </Button>
                 </div>
               </CardContent>
             </Card>
