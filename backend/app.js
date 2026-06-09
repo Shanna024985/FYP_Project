@@ -3,6 +3,8 @@ var session = require('express-session')
 require("dotenv").config();
 let cors = require("cors")
 const path = require('path');
+const http = require('node:http');
+const socket = require('socket.io');
 
 let app = express();
 app.use(cors({
@@ -12,6 +14,9 @@ app.use(express.json())
 app.use(express.urlencoded({extended: false}))
 // Singpass also needs session data
 app.use(session({secret: 'singpassSessionData', resave: false, saveUninitialized: true, cookie: {secure: false, maxAge: 120000}}))
+// socket for updating messages
+const server = http.Server(app);
+const io = new socket.Server();
 let pathForServingHtmlFile = path.join(__dirname,"dist")
 console.log(pathForServingHtmlFile)
 app.use("/",express.static(pathForServingHtmlFile))
@@ -24,9 +29,13 @@ app.use((req, res) => {
     res.sendFile(path.join(pathForServingHtmlFile, "index.html"));
 });
 
+io.on('connection', socket => {
+    console.log('test');
+})
+
 // START THE SERVER - ADD THIS
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Backend running on http://localhost:${PORT}`);
 });
 

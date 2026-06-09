@@ -47,14 +47,21 @@ module.exports.insertSingleMessage = (senderUserId, receiverUserId, message) => 
 }
 
 module.exports.updateMessageById = (message, id) => {
-    let sql = `UPDATE message SET message = $1 WHERE id = $2;`;
+    let sql = `UPDATE message SET message = $1 WHERE id = $2 RETURNING id;`;
     return query(sql, [message, id]).then(function(result) {
         return result.rows;
     });
 }
 
 module.exports.deleteMessageById = (id) => {
-    let sql = `DELETE message WHERE id = $1;`;
+    let sql = `DELETE message WHERE id = $1 RETURNING id;`;
+    return query(sql, [id]).then(function(result) {
+        return result.rows;
+    });
+}
+
+module.exports.getMessageById = (id) => {
+    let sql = `SELECT * FROM message WHERE id = $1;`;
     return query(sql, [id]).then(function(result) {
         return result.rows;
     });
