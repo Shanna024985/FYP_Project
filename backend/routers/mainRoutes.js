@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const jwtMiddleware = require('../middlewares/jwtMiddleware');
 
 router.get("/",(req,res,next)=>{
     res.send("You are connected!")
@@ -19,6 +20,6 @@ const userRoutes = require("./userRoutes");
 router.use("/user", userRoutes);
 
 const messageRoutes = require("./messageRoutes");
-router.use("/message", messageRoutes);
+router.use("/message", jwtMiddleware.verifyToken, messageRoutes);
 
 module.exports = router;

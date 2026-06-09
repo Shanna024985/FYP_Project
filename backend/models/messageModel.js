@@ -1,15 +1,39 @@
 const { query } = require("../services/dbConnection");
 
-module.exports.getMessageByUserId = (userId, page) => {
-    let sql = `GET m.message,
-    u1.first_name || ' ' || u1.last_name sender_name,
-    u2.first_name || ' ' || u2.last_name receiver_name,
+// module.exports.getMessageByUserId = (userId, page) => {
+//     let sql = `GET m.message,
+//     u1.first_name || ' ' || u1.last_name sender_name,
+//     u2.first_name || ' ' || u2.last_name receiver_name,
+//     m.time_sent FROM message m
+//     JOIN user_ u1 ON u1.id = m.sender_user_id
+//     JOIN user_u2 ON u2.id = m.receiver_user_id
+//     WHERE sender_user_id = $1 OR receiver_user_id = $2
+//     ORDER BY 4 DESC LIMIT 25 OFFSET $3;`;
+//     return query(sql, [userId, userId, (page - 1) * 25]).then(function(result) {
+//         return result.rows;
+//     });
+// }
+
+module.exports.getMessageBetweenUsers = (userId1, userId2, page) => {
+    let sql = `SELECT m.message,
+    u1.id sender_user_id,
+    u1.first_name || ' ' || u1.last_name sender_user_name,
+    u2.id receiver_user_id,
+    u2.first_name || ' ' || u2.last_name receiver_user_name,
     m.time_sent FROM message m
     JOIN user_ u1 ON u1.id = m.sender_user_id
-    JOIN user_u2 ON u2.id = m.receiver_user_id
-    WHERE sender_user_id = $1 OR receiver_user_id = $2
-    ORDER BY 4 DESC LIMIT 25 OFFSET $3;`;
-    return query(sql, [userId, userId, (page - 1) * 25]).then(function(result) {
+    JOIN user_ u2 ON u2.id = m.receiver_user_id
+    WHERE (sender_user_id = $1 AND receiver_user_id = $2)
+    OR (receiver_user_id = $3 AND sender_user_id = $4)
+    ORDER BY 6 DESC LIMIT 25 OFFSET $5;`;
+    return query(sql, [userId1, userId2, userId1, userId2, (page - 1) * 25]).then(function(result) {
+        return result.rows;
+    });
+}
+
+module.exports.getUserList = (userId) => {
+    let sql = `SELECT * FROM get_user_message_list($1);`;
+    return query(sql, [userId]).then(function(result) {
         return result.rows;
     });
 }
