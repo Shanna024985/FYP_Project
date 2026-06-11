@@ -64,7 +64,7 @@ import LoginPage from "./Login";
 import LoginCallbackPage from "./LoginCallback";
 import ProtectedLayout from "./ProtectedLayout";
 import SavedJobs from "./SavedJobsPage";
-
+import ApplyJobPage from "./ApplyJobPage";
 const linkForBackend = "http://localhost:3000/api";
 function App() {
   const [count, setCount] = useState(0);
@@ -77,6 +77,7 @@ function App() {
         <Route path="/jobDetails" element={<JobDetails currentUrl={linkForBackend} />} />
         <Route path="/login" element={<LoginPage currentUrl={linkForBackend} />} />
         <Route path="/login/callback" element={<LoginCallbackPage currentUrl={linkForBackend}/>} />
+        <Route path="/applyjob" element={<ApplyJobPage currentUrl={linkForBackend}/>} />
         {/* PROTECTED AREA */}
         <Route element={<ProtectedLayout />}>
           <Route
