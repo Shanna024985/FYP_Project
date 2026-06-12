@@ -1,24 +1,24 @@
 const { query } = require("../services/dbConnection");
 
-// CREATE - Post a new job
+// CREATE - Post a new job (NO status column)
 module.exports.createJob = function createJob(jobData, companyId) {
     const { 
-        title, description, category, type, status, 
+        title, description, category, type, 
         salary_range_from, salary_range_to, salary_type, salary_period,
         duration, deadline, experience, career_level, location, 
         jobs_needed, reports 
     } = jobData;
     
     let sql = `INSERT INTO job(
-        title, description, category, type, status, 
+        title, description, category, type, 
         salary_range_from, salary_range_to, salary_type, salary_period,
         duration, deadline, experience, career_level, location, 
         jobs_needed, reports, company_id
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) 
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) 
     RETURNING *;`;
     
     return query(sql, [
-        title, description, category, type, status || 'Active',
+        title, description, category, type,
         salary_range_from, salary_range_to, salary_type || 'Negotiable',
         salary_period || 'Month', duration, deadline, experience, 
         career_level, location, jobs_needed || 1, reports || 0, companyId
@@ -27,23 +27,14 @@ module.exports.createJob = function createJob(jobData, companyId) {
     });
 }
 
-// READ - Get all jobs with filters (status filter removed - column doesn't exist)
+// READ - Get all jobs with filters
 module.exports.getAllJobs = function getAllJobs(filters = {}) {
-    let sql = `SELECT j.*, c.name as company_name, c.city as company_city, c.logo_file_url 
+    let sql = `SELECT j.*, c.name as company_name, c.city as company_city 
                FROM job j 
                JOIN company c ON j.company_id = c.id`;
     let params = [];
     let paramIndex = 1;
     let conditions = [];
-    
-    // Status filter removed because column doesn't exist in schema
-    // if (filters.status) {
-    //     conditions.push(` j.status = $${paramIndex}`);
-    //     params.push(filters.status);
-    //     paramIndex++;
-    // } else {
-    //     conditions.push(` j.status = 'Active'`);
-    // }
     
     if (filters.category) {
         conditions.push(` j.category = $${paramIndex}`);
@@ -112,7 +103,7 @@ module.exports.getAllJobs = function getAllJobs(filters = {}) {
 
 // READ - Get single job by ID
 module.exports.getJobById = function getJobById(jobId) {
-    let sql = `SELECT j.*, c.name as company_name, c.city, c.logo_file_url, 
+    let sql = `SELECT j.*, c.name as company_name, c.city, 
                c.description as company_description, c.contact_email as company_email,
                (SELECT COUNT(*) FROM application WHERE job_id = j.id) as application_count 
                FROM job j 
@@ -123,7 +114,7 @@ module.exports.getJobById = function getJobById(jobId) {
     });
 }
 
-// READ - Get jobs by company (for employer's "My Jobs")
+// READ - Get jobs by company
 module.exports.getJobsByCompany = function getJobsByCompany(companyId) {
     let sql = `SELECT j.*, 
                (SELECT COUNT(*) FROM application WHERE job_id = j.id) as application_count 
@@ -135,47 +126,10 @@ module.exports.getJobsByCompany = function getJobsByCompany(companyId) {
     });
 }
 
-// READ - Get all companies owned by user
-module.exports.getUserCompanies = function getUserCompanies(userId) {
-    let sql = `SELECT c.* 
-               FROM company c 
-               JOIN company_ownership co ON c.id = co.company_id 
-               WHERE co.user_id = $1;`;
-    return query(sql, [userId]).then(function(result) {
-        return result.rows;
-    });
-}
-
-// READ - Get single company by ID
-module.exports.getCompanyById = function getCompanyById(companyId) {
-    let sql = "SELECT * FROM company WHERE id = $1;";
-    return query(sql, [companyId]).then(function(result) {
-        return result.rows;
-    });
-}
-
-// CREATE - Create a company
-module.exports.createCompany = function createCompany(companyData, userId) {
-    const { name, url, contact_email, logo_file_name, logo_file_url, tagline, description, city } = companyData;
-    
-    let sql = `INSERT INTO company(name, url, contact_email, logo_file_name, logo_file_url, tagline, description, city) 
-               VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
-               RETURNING *;`;
-    
-    return query(sql, [name, url, contact_email, logo_file_name, logo_file_url, tagline, description, city])
-        .then(function(result) {
-            let company = result.rows[0];
-            let sql2 = "INSERT INTO company_ownership(user_id, company_id) VALUES ($1, $2) RETURNING *;";
-            return query(sql2, [userId, company.id]).then(function() {
-                return [company];
-            });
-        });
-}
-
-// UPDATE - Edit a job
+// UPDATE - Edit a job (NO status)
 module.exports.updateJob = function updateJob(jobId, jobData, companyId) {
     const { 
-        title, description, category, type, status, 
+        title, description, category, type, 
         salary_range_from, salary_range_to, salary_type, salary_period,
         duration, deadline, experience, career_level, location, 
         jobs_needed, reports 
@@ -186,23 +140,22 @@ module.exports.updateJob = function updateJob(jobId, jobData, companyId) {
                    description = COALESCE($2, description),
                    category = COALESCE($3, category),
                    type = COALESCE($4, type),
-                   status = COALESCE($5, status),
-                   salary_range_from = COALESCE($6, salary_range_from),
-                   salary_range_to = COALESCE($7, salary_range_to),
-                   salary_type = COALESCE($8, salary_type),
-                   salary_period = COALESCE($9, salary_period),
-                   duration = COALESCE($10, duration),
-                   deadline = COALESCE($11, deadline),
-                   experience = COALESCE($12, experience),
-                   career_level = COALESCE($13, career_level),
-                   location = COALESCE($14, location),
-                   jobs_needed = COALESCE($15, jobs_needed),
-                   reports = COALESCE($16, reports)
-               WHERE id = $17 AND company_id = $18
+                   salary_range_from = COALESCE($5, salary_range_from),
+                   salary_range_to = COALESCE($6, salary_range_to),
+                   salary_type = COALESCE($7, salary_type),
+                   salary_period = COALESCE($8, salary_period),
+                   duration = COALESCE($9, duration),
+                   deadline = COALESCE($10, deadline),
+                   experience = COALESCE($11, experience),
+                   career_level = COALESCE($12, career_level),
+                   location = COALESCE($13, location),
+                   jobs_needed = COALESCE($14, jobs_needed),
+                   reports = COALESCE($15, reports)
+               WHERE id = $16 AND company_id = $17
                RETURNING *;`;
     
     return query(sql, [
-        title, description, category, type, status,
+        title, description, category, type,
         salary_range_from, salary_range_to, salary_type, salary_period,
         duration, deadline, experience, career_level, location,
         jobs_needed, reports, jobId, companyId
@@ -227,7 +180,7 @@ module.exports.checkJobBelongsToCompany = function checkJobBelongsToCompany(jobI
     });
 }
 
-// UPDATE - Change job status (Active, Closed, Reviewing)
+// UPDATE - Change job status (ADD THIS FUNCTION)
 module.exports.updateJobStatus = function updateJobStatus(jobId, status, companyId) {
     let sql = "UPDATE job SET status = $1 WHERE id = $2 AND company_id = $3 RETURNING *;";
     return query(sql, [status, jobId, companyId]).then(function(result) {
