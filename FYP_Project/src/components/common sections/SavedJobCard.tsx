@@ -77,7 +77,7 @@ export default function SavedJobCard({
 
           {/* Right side - actions */}
           <div className="flex gap-2">
-            <Button variant="default" onClick={() => onApply(job.jobId)}>
+            <Button variant="default" onClick={() => navigate(`/applyjob`)}>
               Apply Job
             </Button>
             <Button

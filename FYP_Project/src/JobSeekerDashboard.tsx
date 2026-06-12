@@ -193,7 +193,9 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
                   <h2 className="mt-2 text-4xl font-bold title-black">5</h2>
                 </div>
 
-                <Button variant="outline">View Details</Button>
+                <Button variant="outline" onClick={() => navigate("/jobSeeker/myReviews")}>
+                  View Details
+                </Button>
               </CardContent>
             </Card>
           </div>
@@ -370,7 +372,9 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
                     </Button>
 
                     <div className="flex gap-2">
-                      <Button>Apply Now</Button>
+                      <Button onClick={() => navigate("/applyjob")}>
+                        Apply Now
+                      </Button>
                       <Button variant="outline" onClick={() => navigate(`/jobDetails`)}>
                         View
                       </Button>
