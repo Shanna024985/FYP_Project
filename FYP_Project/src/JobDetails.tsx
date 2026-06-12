@@ -14,10 +14,12 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import NavigationMenus from "./NavigationMenu";
 import Sidebar from "./Sidebar"
+import { useNavigate } from "react-router-dom";
 type Props = {
   currentUrl: string;
 };
 export default function JobDetailsPage({ currentUrl }: Props) {
+  const navigate = useNavigate();
   const [bookmarked, setBookmarked] = useState(false);
   const token = localStorage.getItem("token");
   // Temporary mock data (replace with backend later)
@@ -108,7 +110,7 @@ Requirements:
               </div>
 
               {/* APPLY BUTTON */}
-              <Button className="w-full rounded-xl py-6 text-base">
+              <Button className="w-full rounded-xl py-6 text-base" onClick={() => navigate("/applyjob")}>
                 Apply Now
               </Button>
 
