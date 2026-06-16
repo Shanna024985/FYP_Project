@@ -1,4 +1,5 @@
 const { query } = require("../services/dbConnection");
+const {Server} = require('ws');
 
 // module.exports.getMessageByUserId = (userId, page) => {
 //     let sql = `GET m.message,
@@ -47,14 +48,14 @@ module.exports.insertSingleMessage = (senderUserId, receiverUserId, message) => 
 }
 
 module.exports.updateMessageById = (message, id) => {
-    let sql = `UPDATE message SET message = $1 WHERE id = $2 RETURNING id;`;
+    let sql = `UPDATE message SET message = $1 WHERE id = $2 RETURNING id, sender_user_id, receiver_user_id;`;
     return query(sql, [message, id]).then(function(result) {
         return result.rows;
     });
 }
 
 module.exports.deleteMessageById = (id) => {
-    let sql = `DELETE message WHERE id = $1 RETURNING id;`;
+    let sql = `DELETE message WHERE id = $1 RETURNING id, sender_user_id, receiver_user_id;`;
     return query(sql, [id]).then(function(result) {
         return result.rows;
     });
@@ -65,4 +66,32 @@ module.exports.getMessageById = (id) => {
     return query(sql, [id]).then(function(result) {
         return result.rows;
     });
+}
+
+const PORT = 3001;
+const server = new Server({port: PORT}, () => {
+    console.log(`Websocket running on ws://localhost:${PORT}`);
+});
+let clients = {};
+const jwt = require("jsonwebtoken");
+const secretKey = process.env.JWT_SECRET_KEY.trim();
+
+server.on('connection', (ws, req) => {
+    let params = new URLSearchParams(req.url.slice(2));
+    let token = params.get('token');
+    if (token) {
+        try {
+            clients[jwt.verify(token, secretKey).userId] = ws;
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+    ws.on('close', (ws, req) => {
+        delete clients[clients.findIndex(ws)];
+    })
+})
+
+module.exports.sendUpdateMessage = (userId) => {
+    clients[userId].send('updateMessage');
 }
