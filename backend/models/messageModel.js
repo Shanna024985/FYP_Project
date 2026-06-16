@@ -92,6 +92,6 @@ server.on('connection', (ws, req) => {
     })
 })
 
-module.exports.sendUpdateMessage = (userId) => {
-    clients[userId].send('updateMessage');
+module.exports.sendUpdateMessage = (userId, senderUserId) => {
+    clients[userId].send(senderUserId);
 }

@@ -44,7 +44,7 @@ module.exports.checkMessageExists = (req, res, next) => {
 module.exports.deleteMessageById = (req, res, next) => {
     return model.deleteMessageById(req.params.id)
     .then((messages) => {
-        model.sendUpdateMessage(messages[0].receiver_user_id);
+        model.sendUpdateMessage(messages[0].receiver_user_id, res.locals.userId);
         return res.status(200).json({message: 'message deleted successfully'});
     }).catch(function (error) {
         console.error(error);
@@ -59,7 +59,7 @@ module.exports.updateMessageById = (req, res, next) => {
 
     return model.updateMessageById(req.body.message, req.params.id)
     .then((messages) => {
-        model.sendUpdateMessage(messages[0].receiver_user_id);
+        model.sendUpdateMessage(messages[0].receiver_user_id, res.locals.userId);
         return res.status(200).json({message: 'message deleted successfully'});
     }).catch(function (error) {
         console.error(error);
@@ -92,7 +92,7 @@ module.exports.createMessage = (req, res, next) => {
 
     return model.insertSingleMessage(res.locals.userId, req.body.receiverUserId, req.body.message)
     .then((messages) => {
-        model.sendUpdateMessage(req.body.receiverUserId);
+        model.sendUpdateMessage(req.body.receiverUserId, res.locals.userId);
         return res.status(200).json({message: 'message created successfully', id: messages[0].id});
     }).catch(function (error) {
         console.error(error);
