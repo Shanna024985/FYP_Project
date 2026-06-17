@@ -13,7 +13,7 @@ import {
 import "./title.css";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
+import { Star } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -22,8 +22,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
+import { Badge } from "@/components/ui/badge";
 import JobCard from "@/components/common sections/JobCard";
+import JobSeekerRatingsPage from "./JobSeekerRating";
 
 type AppliedJob = {
   title: string;
@@ -108,7 +109,7 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
     savedPage * savedPerPage,
   );
   const navigate = useNavigate();
-  
+
   return (
     <div className="flex flex-col gap-6">
       <NavigationMenus />
@@ -140,11 +141,23 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
           <Card className="flex flex-col justify-center p-6">
             <CardContent className="space-y-4 p-0">
               <div>
+                {/* Name */}
                 <h2 className="text-2xl font-semibold title-black">John Doe</h2>
 
+                {/* Rating */}
+                <Button
+                  variant="ghost"
+                  className="cursor-pointer transition-all hover:bg-primary/10 hover:text-primary hover:scale-105"
+                  onClick={() => navigate("/jobSeeker/ratings")}
+                >
+                  <Badge variant="secondary" className="cursor-pointer">
+                    ⭐ 4.8 (25 Reviews)
+                    <Eye className="h-4 w-4" />
+                  </Badge>
+                </Button>
+                {/* Email */}
                 <p className="text-muted-foreground">johndoe@gmail.com</p>
               </div>
-
               <Button className="w-fit" onClick={() => navigate("/profile")}>
                 <Pencil />
                 Edit Profile
@@ -163,7 +176,10 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
                   <h2 className="mt-2 text-4xl font-bold title-black">12</h2>
                 </div>
 
-                <Button variant="outline" onClick={() => navigate("/jobSeeker/applications")}>
+                <Button
+                  variant="outline"
+                  onClick={() => navigate("/jobSeeker/applications")}
+                >
                   View Details
                 </Button>
               </CardContent>
@@ -178,7 +194,10 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
                   <h2 className="mt-2 text-4xl font-bold title-black">14</h2>
                 </div>
 
-                <Button variant="outline" onClick={() => navigate("/jobSeeker/savedJobs")}>
+                <Button
+                  variant="outline"
+                  onClick={() => navigate("/jobSeeker/savedJobs")}
+                >
                   View Details
                 </Button>
               </CardContent>
@@ -193,7 +212,10 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
                   <h2 className="mt-2 text-4xl font-bold title-black">5</h2>
                 </div>
 
-                <Button variant="outline" onClick={() => navigate("/jobSeeker/myReviews")}>
+                <Button
+                  variant="outline"
+                  onClick={() => navigate("/jobSeeker/myReviews")}
+                >
                   View Details
                 </Button>
               </CardContent>
@@ -226,7 +248,12 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-semibold title-black">Jobs Applied</h2>
 
-            <Button variant="outline" onClick={() => navigate("/jobSeeker/applications")}>View All</Button>
+            <Button
+              variant="outline"
+              onClick={() => navigate("/jobSeeker/applications")}
+            >
+              View All
+            </Button>
           </div>
 
           <Card>
@@ -313,7 +340,10 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-semibold title-black">Saved Jobs</h2>
 
-            <Button variant="outline" onClick={() => navigate("/jobSeeker/savedJobs")}>
+            <Button
+              variant="outline"
+              onClick={() => navigate("/jobSeeker/savedJobs")}
+            >
               View All
             </Button>
           </div>
@@ -375,7 +405,10 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
                       <Button onClick={() => navigate("/applyjob")}>
                         Apply Now
                       </Button>
-                      <Button variant="outline" onClick={() => navigate(`/jobDetails`)}>
+                      <Button
+                        variant="outline"
+                        onClick={() => navigate(`/jobDetails`)}
+                      >
                         View
                       </Button>
                     </div>
