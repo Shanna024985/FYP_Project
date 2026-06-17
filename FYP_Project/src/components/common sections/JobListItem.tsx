@@ -1,37 +1,40 @@
-import { Bookmark, MapPin, Eye } from "lucide-react"
-import { useState } from "react"
+import { Bookmark, MapPin, Eye } from "lucide-react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 type JobListItemProps = {
-  title: string
-  description: string
-  salary: string
-  location: string
-  tags: string[]
-  date: string
-  companyLogo: string
-}
+  title: string;
+  description: string;
+  salaryRangeFrom: number;
+  salaryRangeTo: number;
+  salaryType: string;
+  location: string;
+  tags: string[];
+  date: string;
+  companyLogo: string;
+  salaryPeriod: string;
+};
 
 export default function JobListItem({
   title,
   description,
-  salary,
+  salaryRangeFrom,
+  salaryRangeTo,
+  salaryType,
   location,
   tags,
   date,
   companyLogo,
+  salaryPeriod,
 }: JobListItemProps) {
-  const [bookmarked, setBookmarked] = useState(false)
+  const [bookmarked, setBookmarked] = useState(false);
   const navigate = useNavigate();
   return (
     <Card className="relative flex gap-4 p-4 hover:shadow-md transition">
       {/* LEFT: LOGO */}
-      <img
-        src={companyLogo}
-        className="h-12 w-12 rounded-md object-cover"
-      />
+      <img src={companyLogo} className="h-12 w-12 rounded-md object-cover" />
 
       {/* RIGHT CONTENT */}
       <div className="flex-1 space-y-2">
@@ -45,7 +48,15 @@ export default function JobListItem({
 
         {/* LINE 3: SALARY + LOCATION */}
         <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-          <span>{salary}</span>
+          <span>
+            {salaryType?.toLowerCase() === "negotiable"
+              ? `${salaryRangeFrom} - ${salaryRangeTo} / ${salaryPeriod?.toLowerCase()} (Negotiable)`
+              : salaryRangeFrom && salaryRangeTo
+                ? salaryRangeFrom === salaryRangeTo
+                  ? `${salaryRangeFrom} / ${salaryPeriod?.toLowerCase()}`
+                  : `${salaryRangeFrom} - ${salaryRangeTo} / ${salaryPeriod?.toLowerCase()}`
+                : "Not specified"}
+          </span>
 
           <span className="flex items-center gap-1">
             <MapPin size={14} />
@@ -56,19 +67,14 @@ export default function JobListItem({
         {/* LINE 4: TAGS */}
         <div className="flex flex-wrap gap-2">
           {tags.map((tag) => (
-            <span
-              key={tag}
-              className="text-xs px-2 py-1 rounded-full bg-muted"
-            >
+            <span key={tag} className="text-xs px-2 py-1 rounded-full bg-muted">
               {tag}
             </span>
           ))}
         </div>
 
         {/* LINE 5: DATE */}
-        <p className="text-xs text-muted-foreground">
-          Posted on {date}
-        </p>
+        <p className="text-xs text-muted-foreground">Posted on {date}</p>
       </div>
 
       {/* TOP RIGHT: BOOKMARK */}
@@ -79,17 +85,17 @@ export default function JobListItem({
         <Bookmark
           size={18}
           className={
-            bookmarked
-              ? "fill-black text-black"
-              : "text-muted-foreground"
+            bookmarked ? "fill-black text-black" : "text-muted-foreground"
           }
         />
       </button>
 
       {/* BOTTOM RIGHT: VIEW BUTTON */}
       <div className="absolute bottom-3 right-3">
-        <Button size="sm" onClick={() => navigate("/jobDetails")}>View</Button>
+        <Button size="sm" onClick={() => navigate("/jobDetails")}>
+          View
+        </Button>
       </div>
     </Card>
-  )
+  );
 }

@@ -1,10 +1,22 @@
 export type Job = {
   id: number;
+  company_id: number;
   title: string;
   description: string;
-  salary: string;
+  category: string;
+  type: string;
+  status: string;
+  salary_range_from: number;
+  salary_range_to: number;
+  salary_type: string;
+  salary_period: string;
+  duration: string;
+  deadline: string;
+  experience: string;
+  career_level: string;
   location: string;
-  tags: string[];
-  date: string;
-  companyLogo: string;
+  jobs_needed: number;
+  reports: number;
+  company_name: string;
+  company_city: string;
 };
