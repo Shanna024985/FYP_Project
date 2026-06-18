@@ -169,8 +169,6 @@ export default function JobFilters({ currentUrl }: Props) {
                   Marketing & Advertising
                 </SelectItem>
 
-                <SelectItem value="freelance">Part-time & Freelance</SelectItem>
-
                 <SelectItem value="sales">Sales & Retail</SelectItem>
 
                 <SelectItem value="trades">Trades & Services</SelectItem>
