@@ -63,8 +63,9 @@ import JobSeekerApplications from "./JobSeekerApplications";
 import LoginPage from "./Login";
 import LoginCallbackPage from "./LoginCallback";
 import ProtectedLayout from "./ProtectedLayout";
-import CompanyPage from "./CompanyPage";
+import { CompanyPageRenderer } from "./CompanyPage";
 import CompanyReviews from "./CompanyReviews";
+import AddCompanies from "./AddCompanies";
 const linkForBackend = "http://localhost:3000/api";
 function App() {
   const [count, setCount] = useState(0);
@@ -104,8 +105,9 @@ function App() {
             path="/jobSeeker/applications"
             element={<JobSeekerApplications currentUrl={linkForBackend} />}
           />
-          <Route path="/company" element={<CompanyPage  currentUrl={linkForBackend}/>}/>
+          <Route path="/company" element={<CompanyPageRenderer  currentUrl={linkForBackend}/>}/>
           <Route path="/companyreviews" element={<CompanyReviews currentUrl={linkForBackend}/>}/>
+          <Route path="/addcompanies" element={<AddCompanies currentUrl={linkForBackend}/>}/>
         </Route>
       </Routes>
     </>

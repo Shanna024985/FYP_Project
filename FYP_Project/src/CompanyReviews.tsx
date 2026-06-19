@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Plus, StarHalfIcon, StarIcon } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./components/ui/avatar";
 import { Button } from "./components/ui/button";
@@ -19,6 +19,8 @@ type Props = {
   currentUrl: String;
 };
 const CompanyReviews = (prop: Props) => {
+  const [rating, setRating] = useState(0);
+
   return (
     <div>
       <div className="flex justify-between">
@@ -42,92 +44,15 @@ const CompanyReviews = (prop: Props) => {
                 <Label htmlFor="link" className="sr-only">
                   Link
                 </Label>
-                <div className="flex gap-3" id="starsToClickOn">
-                  <StarIcon
-                    className="self-center size-7"
-                    fill="white"
-                    id="1"
-                    onClick={(e) => {
-                      let target = e.currentTarget;
-                      target.style.fill = "yellow";
-                    }}
-                  />
-                  <StarIcon
-                    className="self-center size-7"
-                    fill="white"
-                    id="2"
-                    onClick={(e) => {
-                      let div = document.getElementById("starsToClickOn");
-                      let elementsInDiv = div?.children;
-                      for (const element in elementsInDiv) {
-                        let number = parseInt(element);
-                        if (number <= parseInt(e.currentTarget.id)) {
-                          let elementsGotten = document.getElementById(element);
-                          if (elementsGotten) {
-                            elementsGotten.style.fill = "yellow";
-                          }
-                        }
-                      }
-                    }}
-                  />
-
-                  <StarIcon
-                    className="self-center size-7"
-                    fill="white"
-                    id="3"
-                    onClick={(e) => {
-                      let div = document.getElementById("starsToClickOn");
-                      let elementsInDiv = div?.children;
-                      for (const element in elementsInDiv) {
-                        let number = parseInt(element);
-                        if (number <= parseInt(e.currentTarget.id)) {
-                          let elementsGotten = document.getElementById(element);
-                          if (elementsGotten) {
-                            elementsGotten.style.fill = "yellow";
-                          }
-                        }
-                      }
-                    }}
-                  />
-
-                  <StarIcon
-                    className="self-center size-7"
-                    fill="white"
-                    id="4"
-                    onClick={(e) => {
-                      let div = document.getElementById("starsToClickOn");
-                      let elementsInDiv = div?.children;
-                      for (const element in elementsInDiv) {
-                        let number = parseInt(element);
-                        if (number <= parseInt(e.currentTarget.id)) {
-                          let elementsGotten = document.getElementById(element);
-                          if (elementsGotten) {
-                            elementsGotten.style.fill = "yellow";
-                          }
-                        }
-                      }
-                    }}
-                  />
-                  <StarIcon
-                    className="self-center size-7"
-                    fill="white"
-                    id="5"
-                    onClick={(e) => {
-                      let div = document.getElementById("starsToClickOn");
-                      let elementsInDiv = div?.children;
-                      for (const element in elementsInDiv) {
-                        let number = parseInt(element);
-                        if (number <= parseInt(e.currentTarget.id)) {
-                          let elementsGotten = document.getElementById(element);
-                          if (elementsGotten) {
-                            elementsGotten.style.fill = "yellow";
-                            let target = e.currentTarget;
-                            target.style.fill = "yellow";
-                          }
-                        }
-                      }
-                    }}
-                  />
+                <div className="flex gap-3">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <StarIcon
+                      key={star}
+                      className="size-7"
+                      fill={star <= rating ? "yellow" : "white"}
+                      onClick={() => setRating(star)}
+                    />
+                  ))}
                 </div>
                 <Input
                   id="link"
@@ -222,7 +147,7 @@ const CompanyReviews = (prop: Props) => {
               <StarIcon className="self-center" fill="yellow" />
               <StarHalfIcon className="self-center" fill="yellow" />
             </div>
-            <p>
+            <p className="text-left">
               My first job in this company went well it was very fruitful and
               the company culture is great
             </p>
@@ -252,7 +177,7 @@ const CompanyReviews = (prop: Props) => {
               <StarIcon className="self-center" fill="yellow" />
               <StarHalfIcon className="self-center" fill="yellow" />
             </div>
-            <p>
+            <p className="text-left">
               My first job in this company went well it was very fruitful and
               the company culture is great
             </p>
