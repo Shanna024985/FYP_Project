@@ -54,8 +54,12 @@ type PropsForCompanyPage = {
   setBannerImage: Function;
 };
 export const CompanyPageRenderer = (prop: Props) => {
-  let [imageOfTea, setImageOfTea] = React.useState("../public/IMG_0230 copy.jpeg");
-  let [imageOfBanner, setImageOfBanner] = React.useState("../public/IMG_0049.JPG");
+  let [imageOfTea, setImageOfTea] = React.useState(
+    "../public/IMG_0230 copy.jpeg",
+  );
+  let [imageOfBanner, setImageOfBanner] = React.useState(
+    "../public/IMG_0049.JPG",
+  );
   let [name, setName] = React.useState("Green Tea");
   let [overviewPage, setOverviewPage] = React.useState(
     "We sell green tea for everyone to experience a taste of authentic Matcha from Japan",
@@ -92,7 +96,87 @@ export const CompanyPageRenderer = (prop: Props) => {
       id: 6,
     },
   ]);
+  let [cities, setCities] = React.useState({
+    Singapore: ["Singapore"],
+
+    Japan: ["Tokyo", "Osaka", "Kyoto", "Nagoya", "Sapporo", "Fukuoka"],
+
+    "South Korea": ["Seoul", "Busan", "Incheon", "Daegu"],
+
+    China: [
+      "Beijing",
+      "Shanghai",
+      "Guangzhou",
+      "Shenzhen",
+      "Chengdu",
+      "Hangzhou",
+    ],
+
+    India: ["Mumbai", "Delhi", "Bangalore", "Hyderabad", "Chennai", "Kolkata"],
+
+    Thailand: ["Bangkok", "Chiang Mai", "Phuket"],
+
+    Malaysia: ["Kuala Lumpur", "George Town", "Johor Bahru"],
+
+    Indonesia: ["Jakarta", "Surabaya", "Bandung", "Denpasar"],
+
+    Vietnam: ["Ho Chi Minh City", "Hanoi", "Da Nang"],
+
+    "United Kingdom": [
+      "London",
+      "Manchester",
+      "Birmingham",
+      "Edinburgh",
+      "Glasgow",
+    ],
+
+    France: ["Paris", "Lyon", "Marseille", "Nice"],
+
+    Germany: ["Berlin", "Munich", "Hamburg", "Frankfurt", "Cologne"],
+
+    Italy: ["Rome", "Milan", "Naples", "Florence", "Venice"],
+
+    Spain: ["Madrid", "Barcelona", "Valencia", "Seville"],
+
+    Netherlands: ["Amsterdam", "Rotterdam", "The Hague"],
+
+    "United States": [
+      "New York",
+      "Los Angeles",
+      "Chicago",
+      "Houston",
+      "San Francisco",
+      "Seattle",
+      "Miami",
+      "Boston",
+    ],
+
+    Canada: ["Toronto", "Vancouver", "Montreal", "Calgary"],
+
+    Australia: ["Sydney", "Melbourne", "Brisbane", "Perth", "Adelaide"],
+
+    "New Zealand": ["Auckland", "Wellington", "Christchurch"],
+
+    "United Arab Emirates": ["Dubai", "Abu Dhabi"],
+
+    "South Africa": ["Cape Town", "Johannesburg", "Durban"],
+
+    Brazil: ["São Paulo", "Rio de Janeiro", "Brasília"],
+
+    Mexico: ["Mexico City", "Guadalajara", "Monterrey"],
+  });
   let [totalReviews, setTotalReviews] = React.useState(4000);
+  useEffect(() => {
+    let address = new URL(window.location.href);
+    let queryParameters = address.searchParams;
+    let id = queryParameters.get("id");
+    fetch(prop.currentUrl + "company/" + id)
+    .then((value)=>{
+      return value.json()
+    }).then((valueOfResult)=>{
+      
+    })
+  }, []);
   return (
     <>
       <CompanyPage
@@ -126,29 +210,30 @@ export const CompanyPageRenderer = (prop: Props) => {
 };
 let StarsPage = (prop: Stars) => {
   const stars = [];
-  let previousNumber = 0
+  let previousNumber = 0;
   for (let i = 1; i <= 5; i++) {
     if (prop.averageRating >= i) {
       stars.push(<StarIcon className="self-center" fill="yellow" key={i} />);
-      previousNumber = i
-    } else if (prop.averageRating < i && prop.averageRating > previousNumber){
-      stars.push(<StarHalfIcon className="self-center" fill="yellow" key={i}/>)
-      previousNumber = i
-    } 
-  }
-  return stars
-};
-let ReviewsToString = (averageRating: number) =>{
-  if (averageRating >= 1000){
-    let amountDivided = averageRating/1000
-    if (Number.isInteger(amountDivided)){
-    return amountDivided + ".0k"
-
-    } else {
-      return amountDivided + "k"
+      previousNumber = i;
+    } else if (prop.averageRating < i && prop.averageRating > previousNumber) {
+      stars.push(
+        <StarHalfIcon className="self-center" fill="yellow" key={i} />,
+      );
+      previousNumber = i;
     }
   }
-}
+  return stars;
+};
+let ReviewsToString = (averageRating: number) => {
+  if (averageRating >= 1000) {
+    let amountDivided = averageRating / 1000;
+    if (Number.isInteger(amountDivided)) {
+      return amountDivided + ".0k";
+    } else {
+      return amountDivided + "k";
+    }
+  }
+};
 export const CompanyPage = (prop: PropsForCompanyPage) => {
   const navigate = useNavigate();
 
@@ -216,7 +301,7 @@ export const CompanyPage = (prop: PropsForCompanyPage) => {
                     <p className="font-bold text-2xl">Average Rating</p>
                     <div className="flex mt-2 gap-3">
                       <p className="text-3xl">{prop.averageRating}</p>
-                      <StarsPage averageRating={prop.averageRating}/>
+                      <StarsPage averageRating={prop.averageRating} />
                     </div>
                     <p className="text-sm text-gray-400">
                       Average rating on this year performance
@@ -225,13 +310,13 @@ export const CompanyPage = (prop: PropsForCompanyPage) => {
 
                   <div className="text-left w-full flex flex-col gap-2">
                     <p className="font-bold text-2xl ">Total Reviews</p>
-                    {
-                      prop.totalReviews > 1000 ? (
-                        <p className="text-3xl">{ReviewsToString(prop.totalReviews)}</p>
-                      ) : (
-                        <p className="text-3xl">{prop.totalReviews}</p>
-                      )
-                    }
+                    {prop.totalReviews > 1000 ? (
+                      <p className="text-3xl">
+                        {ReviewsToString(prop.totalReviews)}
+                      </p>
+                    ) : (
+                      <p className="text-3xl">{prop.totalReviews}</p>
+                    )}
                     <Button
                       className="w-fit"
                       onClick={(e) => {
