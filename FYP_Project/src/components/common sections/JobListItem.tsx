@@ -1,0 +1,101 @@
+import { Bookmark, MapPin, Eye } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+
+type JobListItemProps = {
+  title: string;
+  description: string;
+  salaryRangeFrom: number;
+  salaryRangeTo: number;
+  salaryType: string;
+  location: string;
+  tags: string[];
+  date: string;
+  companyLogo: string;
+  salaryPeriod: string;
+};
+
+export default function JobListItem({
+  title,
+  description,
+  salaryRangeFrom,
+  salaryRangeTo,
+  salaryType,
+  location,
+  tags,
+  date,
+  companyLogo,
+  salaryPeriod,
+}: JobListItemProps) {
+  const [bookmarked, setBookmarked] = useState(false);
+  const navigate = useNavigate();
+  return (
+    <Card className="relative flex gap-4 p-4 hover:shadow-md transition">
+      {/* LEFT: LOGO */}
+      <img src={companyLogo} className="h-12 w-12 rounded-md object-cover" />
+
+      {/* RIGHT CONTENT */}
+      <div className="flex-1 space-y-2">
+        {/* LINE 1: TITLE */}
+        <h3 className="font-semibold text-base">{title}</h3>
+
+        {/* LINE 2: DESCRIPTION (3 lines clamp) */}
+        <p className="text-sm text-muted-foreground line-clamp-3">
+          {description}
+        </p>
+
+        {/* LINE 3: SALARY + LOCATION */}
+        <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+          <span>
+            {salaryType?.toLowerCase() === "negotiable"
+              ? `${salaryRangeFrom} - ${salaryRangeTo} / ${salaryPeriod?.toLowerCase()} (Negotiable)`
+              : salaryRangeFrom && salaryRangeTo
+                ? salaryRangeFrom === salaryRangeTo
+                  ? `${salaryRangeFrom} / ${salaryPeriod?.toLowerCase()}`
+                  : `${salaryRangeFrom} - ${salaryRangeTo} / ${salaryPeriod?.toLowerCase()}`
+                : "Not specified"}
+          </span>
+
+          <span className="flex items-center gap-1">
+            <MapPin size={14} />
+            {location}
+          </span>
+        </div>
+
+        {/* LINE 4: TAGS */}
+        <div className="flex flex-wrap gap-2">
+          {tags.map((tag) => (
+            <span key={tag} className="text-xs px-2 py-1 rounded-full bg-muted">
+              {tag}
+            </span>
+          ))}
+        </div>
+
+        {/* LINE 5: DATE */}
+        <p className="text-xs text-muted-foreground">Posted on {date}</p>
+      </div>
+
+      {/* TOP RIGHT: BOOKMARK */}
+      <button
+        onClick={() => setBookmarked(!bookmarked)}
+        className="absolute top-3 right-3"
+      >
+        <Bookmark
+          size={18}
+          className={
+            bookmarked ? "fill-black text-black" : "text-muted-foreground"
+          }
+        />
+      </button>
+
+      {/* BOTTOM RIGHT: VIEW BUTTON */}
+      <div className="absolute bottom-3 right-3">
+        <Button size="sm" onClick={() => navigate("/jobDetails")}>
+          View
+        </Button>
+      </div>
+    </Card>
+  );
+}
