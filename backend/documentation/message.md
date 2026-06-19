@@ -1,3 +1,4 @@
+# Message
 in the messages page, please implement this code:
 ```js
 const ws = new WebSocket('ws://localhost:3001?token={TOKEN}');
@@ -12,6 +13,8 @@ please make sure that this happens:
 - otherwise, call GET /api/message/list
 
 PUT /api/message/:id - edits a message
+BODY PARAMETERS:
+- message: the message to be updated with
 
 DELETE /api/message/:id - deletes a message
 
