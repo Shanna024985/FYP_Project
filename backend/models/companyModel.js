@@ -39,7 +39,7 @@ module.exports.getAllCompanies = function getAllCompanies() {
 
 // READ - Get single company by ID
 module.exports.getCompanyById = function getCompanyById(companyId) {
-    let sql = `SELECT id, name, url, contact_email, tagline, description, city 
+    let sql = `SELECT id, name, url, contact_email, tagline, description, city, logo_file_name, encode(logo_file_data, 'base64') as logo_base64
                FROM company WHERE id = $1;`;
     return query(sql, [companyId]).then(function(result) {
         return result.rows;
