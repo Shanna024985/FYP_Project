@@ -99,166 +99,168 @@ const AddCompanies = (prop: Props) => {
     Mexico: ["Mexico City", "Guadalajara", "Monterrey"],
   });
   let [companyType, setCompanyType] = useState([
-  {
-    value: "technology",
-    label: "Technology",
-  },
-  {
-    value: "finance-banking",
-    label: "Finance & Banking",
-  },
-  {
-    value: "food-beverages",
-    label: "Food & Beverages",
-  },
-  {
-    value: "healthcare",
-    label: "Healthcare",
-  },
-  {
-    value: "education",
-    label: "Education",
-  },
-  {
-    value: "retail",
-    label: "Retail",
-  },
-  {
-    value: "ecommerce",
-    label: "E-Commerce",
-  },
-  {
-    value: "manufacturing",
-    label: "Manufacturing",
-  },
-  {
-    value: "construction",
-    label: "Construction",
-  },
-  {
-    value: "real-estate",
-    label: "Real Estate",
-  },
-  {
-    value: "transportation-logistics",
-    label: "Transportation & Logistics",
-  },
-  {
-    value: "hospitality-tourism",
-    label: "Hospitality & Tourism",
-  },
-  {
-    value: "telecommunications",
-    label: "Telecommunications",
-  },
-  {
-    value: "media-entertainment",
-    label: "Media & Entertainment",
-  },
-  {
-    value: "marketing-advertising",
-    label: "Marketing & Advertising",
-  },
-  {
-    value: "consulting",
-    label: "Consulting",
-  },
-  {
-    value: "legal-services",
-    label: "Legal Services",
-  },
-  {
-    value: "insurance",
-    label: "Insurance",
-  },
-  {
-    value: "energy-utilities",
-    label: "Energy & Utilities",
-  },
-  {
-    value: "agriculture",
-    label: "Agriculture",
-  },
-  {
-    value: "automotive",
-    label: "Automotive",
-  },
-  {
-    value: "aerospace-defense",
-    label: "Aerospace & Defense",
-  },
-  {
-    value: "pharmaceuticals",
-    label: "Pharmaceuticals",
-  },
-  {
-    value: "biotechnology",
-    label: "Biotechnology",
-  },
-  {
-    value: "government-public-sector",
-    label: "Government & Public Sector",
-  },
-  {
-    value: "nonprofit-ngo",
-    label: "Non-Profit & NGO",
-  },
-  {
-    value: "human-resources-recruitment",
-    label: "Human Resources & Recruitment",
-  },
-  {
-    value: "cybersecurity",
-    label: "Cybersecurity",
-  },
-  {
-    value: "architecture-design",
-    label: "Architecture & Design",
-  },
-  {
-    value: "research-development",
-    label: "Research & Development",
-  },
-  {
-    value: "environmental-services",
-    label: "Environmental Services",
-  },
-  {
-    value: "sports-recreation",
-    label: "Sports & Recreation",
-  },
-  {
-    value: "fashion-apparel",
-    label: "Fashion & Apparel",
-  },
-  {
-    value: "beauty-cosmetics",
-    label: "Beauty & Cosmetics",
-  },
-  {
-    value: "gaming",
-    label: "Gaming",
-  },
-  {
-    value: "security-services",
-    label: "Security Services",
-  },
-  {
-    value: "events-management",
-    label: "Events Management",
-  },
-  {
-    value: "pet-care-veterinary",
-    label: "Pet Care & Veterinary",
-  },
-  {
-    value: "other",
-    label: "Other",
-  },
-])
+    {
+      value: "technology",
+      label: "Technology",
+    },
+    {
+      value: "finance-banking",
+      label: "Finance & Banking",
+    },
+    {
+      value: "food-beverages",
+      label: "Food & Beverages",
+    },
+    {
+      value: "healthcare",
+      label: "Healthcare",
+    },
+    {
+      value: "education",
+      label: "Education",
+    },
+    {
+      value: "retail",
+      label: "Retail",
+    },
+    {
+      value: "ecommerce",
+      label: "E-Commerce",
+    },
+    {
+      value: "manufacturing",
+      label: "Manufacturing",
+    },
+    {
+      value: "construction",
+      label: "Construction",
+    },
+    {
+      value: "real-estate",
+      label: "Real Estate",
+    },
+    {
+      value: "transportation-logistics",
+      label: "Transportation & Logistics",
+    },
+    {
+      value: "hospitality-tourism",
+      label: "Hospitality & Tourism",
+    },
+    {
+      value: "telecommunications",
+      label: "Telecommunications",
+    },
+    {
+      value: "media-entertainment",
+      label: "Media & Entertainment",
+    },
+    {
+      value: "marketing-advertising",
+      label: "Marketing & Advertising",
+    },
+    {
+      value: "consulting",
+      label: "Consulting",
+    },
+    {
+      value: "legal-services",
+      label: "Legal Services",
+    },
+    {
+      value: "insurance",
+      label: "Insurance",
+    },
+    {
+      value: "energy-utilities",
+      label: "Energy & Utilities",
+    },
+    {
+      value: "agriculture",
+      label: "Agriculture",
+    },
+    {
+      value: "automotive",
+      label: "Automotive",
+    },
+    {
+      value: "aerospace-defense",
+      label: "Aerospace & Defense",
+    },
+    {
+      value: "pharmaceuticals",
+      label: "Pharmaceuticals",
+    },
+    {
+      value: "biotechnology",
+      label: "Biotechnology",
+    },
+    {
+      value: "government-public-sector",
+      label: "Government & Public Sector",
+    },
+    {
+      value: "nonprofit-ngo",
+      label: "Non-Profit & NGO",
+    },
+    {
+      value: "human-resources-recruitment",
+      label: "Human Resources & Recruitment",
+    },
+    {
+      value: "cybersecurity",
+      label: "Cybersecurity",
+    },
+    {
+      value: "architecture-design",
+      label: "Architecture & Design",
+    },
+    {
+      value: "research-development",
+      label: "Research & Development",
+    },
+    {
+      value: "environmental-services",
+      label: "Environmental Services",
+    },
+    {
+      value: "sports-recreation",
+      label: "Sports & Recreation",
+    },
+    {
+      value: "fashion-apparel",
+      label: "Fashion & Apparel",
+    },
+    {
+      value: "beauty-cosmetics",
+      label: "Beauty & Cosmetics",
+    },
+    {
+      value: "gaming",
+      label: "Gaming",
+    },
+    {
+      value: "security-services",
+      label: "Security Services",
+    },
+    {
+      value: "events-management",
+      label: "Events Management",
+    },
+    {
+      value: "pet-care-veterinary",
+      label: "Pet Care & Veterinary",
+    },
+    {
+      value: "other",
+      label: "Other",
+    },
+  ]);
   let [totalReviews, setTotalReviews] = React.useState(0);
-let [averageRating, setAverageRating] = React.useState(4.5)
-let [companyTypeChosen, setCompanyTypeChosen] = useState("")
+  let [averageRating, setAverageRating] = React.useState(4.5);
+  let [companyTypeChosen, setCompanyTypeChosen] = useState("");
+  let [imageOfProfile, setImageOfProfile] = useState("");
+  let [imageOfBanner, setBannerImage] = useState("");
   return (
     <div>
       <p className="text-left text-3xl font-semibold">Add companies</p>
@@ -289,27 +291,30 @@ let [companyTypeChosen, setCompanyTypeChosen] = useState("")
             </Field>
             <Field>
               <FieldLabel>Company Type</FieldLabel>
-              <Select required onValueChange={(e)=>{
-                companyType.forEach((value)=>{
-                    if (value.value == e){
-                        setCompanyTypeChosen(value.label)
+              <Select
+                required
+                onValueChange={(e) => {
+                  companyType.forEach((value) => {
+                    if (value.value == e) {
+                      setCompanyTypeChosen(value.label);
                     }
-                })
-              }}>
+                  });
+                }}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select..." />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    {
-                        companyType.map((type)=>{
-                            return (
-                                <>
-                                <SelectItem value={type.value} key={type.value}>{type.label}</SelectItem>
-                                </>
-                            )
-                        })
-                    }
+                    {companyType.map((type) => {
+                      return (
+                        <>
+                          <SelectItem value={type.value} key={type.value}>
+                            {type.label}
+                          </SelectItem>
+                        </>
+                      );
+                    })}
                   </SelectGroup>
                 </SelectContent>
               </Select>
@@ -327,28 +332,27 @@ let [companyTypeChosen, setCompanyTypeChosen] = useState("")
             </Field>
             <Field>
               <FieldLabel htmlFor="locationDropdown">Location</FieldLabel>
-              <Select required onValueChange={(e)=>{
-                console.log(e)
-                Object.entries(cities).forEach(([countries, citiesLoop])=>{
-                    citiesLoop.forEach((value)=>{
-                        let citiesInValueFormat = value.toLowerCase().replace(/\s+/g, "-")
-                        if (citiesInValueFormat === e){
-                            setLocation(value + ", " + countries)
-                        }
-                    })
-                })
-            
-              }}>
+              <Select
+                required
+                onValueChange={(e) => {
+                  console.log(e);
+                  Object.entries(cities).forEach(([countries, citiesLoop]) => {
+                    citiesLoop.forEach((value) => {
+                      let citiesInValueFormat = value
+                        .toLowerCase()
+                        .replace(/\s+/g, "-");
+                      if (citiesInValueFormat === e) {
+                        setLocation(value + ", " + countries);
+                      }
+                    });
+                  });
+                }}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select..." />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    {/* <SelectLabel>Singapore</SelectLabel>
-                    <SelectItem value={"singapore"}>Singapore</SelectItem>
-                    <SelectLabel>Japan</SelectLabel>
-                    <SelectItem value="osaka">Osaka</SelectItem>
-                    <SelectItem value="tokyo">Tokyo</SelectItem> */}
                     {Object.entries(cities).map(([country, citiesLoop]) => {
                       return (
                         <>
@@ -401,11 +405,41 @@ let [companyTypeChosen, setCompanyTypeChosen] = useState("")
             </Field>
             <Field>
               <FieldLabel htmlFor="imageForBanner">Banner Image</FieldLabel>
-              <Input id="imageForBanner" type="file" />
+              <Input
+                id="imageForBanner"
+                type="file"
+                onInput={(event) => {
+                  let files = event.currentTarget.files;
+                  if (files) {
+                    if (files.length > 0) {
+                      const file = files[0]; // Get the first file
+
+                      console.log("File Name:", file.name); // e.g., "document.pdf"
+                      console.log("File Size:", file.size); // Size in bytes
+                      console.log("File Type:", file.type); // MIME type, e.g., "application/pdf"
+                      let url = URL.createObjectURL(file)
+                      setBannerImage(url)
+                    }
+                  }
+                }}
+              />
             </Field>
             <Field>
               <FieldLabel htmlFor="imageForProfile">Profile Image</FieldLabel>
-              <Input id="imageForProfile" type="file" />
+              <Input id="imageForProfile" type="file"                 onInput={(event) => {
+                  let files = event.currentTarget.files;
+                  if (files) {
+                    if (files.length > 0) {
+                      const file = files[0]; // Get the first file
+
+                      console.log("File Name:", file.name); // e.g., "document.pdf"
+                      console.log("File Size:", file.size); // Size in bytes
+                      console.log("File Type:", file.type); // MIME type, e.g., "application/pdf"
+                      let url = URL.createObjectURL(file)
+                      setImageOfProfile(url)
+                    }
+                  }
+                }}/>
             </Field>
           </FieldGroup>
           <div className="justify-self-start">
@@ -415,8 +449,12 @@ let [companyTypeChosen, setCompanyTypeChosen] = useState("")
         <div className="flex-1">
           <p className="text-xl text-left">Preview</p>
           <CompanyPage
-          totalReviews={totalReviews}
-          totalReviewsFunction={setTotalReviews}
+            bannerImage={imageOfBanner}
+            setBannerImage={setBannerImage}
+            profileImage={imageOfProfile}
+            setProfileImage={setImageOfProfile}
+            totalReviews={totalReviews}
+            totalReviewsFunction={setTotalReviews}
             name={name}
             setName={setName}
             linkOfCompany={linkOfCompany}

@@ -48,10 +48,14 @@ type PropsForCompanyPage = {
   jobPostings?: Array<ArrayType>;
   jobPostingsFunction?: Function;
   totalReviewsFunction: Function;
+  profileImage: string;
+  setProfileImage: Function;
+  bannerImage: string;
+  setBannerImage: Function;
 };
 export const CompanyPageRenderer = (prop: Props) => {
-  let [imageOfTea, setImageOfTea] = React.useState("");
-  let [imageOfBanner, setImageOfBanner] = React.useState("");
+  let [imageOfTea, setImageOfTea] = React.useState("../public/IMG_0230 copy.jpeg");
+  let [imageOfBanner, setImageOfBanner] = React.useState("../public/IMG_0049.JPG");
   let [name, setName] = React.useState("Green Tea");
   let [overviewPage, setOverviewPage] = React.useState(
     "We sell green tea for everyone to experience a taste of authentic Matcha from Japan",
@@ -92,6 +96,10 @@ export const CompanyPageRenderer = (prop: Props) => {
   return (
     <>
       <CompanyPage
+        profileImage={imageOfTea}
+        setProfileImage={setImageOfTea}
+        bannerImage={imageOfBanner}
+        setBannerImage={setImageOfBanner}
         jobPostingsFunction={setJobPostings}
         totalReviewsFunction={setTotalReviews}
         totalReviews={totalReviews}
@@ -148,7 +156,7 @@ export const CompanyPage = (prop: PropsForCompanyPage) => {
     <div>
       <div>
         <img
-          src="../public/IMG_0049.JPG"
+          src={prop.bannerImage}
           alt="banner"
           className="object-cover h-40 w-full rounded-md"
         />
@@ -156,7 +164,7 @@ export const CompanyPage = (prop: PropsForCompanyPage) => {
       <div className="flex p-5 gap-7">
         <div className="flex items-center justify-center">
           <Avatar className="size-35">
-            <AvatarImage src="../public/IMG_0230 copy.jpeg" />
+            <AvatarImage src={prop.profileImage} />
             <AvatarFallback>ProfilePic</AvatarFallback>
           </Avatar>
         </div>
@@ -195,37 +203,6 @@ export const CompanyPage = (prop: PropsForCompanyPage) => {
           </div>
 
           <div className="bg-[#F2E9D9] text-left p-4 rounded-md gap-4 flex-col  flex h-fit">
-            {/* <div className="flex justify-between">
-              <div className="text-left w-full flex flex-col gap-2">
-                <p className="font-bold text-2xl">Average Rating</p>
-                <div className="flex mt-2 gap-3">
-                  <p className="text-3xl">{prop.averageRating}</p>
-                  <StarIcon className="self-center" fill="yellow" />
-                  <StarIcon className="self-center" fill="yellow" />
-
-                  <StarIcon className="self-center" fill="yellow" />
-
-                  <StarIcon className="self-center" fill="yellow" />
-                  <StarHalfIcon className="self-center" fill="yellow" />
-                </div>
-                <p className="text-sm text-gray-400">
-                  Average rating on this year performance
-                </p>
-              </div>
-
-              <div className="text-left w-full flex flex-col gap-2">
-                <p className="font-bold text-2xl ">Total Reviews</p>
-                <p className="text-3xl">10.0k</p>
-                <Button
-                  className="w-fit"
-                  onClick={(e) => {
-                    navigate("/companyreviews");
-                  }}
-                >
-                  View all reviews
-                </Button>
-              </div>
-            </div> */}
             {prop.totalReviews == 0 ? (
               <>
                 <p className="text-xl text-gray-500">
