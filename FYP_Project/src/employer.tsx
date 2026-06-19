@@ -95,7 +95,7 @@ const Employer = (props: Props) => {
                 <TableCell className="text-left">Central</TableCell>
                 <TableCell>
                   <Button
-                    className="p-0 bg-white/0 text-left"
+                    className="p-0 bg-white/0 text-left hover:bg-amber-50"
                     onClick={() => {
                       navigate("/jobApplicants");
                     }}
@@ -105,7 +105,7 @@ const Employer = (props: Props) => {
                 </TableCell>
                 <TableCell>
                   <Button
-                    className="p-0 bg-white/0 text-left"
+                    className="p-0 bg-white/0 text-left hover:bg-amber-50"
                     onClick={() => {
                       navigate("/editjobs");
                     }}
@@ -115,7 +115,7 @@ const Employer = (props: Props) => {
                 </TableCell>
                 <TableCell>
                   <Button
-                    className="p-0 bg-white/0 text-left"
+                    className="p-0 bg-white/0 text-left hover:bg-amber-50"
                     onClick={() =>
                       toast("Job has been deleted", {
                         action: {
