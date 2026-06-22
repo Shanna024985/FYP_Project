@@ -19,4 +19,6 @@ export type Job = {
   reports: number;
   company_name: string;
   company_city: string;
+  created_at: string;
+  updated_at: string;
 };

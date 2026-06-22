@@ -20,9 +20,6 @@ export default function BrowseJobs({ currentUrl }: Props) {
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const location = useLocation();
-
-  const query = new URLSearchParams(location.search);
 
   // FETCH DATA
   useEffect(() => {
@@ -62,6 +59,7 @@ export default function BrowseJobs({ currentUrl }: Props) {
 
   // MAP API → UI FORMAT
   const mappedJobs = currentJobs.map((job) => ({
+    jobId: job.id, 
     title: job.title,
     description: job.description,
 

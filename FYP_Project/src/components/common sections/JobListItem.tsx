@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 type JobListItemProps = {
+  jobId: number;
   title: string;
   description: string;
   salaryRangeFrom: number;
@@ -18,6 +19,7 @@ type JobListItemProps = {
 };
 
 export default function JobListItem({
+  jobId,
   title,
   description,
   salaryRangeFrom,
@@ -92,7 +94,7 @@ export default function JobListItem({
 
       {/* BOTTOM RIGHT: VIEW BUTTON */}
       <div className="absolute bottom-3 right-3">
-        <Button size="sm" onClick={() => navigate("/jobDetails")}>
+        <Button size="sm" onClick={() => navigate(`/jobDetails?id=${jobId}`)}>
           View
         </Button>
       </div>
