@@ -37,9 +37,7 @@ export default function JobDetailsPage({ currentUrl }: Props) {
     const fetchData = async () => {
       try {
         // 1. fetch job
-        const jobRes = await axios.get(
-          `${currentUrl}/jobs/${jobId}`,
-        );
+        const jobRes = await axios.get(`${currentUrl}/jobs/${jobId}`);
 
         const jobData = jobRes.data.job;
         setJob(jobData);
@@ -245,7 +243,7 @@ export default function JobDetailsPage({ currentUrl }: Props) {
                         <p>
                           <span className="font-medium">Apply Before:</span>{" "}
                           <span className="text-muted-foreground">
-                            {job.deadline}
+                            {new Date(job.deadline).toLocaleDateString("en-SG")}
                           </span>
                         </p>
                       </div>

@@ -46,9 +46,13 @@ export default function NewestJobsSection({ currentUrl }: Props) {
             title={job.title}
             companyName={job.company_name}
             companyLogo={`data:image/png;base64,AA==`} // temporary (we fix company next step)
-            salary={`${job.salary_range_from} - ${job.salary_range_to} / ${job.salary_period}`}
-            location={`${job.location}, ${job.city}`}
-            tags={[job.type, job.category]}
+            salaryRangeFrom={job.salary_range_from}
+            salaryRangeTo={job.salary_range_to}
+            salaryType={job.salary_type}
+            salaryPeriod={job.salary_period}
+            location={`${job.location}`}
+            type={job.type}
+            category={job.category}
             postedDate={new Date(job.created_at).toLocaleDateString()}
           />
         ))}
