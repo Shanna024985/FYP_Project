@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "../ui/button";
 import { useNavigate } from "react-router-dom";
 type JobCardProps = {
+  id: number;
   title: string;
   companyName: string;
   companyLogo: string;
@@ -13,6 +14,7 @@ type JobCardProps = {
 };
 
 export default function JobCard({
+  id,
   title,
   companyName,
   companyLogo,
@@ -73,7 +75,7 @@ export default function JobCard({
         <div className="pt-3">
           <Button
             className="w-full"
-            onClick={() => navigate("/jobDetails")}
+            onClick={() => navigate(`/jobDetails?id=${id}`)}
           >
             View Job
           </Button>
