@@ -1,6 +1,5 @@
 // JobSeekerDashboard.tsx
 import NavigationMenus from "./NavigationMenu";
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   MapPin,
@@ -25,6 +24,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import JobCard from "@/components/common sections/JobCard";
 import JobSeekerRatingsPage from "./JobSeekerRating";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 type AppliedJob = {
   title: string;
@@ -49,18 +50,33 @@ type Props = {
 };
 
 export default function JobSeekerDashboard({ currentUrl }: Props) {
-  // ---------------------------------------
-  // Dummy Recommended Jobs
-  // ---------------------------------------
-  const recommendedJobs = Array.from({ length: 3 }).map((_, i) => ({
-    title: `Frontend Developer ${i + 1}`,
-    companyName: "Tech Company",
-    companyLogo: "https://via.placeholder.com/40",
-    salary: "$3000 / month",
-    location: "Singapore",
-    tags: ["Full-time", "Urgent"],
-    postedDate: "21 May 2026",
-  }));
+  const [recommendedJobs, setRecommendedJobs] = useState<any[]>([]);
+  const [loadingRecommended, setLoadingRecommended] = useState(true);
+  useEffect(() => {
+    const fetchRecommendedJobs = async () => {
+      try {
+        setLoadingRecommended(true);
+
+        const res = await axios.get(`${currentUrl}/jobs`);
+
+        const sorted = res.data.jobs
+          .sort(
+            (a: any, b: any) =>
+              new Date(b.created_at).getTime() -
+              new Date(a.created_at).getTime(),
+          )
+          .slice(0, 3);
+
+        setRecommendedJobs(sorted);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoadingRecommended(false);
+      }
+    };
+
+    fetchRecommendedJobs();
+  }, [currentUrl]);
 
   // ---------------------------------------
   // Dummy Applied Jobs
@@ -234,11 +250,31 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
           </div>
 
           {/* 3 CARDS IN 1 ROW */}
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            {recommendedJobs.map((job, i) => (
-              <JobCard key={i} {...job} />
-            ))}
-          </div>
+          {loadingRecommended ? (
+            <p>Loading...</p>
+          ) : (
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+              {recommendedJobs.map((job) => (
+                <JobCard
+                  key={job.id}
+                  id={job.id}
+                  title={job.title}
+                  companyName={job.company_name}
+                  companyLogo={`data:image/png;base64,AA==`}
+                  salaryRangeFrom={job.salary_range_from}
+                  salaryRangeTo={job.salary_range_to}
+                  salaryType={job.salary_type}
+                  salaryPeriod={job.salary_period}
+                  location={`${job.location}`}
+                  type={job.type}
+                  category={job.category}
+                  postedDate={new Date(job.created_at).toLocaleDateString(
+                    "en-SG",
+                  )}
+                />
+              ))}
+            </div>
+          )}
         </section>
 
         {/* ========================================= */}
