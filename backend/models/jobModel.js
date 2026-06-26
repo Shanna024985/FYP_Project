@@ -1,6 +1,6 @@
 const { query } = require("../services/dbConnection");
 
-// CREATE - Post a new job (NO status column)
+// CREATE - Post a new job with location support for countries/cities
 module.exports.createJob = function createJob(jobData, companyId) {
     const { 
         title, description, category, type, 
@@ -13,8 +13,8 @@ module.exports.createJob = function createJob(jobData, companyId) {
         title, description, category, type, 
         salary_range_from, salary_range_to, salary_type, salary_period,
         duration, deadline, experience, career_level, location, 
-        jobs_needed, reports, company_id
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) 
+        jobs_needed, reports, company_id, status
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, 'Active') 
     RETURNING *;`;
     
     return query(sql, [
@@ -27,7 +27,7 @@ module.exports.createJob = function createJob(jobData, companyId) {
     });
 }
 
-// READ - Get all jobs with filters
+// READ - Get all jobs with filters (supports countries and cities)
 module.exports.getAllJobs = function getAllJobs(filters = {}) {
     let sql = `SELECT j.*, c.name as company_name, c.city as company_city 
                FROM job j 
@@ -35,6 +35,11 @@ module.exports.getAllJobs = function getAllJobs(filters = {}) {
     let params = [];
     let paramIndex = 1;
     let conditions = [];
+    
+    // Only show Active jobs by default
+    if (!filters.show_all) {
+        conditions.push(` j.status = 'Active'`);
+    }
     
     if (filters.category) {
         conditions.push(` j.category = $${paramIndex}`);
@@ -48,9 +53,23 @@ module.exports.getAllJobs = function getAllJobs(filters = {}) {
         paramIndex++;
     }
     
+    // Location filter - supports countries, cities, and partial matches
     if (filters.location) {
-        conditions.push(` j.location = $${paramIndex}`);
-        params.push(filters.location);
+        conditions.push(` j.location ILIKE $${paramIndex}`);
+        params.push(`%${filters.location}%`);
+        paramIndex++;
+    }
+    
+    if (filters.country) {
+        // If you add a country column or store as part of location
+        conditions.push(` j.location ILIKE $${paramIndex}`);
+        params.push(`%${filters.country}%`);
+        paramIndex++;
+    }
+    
+    if (filters.city) {
+        conditions.push(` j.location ILIKE $${paramIndex}`);
+        params.push(`%${filters.city}%`);
         paramIndex++;
     }
     
@@ -126,7 +145,7 @@ module.exports.getJobsByCompany = function getJobsByCompany(companyId) {
     });
 }
 
-// UPDATE - Edit a job (NO status)
+// UPDATE - Edit a job
 module.exports.updateJob = function updateJob(jobId, jobData, companyId) {
     const { 
         title, description, category, type, 
@@ -180,7 +199,7 @@ module.exports.checkJobBelongsToCompany = function checkJobBelongsToCompany(jobI
     });
 }
 
-// UPDATE - Change job status (ADD THIS FUNCTION)
+// UPDATE - Change job status
 module.exports.updateJobStatus = function updateJobStatus(jobId, status, companyId) {
     let sql = "UPDATE job SET status = $1 WHERE id = $2 AND company_id = $3 RETURNING *;";
     return query(sql, [status, jobId, companyId]).then(function(result) {
