@@ -2,34 +2,57 @@ const { query } = require("../services/dbConnection");
 
 // CREATE - Post a new job with location support for countries/cities
 module.exports.createJob = function createJob(jobData, companyId) {
-    const { 
-        title, description, category, type, 
-        salary_range_from, salary_range_to, salary_type, salary_period,
-        duration, deadline, experience, career_level, location, 
-        jobs_needed, reports 
-    } = jobData;
-    
-    let sql = `INSERT INTO job(
+  const {
+    title,
+    description,
+    category,
+    type,
+    salary_range_from,
+    salary_range_to,
+    salary_type,
+    salary_period,
+    duration,
+    deadline,
+    experience,
+    career_level,
+    location,
+    jobs_needed,
+    reports,
+  } = jobData;
+
+  let sql = `INSERT INTO job(
         title, description, category, type, 
         salary_range_from, salary_range_to, salary_type, salary_period,
         duration, deadline, experience, career_level, location, 
         jobs_needed, reports, company_id, status
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, 'Active') 
     RETURNING *;`;
-    
-    return query(sql, [
-        title, description, category, type,
-        salary_range_from, salary_range_to, salary_type || 'Negotiable',
-        salary_period || 'Month', duration, deadline, experience, 
-        career_level, location, jobs_needed || 1, reports || 0, companyId
-    ]).then(function(result) {
-        return result.rows;
-    });
-}
+
+  return query(sql, [
+    title,
+    description,
+    category,
+    type,
+    salary_range_from,
+    salary_range_to,
+    salary_type || "Negotiable",
+    salary_period || "Month",
+    duration,
+    deadline,
+    experience,
+    career_level,
+    location,
+    jobs_needed || 1,
+    reports || 0,
+    companyId,
+  ]).then(function (result) {
+    return result.rows;
+  });
+};
 
 // READ - Get all jobs with filters (supports countries and cities)
 module.exports.getAllJobs = function getAllJobs(filters = {}) {
-    let sql = `SELECT j.*, c.name as company_name, c.city as company_city 
+  let sql = `SELECT j.*, c.name as company_name, c.city as company_city 
                FROM job j 
                JOIN company c ON j.company_id = c.id`;
     let params = [];
@@ -122,39 +145,50 @@ module.exports.getAllJobs = function getAllJobs(filters = {}) {
 
 // READ - Get single job by ID
 module.exports.getJobById = function getJobById(jobId) {
-    let sql = `SELECT j.*, c.name as company_name, c.city, 
+  let sql = `SELECT j.*, c.name as company_name, c.city, 
                c.description as company_description, c.contact_email as company_email,
                (SELECT COUNT(*) FROM application WHERE job_id = j.id) as application_count 
                FROM job j 
                JOIN company c ON j.company_id = c.id 
                WHERE j.id = $1;`;
-    return query(sql, [jobId]).then(function(result) {
-        return result.rows;
-    });
-}
+  return query(sql, [jobId]).then(function (result) {
+    return result.rows;
+  });
+};
 
 // READ - Get jobs by company
 module.exports.getJobsByCompany = function getJobsByCompany(companyId) {
-    let sql = `SELECT j.*, 
+  let sql = `SELECT j.*, 
                (SELECT COUNT(*) FROM application WHERE job_id = j.id) as application_count 
                FROM job j 
                WHERE j.company_id = $1 
                ORDER BY j.id DESC;`;
-    return query(sql, [companyId]).then(function(result) {
-        return result.rows;
-    });
-}
+  return query(sql, [companyId]).then(function (result) {
+    return result.rows;
+  });
+};
 
 // UPDATE - Edit a job
 module.exports.updateJob = function updateJob(jobId, jobData, companyId) {
-    const { 
-        title, description, category, type, 
-        salary_range_from, salary_range_to, salary_type, salary_period,
-        duration, deadline, experience, career_level, location, 
-        jobs_needed, reports 
-    } = jobData;
-    
-    let sql = `UPDATE job 
+  const {
+    title,
+    description,
+    category,
+    type,
+    salary_range_from,
+    salary_range_to,
+    salary_type,
+    salary_period,
+    duration,
+    deadline,
+    experience,
+    career_level,
+    location,
+    jobs_needed,
+    reports,
+  } = jobData;
+
+  let sql = `UPDATE job 
                SET title = COALESCE($1, title),
                    description = COALESCE($2, description),
                    category = COALESCE($3, category),
@@ -172,32 +206,48 @@ module.exports.updateJob = function updateJob(jobId, jobData, companyId) {
                    reports = COALESCE($15, reports)
                WHERE id = $16 AND company_id = $17
                RETURNING *;`;
-    
-    return query(sql, [
-        title, description, category, type,
-        salary_range_from, salary_range_to, salary_type, salary_period,
-        duration, deadline, experience, career_level, location,
-        jobs_needed, reports, jobId, companyId
-    ]).then(function(result) {
-        return result.rows;
-    });
-}
+
+  return query(sql, [
+    title,
+    description,
+    category,
+    type,
+    salary_range_from,
+    salary_range_to,
+    salary_type,
+    salary_period,
+    duration,
+    deadline,
+    experience,
+    career_level,
+    location,
+    jobs_needed,
+    reports,
+    jobId,
+    companyId,
+  ]).then(function (result) {
+    return result.rows;
+  });
+};
 
 // DELETE - Delete a job
 module.exports.deleteJob = function deleteJob(jobId, companyId) {
-    let sql = "DELETE FROM job WHERE id = $1 AND company_id = $2 RETURNING id;";
-    return query(sql, [jobId, companyId]).then(function(result) {
-        return result.rows;
-    });
-}
+  let sql = "DELETE FROM job WHERE id = $1 AND company_id = $2 RETURNING id;";
+  return query(sql, [jobId, companyId]).then(function (result) {
+    return result.rows;
+  });
+};
 
 // CHECK - Verify job belongs to company
-module.exports.checkJobBelongsToCompany = function checkJobBelongsToCompany(jobId, companyId) {
-    let sql = "SELECT id FROM job WHERE id = $1 AND company_id = $2;";
-    return query(sql, [jobId, companyId]).then(function(result) {
-        return result.rows;
-    });
-}
+module.exports.checkJobBelongsToCompany = function checkJobBelongsToCompany(
+  jobId,
+  companyId,
+) {
+  let sql = "SELECT id FROM job WHERE id = $1 AND company_id = $2;";
+  return query(sql, [jobId, companyId]).then(function (result) {
+    return result.rows;
+  });
+};
 
 // UPDATE - Change job status
 module.exports.updateJobStatus = function updateJobStatus(jobId, status, companyId) {
