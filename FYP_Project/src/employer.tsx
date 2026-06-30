@@ -174,7 +174,6 @@ let EmployerPage = (props: Props) => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                
                 {dataOfJobs.map((value) => {
                   return (
                     <TableRow>
@@ -186,7 +185,27 @@ let EmployerPage = (props: Props) => {
                       </TableCell>
                       <TableCell className="text-left">{value.type}</TableCell>
                       <TableCell className="text-left">
-                        <NativeSelect key={value.id}>
+                        <NativeSelect
+                          key={value.id}
+                          onInput={(e) => {
+                            let valueOfInput = e.currentTarget.value;
+                            console.log(valueOfInput)
+                            let body = JSON.stringify({status: valueOfInput, companyId: localStorage.getItem("companyId")})
+                            fetch(props.currentUrl + "/jobs/" + value.id, {
+                              method: "PUT",
+                              headers: {
+                                "Content-Type": "application/json",
+                                Authorization:
+                                  "Bearer " + localStorage.getItem("token"),
+                              },
+                              body: body,
+                            }).then((value)=>{
+                              if (value.status == 200){
+                                alert("Job status have been saved")
+                              }
+                            })
+                          }}
+                        >
                           <StatusOfJob status={value.status} />
                         </NativeSelect>
                       </TableCell>
@@ -207,7 +226,7 @@ let EmployerPage = (props: Props) => {
                         <Button
                           className="p-0 bg-white/0 text-left hover:bg-amber-50"
                           onClick={() => {
-                            navigate("/editjobs?id="+ value.id);
+                            navigate("/editjobs?id=" + value.id);
                           }}
                         >
                           <SquarePenIcon color="black" />

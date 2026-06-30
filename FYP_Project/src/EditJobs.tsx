@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import NavigationMenus from "./NavigationMenu";
 import { Field, FieldGroup, FieldLabel } from "./components/ui/field";
 import { Input } from "./components/ui/input";
@@ -142,6 +142,9 @@ let CareerLevel = (props: Statuses) => {
 };
 const EditJobs = (props: Props) => {
   let [jobReturned, setJobReturned] = useState<JobsObject>();
+  const titleRef = useRef(null)
+  const descriptionRef = useRef(null)
+  const jobTypeRef = useRef(null)
   useEffect(() => {
     let address = new URL(window.location.href);
     let queryParameters = address.searchParams;
@@ -167,6 +170,7 @@ const EditJobs = (props: Props) => {
               id="titleName"
               placeholder="Backend Engineer"
               value={jobReturned?.title}
+              ref={titleRef}
             />
           </Field>
           <Field>
@@ -175,6 +179,7 @@ const EditJobs = (props: Props) => {
               id="description"
               placeholder="We need..."
               value={jobReturned?.description}
+              ref={descriptionRef}
             />
           </Field>
           <Field>
@@ -192,10 +197,6 @@ const EditJobs = (props: Props) => {
           <Field>
             <FieldLabel htmlFor="locationDropdown">Location</FieldLabel>
             <NativeSelect id="locationDropdown">
-              {/* <NativeSelectOption value={"Central"}>Central</NativeSelectOption>
-              <NativeSelectOption value={"West"}>West</NativeSelectOption>
-              <NativeSelectOption value={"East"}>East</NativeSelectOption>
-              <NativeSelectOption value={"North"}>North</NativeSelectOption> */}
               <LocationOptions status={jobReturned?.location}/>
             </NativeSelect>
           </Field>
@@ -242,7 +243,10 @@ const EditJobs = (props: Props) => {
           </Field>
         </FieldGroup>
         <div className="flex mt-9">
-          <Button>Save jobs</Button>
+          <Button onClick={(e)=>{
+     
+            
+          }}>Save jobs</Button>
         </div>
       </div>
     </div>

@@ -66,6 +66,7 @@ import ProtectedLayout from "./ProtectedLayout";
 import { CompanyPageRenderer } from "./CompanyPage";
 import CompanyReviews from "./CompanyReviews";
 import AddCompanies from "./AddCompanies";
+import Messages from "./Messages";
 const linkForBackend = "http://localhost:3000/api";
 function App() {
   const [count, setCount] = useState(0);
@@ -108,6 +109,7 @@ function App() {
           <Route path="/company" element={<CompanyPageRenderer  currentUrl={linkForBackend}/>}/>
           <Route path="/companyreviews" element={<CompanyReviews currentUrl={linkForBackend}/>}/>
           <Route path="/addcompanies" element={<AddCompanies currentUrl={linkForBackend}/>}/>
+          <Route path="/messages" element={<Messages currentUrl={linkForBackend}/>}/>
         </Route>
       </Routes>
     </>
