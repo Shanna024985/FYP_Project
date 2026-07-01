@@ -21,7 +21,7 @@ import SavedJobs from "./SavedJobsPage";
 import ApplyJobPage from "./ApplyJobPage";
 import MyReviewsPage from "./MyReviewsPage";
 import JobSeekerRatingsPage from "./JobSeekerRating";
-const linkForBackend = "http://localhost:5000/api";
+const linkForBackend = "http://localhost:3000/api";
 function App() {
   const [count, setCount] = useState(0);
 
