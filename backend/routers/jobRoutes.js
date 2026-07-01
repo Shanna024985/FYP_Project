@@ -13,6 +13,7 @@ router.post("/", jobController.createJob);
 router.put("/:id", jobController.updateJob);
 router.delete("/:id", jobController.deleteJob);
 router.patch("/:id/close", jobController.closeJob);
+router.patch("/:id/open", jobController.openJob);  // ← NEW: Open job
 
 // ==================== APPLICATIONS ====================
 router.post("/:id/apply", jobController.applyForJob);
