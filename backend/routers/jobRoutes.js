@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const jobController = require("../controllers/jobController");
+const jwtMiddleware = require("../middlewares/jwtmiddleware");
 
 // ==================== PUBLIC JOB ROUTES ====================
 router.get("/", jobController.getAllJobs);
@@ -24,7 +25,7 @@ router.patch("/applications/:applicationId/status", jobController.updateApplicat
 router.delete("/applications/:applicationId", jobController.deleteApplication);
 
 // ==================== SAVED JOBS ====================
-router.post("/:id/save", jobController.saveJob);
+router.post("/:id/save", jwtMiddleware.verifyToken,jobController.saveJob);
 router.delete("/:id/save", jobController.unsaveJob);
 router.get("/saved/user", jobController.getSavedJobs);
 router.get("/:id/is-saved", jobController.isJobSaved);

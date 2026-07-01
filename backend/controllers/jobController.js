@@ -541,7 +541,7 @@ module.exports.deleteApplication = (req, res, next) => {
 
 // CREATE - Save a job
 module.exports.saveJob = (req, res, next) => {
-    let userId = req.body.userId || 1;
+    const userId = res.locals.userId;
     let jobId = req.params.id;
     
     return jobModel.saveJob(userId, jobId)
@@ -555,6 +555,7 @@ module.exports.saveJob = (req, res, next) => {
             return res.status(500).json({ error: error.message });
         });
 }
+
 
 // DELETE - Unsave a job
 module.exports.unsaveJob = (req, res, next) => {
