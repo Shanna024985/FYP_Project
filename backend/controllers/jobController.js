@@ -109,7 +109,7 @@ module.exports.getAllJobs = (req, res, next) => {
             }
         });
     }).catch(function(error) {
-        console.error(error);
+        console.error('Error creating job:', error);
         return res.status(500).json({ error: error.message });
     });
 }
@@ -145,7 +145,7 @@ module.exports.getJobById = (req, res, next) => {
         });
 }
 
-// READ - Get jobs by company
+// READ - Get jobs by company (WITH DEBUGGING)
 module.exports.getJobsByCompany = (req, res, next) => {
     let companyId = req.params.companyId;
     
@@ -313,6 +313,11 @@ module.exports.openJob = (req, res, next) => {
     console.log('User ID:', userId);
     console.log('========================================');
     
+    console.log('========================================');
+    console.log('PATCH /api/jobs/' + jobId + '/close');
+    console.log('Company ID:', companyId);
+    console.log('========================================');
+    
     if (!companyId) {
         console.log('ERROR: Company ID is required');
         return res.status(400).json({ error: "Company ID is required" });
@@ -376,6 +381,55 @@ module.exports.applyForJob = (req, res, next) => {
             res.status(201).json({ 
                 message: "Application submitted successfully", 
                 application: result.application 
+            });
+        }).catch(function(error) {
+            console.error('Error in closeJob:', error);
+            return res.status(500).json({ error: error.message });
+        });
+}
+
+// ==================== APPLICATIONS ====================
+
+// CREATE - Apply for a job
+module.exports.applyForJob = (req, res, next) => {
+    let userId = req.body.userId || 1;
+    let jobId = req.params.id;
+    let resumeId = req.body.resumeId;
+    
+    if (!resumeId) {
+        return res.status(400).json({ error: "Resume ID is required" });
+    }
+    
+    return jobModel.applyForJob(userId, jobId, resumeId)
+        .then(function(result) {
+            if (result.alreadyApplied) {
+                return res.status(400).json({ 
+                    error: "Already applied", 
+                    status: result.status 
+                });
+            }
+            res.status(201).json({ 
+                message: "Application submitted successfully", 
+                application: result.application 
+            });
+        }).catch(function(error) {
+            console.error(error);
+            return res.status(500).json({ error: error.message });
+        });
+}
+
+// READ - Get my applications
+module.exports.getMyApplications = (req, res, next) => {
+    let userId = req.query.userId || 1;
+    
+    return jobModel.getApplicationsByUser(userId)
+        .then(function(applications) {
+            return jobModel.getApplicationStatusCount(userId).then(function(stats) {
+                res.json({ 
+                    count: applications.length, 
+                    applications: applications,
+                    stats: stats
+                });
             });
         }).catch(function(error) {
             console.error(error);
