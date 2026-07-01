@@ -77,7 +77,7 @@ let JobType = (props: Statuses) => {
   );
 };
 let LocationOptions = (props: Statuses) => {
-  let [options, setOptions] = useState(["Central", "West","East","North"]);
+  let [options, setOptions] = useState(["Central", "West", "East", "North"]);
   return (
     <>
       {options.map((value) => {
@@ -132,7 +132,9 @@ let CareerLevel = (props: Statuses) => {
             );
           } else {
             return (
-              <NativeSelectOption value={values.value}>{values.shownOnPage}</NativeSelectOption>
+              <NativeSelectOption value={values.value}>
+                {values.shownOnPage}
+              </NativeSelectOption>
             );
           }
         }
@@ -142,13 +144,17 @@ let CareerLevel = (props: Statuses) => {
 };
 const EditJobs = (props: Props) => {
   let [jobReturned, setJobReturned] = useState<JobsObject>();
-  const titleRef = useRef(null)
-  const descriptionRef = useRef(null)
-  const jobTypeRef = useRef(null)
+  const titleRef = useRef(null);
+  const descriptionRef = useRef(null);
+  let [idToUse, setId] = useState<string>("");
+  const jobTypeRef = useRef(null);
   useEffect(() => {
     let address = new URL(window.location.href);
     let queryParameters = address.searchParams;
     let id = queryParameters.get("id");
+    if (id) {
+      setId(id);
+    }
     fetch(props.currentUrl + "/jobs/" + id)
       .then((value) => {
         return value.json();
@@ -171,6 +177,14 @@ const EditJobs = (props: Props) => {
               placeholder="Backend Engineer"
               value={jobReturned?.title}
               ref={titleRef}
+              onChange={(e) => {
+                if (jobReturned) {
+                  setJobReturned({
+                    ...jobReturned,
+                    title: e.target.value,
+                  });
+                }
+              }}
             />
           </Field>
           <Field>
@@ -180,31 +194,65 @@ const EditJobs = (props: Props) => {
               placeholder="We need..."
               value={jobReturned?.description}
               ref={descriptionRef}
+              onChange={(e) => {
+                if (jobReturned) {
+                  setJobReturned({
+                    ...jobReturned,
+                    description: e.target.value,
+                  });
+                }
+              }}
             />
           </Field>
           <Field>
             <FieldLabel htmlFor="jobTypes">Job Type</FieldLabel>
-            <NativeSelect id="jobTypes">
+            <NativeSelect
+              id="jobTypes"
+              onChange={(e) => {
+                if (jobReturned) {
+                  setJobReturned({
+                    ...jobReturned,
+                    type: e.target.value,
+                  });
+                }
+              }}
+            >
               <JobType status={jobReturned?.type} />
             </NativeSelect>
           </Field>
           <Field>
             <FieldLabel htmlFor="statusDropdown">Status</FieldLabel>
-            <NativeSelect id="statusDropdown">
+            <NativeSelect id="statusDropdown"
+                          onChange={(e) => {
+                if (jobReturned) {
+                  setJobReturned({
+                    ...jobReturned,
+                    status: e.target.value,
+                  });
+                }
+              }}>
               <StatusOfJob status={jobReturned?.status} />
             </NativeSelect>
           </Field>
           <Field>
             <FieldLabel htmlFor="locationDropdown">Location</FieldLabel>
-            <NativeSelect id="locationDropdown">
-              <LocationOptions status={jobReturned?.location}/>
+            <NativeSelect id="locationDropdown"
+                          onChange={(e) => {
+                if (jobReturned) {
+                  setJobReturned({
+                    ...jobReturned,
+                    location: e.target.value,
+                  });
+                }
+              }}>
+              <LocationOptions status={jobReturned?.location} />
             </NativeSelect>
           </Field>
           <Field>
             <FieldLabel htmlFor="date-optional">
               Application Deadline
             </FieldLabel>
-            <DatePickerNaturalLanguage
+            <DatePickerNaturalLanguage 
               date={dateReturned(jobReturned?.deadline ?? "")}
             />
           </Field>
@@ -215,12 +263,27 @@ const EditJobs = (props: Props) => {
               type="number"
               placeholder="4"
               value={jobReturned?.jobs_needed}
+                            onChange={(e) => {
+                if (jobReturned) {
+                  setJobReturned({
+                    ...jobReturned,
+                    jobs_needed: parseInt(e.target.value),
+                  });
+                }
+              }}
             />
           </Field>
           <Field>
             <FieldLabel htmlFor="minimumexperience">Career level</FieldLabel>
-            <NativeSelect id="minimumexperience">
-              <CareerLevel status={jobReturned?.career_level}/>
+            <NativeSelect id="minimumexperience"               onChange={(e) => {
+                if (jobReturned) {
+                  setJobReturned({
+                    ...jobReturned,
+                    career_level: e.target.value,
+                  });
+                }
+              }}>
+              <CareerLevel status={jobReturned?.career_level} />
             </NativeSelect>
           </Field>
           <Field>
@@ -231,6 +294,14 @@ const EditJobs = (props: Props) => {
                 className="w-[45%]"
                 placeholder="100"
                 value={jobReturned?.salary_range_from}
+                              onChange={(e) => {
+                if (jobReturned) {
+                  setJobReturned({
+                    ...jobReturned,
+                    salary_range_from: parseInt(e.target.value),
+                  });
+                }
+              }}
               />
               <p className="text-center p-1">to</p>
               <Input
@@ -238,15 +309,43 @@ const EditJobs = (props: Props) => {
                 className="w-[45%]"
                 placeholder="300"
                 value={jobReturned?.salary_range_to}
+                              onChange={(e) => {
+                if (jobReturned) {
+                  setJobReturned({
+                    ...jobReturned,
+                    salary_range_to: parseInt(e.target.value),
+                  });
+                }
+              }}
               />
             </div>
           </Field>
         </FieldGroup>
         <div className="flex mt-9">
-          <Button onClick={(e)=>{
-     
-            
-          }}>Save jobs</Button>
+          <Button
+            onClick={(e) => {
+              let companyId = localStorage.getItem("companyId");
+              let body = JSON.stringify({
+                companyId: companyId,
+                ...jobReturned,
+              });
+              console.log(body)
+              fetch(props.currentUrl + "/jobs/" + idToUse, {
+                method: "PUT",
+                body: body,
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: "Bearer " + localStorage.getItem("token"),
+                },
+              }).then((value) => {
+                if (value.status == 200) {
+                  alert("Saved successfully!");
+                }
+              });
+            }}
+          >
+            Save jobs
+          </Button>
         </div>
       </div>
     </div>

@@ -30,7 +30,9 @@ type stages = {
   stage: Number;
   setStage: Function;
 };
+
 const StepOneOfJobPostings = (props: stages) => {
+  let [itemsForCompanySelect, setItemsForCompanySelect] = useState<string[]>([""])
   return (
     <>
       <div>
@@ -108,7 +110,7 @@ const StepOneOfJobPostings = (props: stages) => {
             </Select>
             <FieldDescription>
               Click{" "}
-              <a href="" className="text-[#2A88E0]">
+              <a href="/addcompanies" className="text-[#2A88E0]">
                 here
               </a>{" "}
               to add a company

@@ -116,7 +116,7 @@ let StatusOfJob = (props: Statuses) => {
 };
 let EmployerPage = (props: Props) => {
   let [dataOfJobs, setDataOfJobs] = useState<JobsObject[]>([]);
-
+  let [toSearchDataOfJobs, setToSearchDataOfJobs] = useState<JobsObject[]>([]);
   const navigate = useNavigate();
   useEffect(() => {
     fetch(
@@ -135,6 +135,7 @@ let EmployerPage = (props: Props) => {
           newDataOfJobs.push(element);
           if (index == jobs.length - 1) {
             setDataOfJobs(newDataOfJobs);
+            setToSearchDataOfJobs(newDataOfJobs)
           }
         });
       });
@@ -151,7 +152,16 @@ let EmployerPage = (props: Props) => {
               <InputGroupAddon align={"inline-end"}>
                 <SearchIcon />
               </InputGroupAddon>
-              <InputGroupInput placeholder="Search" />
+              <InputGroupInput placeholder="Search" onChange={(e)=>{
+                let newDataOfJobs: JobsObject[] = []
+                
+                toSearchDataOfJobs.forEach((value)=>{
+                  if (value.title.toLowerCase().includes(e.currentTarget.value)){
+                    newDataOfJobs.push(value)
+                  }
+                })
+                setDataOfJobs(newDataOfJobs)
+              }}/>
             </InputGroup>
             <Button
               className="bg-[#2A88E0]"
@@ -187,23 +197,36 @@ let EmployerPage = (props: Props) => {
                       <TableCell className="text-left">
                         <NativeSelect
                           key={value.id}
-                          onInput={(e) => {
+                          onChange={(e) => {
                             let valueOfInput = e.currentTarget.value;
-                            console.log(valueOfInput)
-                            let body = JSON.stringify({status: valueOfInput, companyId: localStorage.getItem("companyId")})
-                            fetch(props.currentUrl + "/jobs/" + value.id, {
-                              method: "PUT",
-                              headers: {
-                                "Content-Type": "application/json",
-                                Authorization:
-                                  "Bearer " + localStorage.getItem("token"),
-                              },
-                              body: body,
-                            }).then((value)=>{
-                              if (value.status == 200){
-                                alert("Job status have been saved")
-                              }
-                            })
+                            console.log(valueOfInput);
+                            let body = JSON.stringify({
+                              status: valueOfInput,
+                              companyId: localStorage.getItem("companyId"),
+                            });
+                            if (value.status == "Active" && value.status != valueOfInput) {
+                              fetch(
+                                props.currentUrl +
+                                  "/jobs/" +
+                                  value.id +
+                                  "/close",
+                                {
+                                  method: "PATCH",
+                                  headers: {
+                                    "Content-Type": "application/json",
+                                    Authorization:
+                                      "Bearer " + localStorage.getItem("token"),
+                                  },
+                                  body: body,
+                                },
+                              ).then((value) => {
+                                if (value.status == 200) {
+                                  alert("Job status have been saved");
+                                }
+                              });
+                            } else {
+
+                            }
                           }}
                         >
                           <StatusOfJob status={value.status} />
@@ -235,15 +258,41 @@ let EmployerPage = (props: Props) => {
                       <TableCell>
                         <Button
                           className="p-0 bg-white/0 text-left hover:bg-amber-50"
-                          onClick={() =>
-                            toast("Job has been deleted", {
-                              action: {
-                                label: "Undo",
-                                onClick: () => console.log("Undo"),
+                          onClick={() => {
+                            let body = JSON.stringify({
+                              companyId: localStorage.getItem("companyId"),
+                            });
+                            fetch(props.currentUrl + "/jobs/" + value.id, {
+                              method: "DELETE",
+                              headers: {
+                                "Content-Type": "application/json",
+                                Authorization:
+                                  "Bearer " + localStorage.getItem("token"),
                               },
-                              position: "top-center",
+                              body: body,
                             })
-                          }
+                              .then((valueNotCompatible) => {
+                                return valueNotCompatible.json();
+                              })
+                              .then((values) => {
+                                toast("Job has been deleted", {
+                                  action: {
+                                    label: "Undo",
+                                    onClick: () => console.log("Undo"),
+                                  },
+                                  position: "top-center",
+                                });
+                                let newDataOfJobs: JobsObject[] = []
+                                dataOfJobs.forEach((valueOfExistingData)=>{
+                                  if (value.id == valueOfExistingData.id) {
+                                    return
+                                  } else {
+                                    newDataOfJobs.push(valueOfExistingData)
+                                  }
+                                })
+                                setDataOfJobs(newDataOfJobs)
+                              });
+                          }}
                         >
                           <Trash color="red" className="w-100 h-100" />
                         </Button>
