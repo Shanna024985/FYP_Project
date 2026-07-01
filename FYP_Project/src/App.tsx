@@ -65,6 +65,10 @@ function App() {
             path="/jobSeeker/applications"
             element={<JobSeekerApplications currentUrl={linkForBackend} />}
           />
+                    <Route path="/company" element={<CompanyPageRenderer  currentUrl={linkForBackend}/>}/>
+          <Route path="/companyreviews" element={<CompanyReviews currentUrl={linkForBackend}/>}/>
+          <Route path="/addcompanies" element={<AddCompanies currentUrl={linkForBackend}/>}/>
+          <Route path="/messages" element={<Messages currentUrl={linkForBackend}/>}/>
         </Route>
       </Routes>
     </>
