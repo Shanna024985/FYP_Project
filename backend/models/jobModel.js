@@ -584,15 +584,27 @@ module.exports.getJobById = function getJobById(jobId, userId = null) {
     });
 }
 
-// READ - Get jobs by company
+// READ - Get jobs by company (WITH DEBUGGING)
 module.exports.getJobsByCompany = function getJobsByCompany(companyId) {
+    console.log('getJobsByCompany called for company:', companyId);
+    
     let sql = `SELECT j.*, 
                (SELECT COUNT(*) FROM application WHERE job_id = j.id) as application_count,
                (SELECT COUNT(*) FROM saved_job WHERE job_id = j.id) as saved_count
                FROM job j 
                WHERE j.company_id = $1 
                ORDER BY j.id DESC;`;
+    
     return query(sql, [companyId]).then(function(result) {
+        console.log('Jobs returned:', result.rows.length);
+        if (result.rows.length > 0) {
+            console.log('Job statuses:');
+            result.rows.forEach(function(job) {
+                console.log('  - ID:', job.id, '| Title:', job.title, '| Status:', job.status);
+            });
+        } else {
+            console.log('No jobs found for company:', companyId);
+        }
         return result.rows;
     });
 }
@@ -655,16 +667,24 @@ module.exports.deleteJob = function deleteJob(jobId, companyId) {
 
 // CHECK - Verify job belongs to company
 module.exports.checkJobBelongsToCompany = function checkJobBelongsToCompany(jobId, companyId) {
+    console.log('checkJobBelongsToCompany:', { jobId, companyId });
     let sql = "SELECT id FROM job WHERE id = $1 AND company_id = $2;";
     return query(sql, [jobId, companyId]).then(function(result) {
+        console.log('Check result:', result.rows.length > 0 ? 'Job belongs to company' : 'Job does NOT belong to company');
         return result.rows;
     });
 }
 
-// UPDATE - Change job status
+// UPDATE - Change job status (WITH DEBUGGING)
 module.exports.updateJobStatus = function updateJobStatus(jobId, status, companyId) {
+    console.log('updateJobStatus called:', { jobId, status, companyId });
+    
     let sql = "UPDATE job SET status = $1 WHERE id = $2 AND company_id = $3 RETURNING *;";
     return query(sql, [status, jobId, companyId]).then(function(result) {
+        console.log('Update result:', result.rows.length > 0 ? 'SUCCESS' : 'FAILED');
+        if (result.rows.length > 0) {
+            console.log('Updated job:', result.rows[0].id, 'New status:', result.rows[0].status);
+        }
         return result.rows;
     });
 }
@@ -884,6 +904,3 @@ module.exports.getJobSeekerDashboard = function getJobSeekerDashboard(userId) {
         };
     });
 }
-
-
-
