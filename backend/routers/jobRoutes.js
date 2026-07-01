@@ -20,7 +20,7 @@ router.get("/applications/my", jobController.getMyApplications);
 router.get("/applications/stats", jobController.getApplicationStats);
 router.get("/:id/applications", jobController.getJobApplications);
 router.patch("/applications/:applicationId/status", jobController.updateApplicationStatus);
-router.delete("/applications/:applicationId", jobController.deleteApplication);  // ← NEW
+router.delete("/applications/:applicationId", jobController.deleteApplication);
 
 // ==================== SAVED JOBS ====================
 router.post("/:id/save", jobController.saveJob);

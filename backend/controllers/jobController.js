@@ -119,15 +119,25 @@ module.exports.getJobById = (req, res, next) => {
         });
 }
 
-// READ - Get jobs by company
+// READ - Get jobs by company (WITH DEBUGGING)
 module.exports.getJobsByCompany = (req, res, next) => {
     let companyId = req.params.companyId;
     
+    console.log('========================================');
+    console.log('GET /api/jobs/company/' + companyId + '/jobs');
+    console.log('========================================');
+    
     return jobModel.getJobsByCompany(companyId)
         .then(function(jobs) {
+            console.log('Jobs found:', jobs.length);
+            console.log('Job statuses:');
+            jobs.forEach(function(job) {
+                console.log('  - ID:', job.id, '| Title:', job.title, '| Status:', job.status);
+            });
+            console.log('========================================');
             res.json({ count: jobs.length, jobs: jobs });
         }).catch(function(error) {
-            console.error(error);
+            console.error('Error in getJobsByCompany:', error);
             return res.status(500).json({ error: error.message });
         });
 }
@@ -187,29 +197,43 @@ module.exports.deleteJob = (req, res, next) => {
         });
 }
 
-// UPDATE - Close a job
+// UPDATE - Close a job (WITH DEBUGGING)
 module.exports.closeJob = (req, res, next) => {
     let jobId = req.params.id;
     let companyId = req.body.companyId;
     
+    console.log('========================================');
+    console.log('PATCH /api/jobs/' + jobId + '/close');
+    console.log('Company ID:', companyId);
+    console.log('========================================');
+    
     if (!companyId) {
+        console.log('ERROR: Company ID is required');
         return res.status(400).json({ error: "Company ID is required" });
     }
     
     return jobModel.checkJobBelongsToCompany(jobId, companyId)
         .then(function(ownership) {
+            console.log('Job belongs to company:', ownership.length > 0);
             if (ownership.length == 0) {
+                console.log('ERROR: Unauthorized - job does not belong to company');
                 return res.status(403).json({ error: "Unauthorized: You don't own this job" });
             }
+            
+            console.log('Updating job status to: Closed');
             return jobModel.updateJobStatus(jobId, 'Closed', companyId)
                 .then(function(closedJob) {
                     if (closedJob.length == 0) {
+                        console.log('ERROR: Job not found');
                         return res.status(404).json({ error: "Job not found or you don't own it" });
                     }
+                    console.log('SUCCESS: Job closed successfully');
+                    console.log('Updated job:', JSON.stringify(closedJob[0], null, 2));
+                    console.log('========================================');
                     res.json({ message: "Job closed successfully", job: closedJob[0] });
                 });
         }).catch(function(error) {
-            console.error(error);
+            console.error('Error in closeJob:', error);
             return res.status(500).json({ error: error.message });
         });
 }
