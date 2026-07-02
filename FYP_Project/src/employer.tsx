@@ -135,7 +135,7 @@ let EmployerPage = (props: Props) => {
           newDataOfJobs.push(element);
           if (index == jobs.length - 1) {
             setDataOfJobs(newDataOfJobs);
-            setToSearchDataOfJobs(newDataOfJobs)
+            setToSearchDataOfJobs(newDataOfJobs);
           }
         });
       });
@@ -152,16 +152,21 @@ let EmployerPage = (props: Props) => {
               <InputGroupAddon align={"inline-end"}>
                 <SearchIcon />
               </InputGroupAddon>
-              <InputGroupInput placeholder="Search" onChange={(e)=>{
-                let newDataOfJobs: JobsObject[] = []
-                
-                toSearchDataOfJobs.forEach((value)=>{
-                  if (value.title.toLowerCase().includes(e.currentTarget.value)){
-                    newDataOfJobs.push(value)
-                  }
-                })
-                setDataOfJobs(newDataOfJobs)
-              }}/>
+              <InputGroupInput
+                placeholder="Search"
+                onChange={(e) => {
+                  let newDataOfJobs: JobsObject[] = [];
+
+                  toSearchDataOfJobs.forEach((value) => {
+                    if (
+                      value.title.toLowerCase().includes(e.currentTarget.value)
+                    ) {
+                      newDataOfJobs.push(value);
+                    }
+                  });
+                  setDataOfJobs(newDataOfJobs);
+                }}
+              />
             </InputGroup>
             <Button
               className="bg-[#2A88E0]"
@@ -204,7 +209,10 @@ let EmployerPage = (props: Props) => {
                               status: valueOfInput,
                               companyId: localStorage.getItem("companyId"),
                             });
-                            if (value.status == "Active" && value.status != valueOfInput) {
+                            if (
+                              value.status == "Active" &&
+                              value.status != valueOfInput
+                            ) {
                               fetch(
                                 props.currentUrl +
                                   "/jobs/" +
@@ -224,8 +232,27 @@ let EmployerPage = (props: Props) => {
                                   alert("Job status have been saved");
                                 }
                               });
-                            } else {
-
+                            } else if ( value.status == "Closed" &&
+                              value.status != valueOfInput){
+                              fetch(
+                                props.currentUrl +
+                                  "/jobs/" +
+                                  value.id +
+                                  "/open",
+                                {
+                                  method: "PATCH",
+                                  headers: {
+                                    "Content-Type": "application/json",
+                                    Authorization:
+                                      "Bearer " + localStorage.getItem("token"),
+                                  },
+                                  body: body,
+                                },
+                              ).then((value) => {
+                                if (value.status == 200) {
+                                  alert("Job status have been saved");
+                                }
+                              });
                             }
                           }}
                         >
@@ -282,15 +309,15 @@ let EmployerPage = (props: Props) => {
                                   },
                                   position: "top-center",
                                 });
-                                let newDataOfJobs: JobsObject[] = []
-                                dataOfJobs.forEach((valueOfExistingData)=>{
+                                let newDataOfJobs: JobsObject[] = [];
+                                dataOfJobs.forEach((valueOfExistingData) => {
                                   if (value.id == valueOfExistingData.id) {
-                                    return
+                                    return;
                                   } else {
-                                    newDataOfJobs.push(valueOfExistingData)
+                                    newDataOfJobs.push(valueOfExistingData);
                                   }
-                                })
-                                setDataOfJobs(newDataOfJobs)
+                                });
+                                setDataOfJobs(newDataOfJobs);
                               });
                           }}
                         >

@@ -66,7 +66,7 @@ module.exports.getCompanyPageData = function getCompanyPageData(companyId) {
     let sql = `SELECT c.id, c.name, c.url, c.contact_email, 
                c.tagline, c.description, c.city,
                c.logo_file_name, c.banner_file_name, c.profile_file_name,
-               COALESCE((SELECT json_agg(json_build_object('id', j.id, 'title', j.title, 'location', j.location)) FROM job j WHERE j.company_id = c.id), '[]') as jobs,
+               COALESCE((SELECT json_agg(json_build_object('id', j.id, 'title', j.title, 'location', j.location, 'category', j.category)) FROM job j WHERE j.company_id = c.id), '[]') as jobs,
                COALESCE((SELECT json_agg(json_build_object('id', r.id, 'rating', r.rating, 'message', r.message, 'created_at', r.created_at)) FROM review r WHERE r.company_id = c.id), '[]') as reviews,
                COALESCE((SELECT AVG(rating) FROM review WHERE company_id = c.id), 0) as average_rating,
                COALESCE((SELECT COUNT(*) FROM review WHERE company_id = c.id), 0) as total_reviews

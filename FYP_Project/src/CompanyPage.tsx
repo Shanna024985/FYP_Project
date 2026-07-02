@@ -19,8 +19,8 @@ type Props = {
   currentUrl: String;
 };
 type ArrayType = {
-  name: string;
-  jobType: string;
+  title: string;
+  category: string;
   location: string;
   id: number;
 };
@@ -78,20 +78,20 @@ export const CompanyPageRenderer = (prop: Props) => {
   let [averageRating, setAverageRating] = React.useState(4.3);
   let [jobPostingsRender, setJobPostings] = React.useState<ArrayType[]>([
     {
-      name: "Tea Master",
-      jobType: "Green Tea",
+      title: "Tea Master",
+      category: "Green Tea",
       location: "Fukuoka, Japan",
       id: 3,
     },
     {
-      name: "Tea Master",
-      jobType: "Green Tea",
-      location: "Fukuoka, Japan",
       id: 5,
+      title: "Tea Master",
+      category: "Green Tea",
+      location: "Fukuoka, Japan",
     },
     {
-      name: "Tea Master",
-      jobType: "Green Tea",
+      title: "Tea Master",
+      category: "Green Tea",
       location: "Fukuoka, Japan",
       id: 6,
     },
@@ -170,11 +170,22 @@ export const CompanyPageRenderer = (prop: Props) => {
     let address = new URL(window.location.href);
     let queryParameters = address.searchParams;
     let id = queryParameters.get("id");
-    fetch(prop.currentUrl + "company/" + id)
+    fetch(prop.currentUrl + "/company/" + id + "/page")
     .then((value)=>{
       return value.json()
     }).then((valueOfResult)=>{
-      
+      let company = valueOfResult.company
+      console.log(company)
+      setAverageRating(company.average_rating)
+      setName(company.name)
+      setOverviewPage(company.description)
+      setEmailOfCompany(company.contact_email)
+      setJobPostings(company.jobs)
+      setTotalReviews(company.total_reviews)
+      setCompanyType(company.tagline)
+      setLinkOfCompany(company.url)
+      setImageOfBanner(company.banner_file_name)
+      setImageOfTea(company.logo_file_name)
     })
   }, []);
   return (
@@ -234,6 +245,16 @@ let ReviewsToString = (averageRating: number) => {
     }
   }
 };
+function formatString(str: string) {
+  return str
+    .replace(/-/g, " ")          // Replace all dashes with spaces
+    .split(" ")
+    .filter(Boolean)             // Remove extra spaces
+    .map(word =>
+      word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+    )
+    .join(" ");
+}
 export const CompanyPage = (prop: PropsForCompanyPage) => {
   const navigate = useNavigate();
 
@@ -357,8 +378,8 @@ export const CompanyPage = (prop: PropsForCompanyPage) => {
                               </Avatar>
                             </div>
                             <div>
-                              <p className="font-bold text-lg">{value.name}</p>
-                              <p>{value.jobType}</p>
+                              <p className="font-bold text-lg">{value.title}</p>
+                              <p>{formatString(value.category)}</p>
                               <p className="text-sm">{value.location}</p>
                             </div>
                           </div>
@@ -390,8 +411,8 @@ export const CompanyPage = (prop: PropsForCompanyPage) => {
                               </Avatar>
                             </div>
                             <div>
-                              <p className="font-bold text-lg">{value.name}</p>
-                              <p>{value.jobType}</p>
+                              <p className="font-bold text-lg">{value.title}</p>
+                              <p>{formatString(value.category)}</p>
                               <p className="text-sm">{value.location}</p>
                             </div>
                           </div>
