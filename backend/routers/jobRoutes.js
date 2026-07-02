@@ -26,9 +26,9 @@ router.delete("/applications/:applicationId", jobController.deleteApplication);
 
 // ==================== SAVED JOBS ====================
 router.post("/:id/save", jwtMiddleware.verifyToken,jobController.saveJob);
-router.delete("/:id/save", jobController.unsaveJob);
+router.delete("/:id/save", jwtMiddleware.verifyToken, jobController.unsaveJob);
 router.get("/saved/user", jobController.getSavedJobs);
-router.get("/:id/is-saved", jobController.isJobSaved);
+router.get("/:id/is-saved", jwtMiddleware.verifyToken, jobController.isJobSaved);
 
 // ==================== JOB COMPLETION & REVIEW ====================
 router.get("/completed/user", jobController.getCompletedJobs);

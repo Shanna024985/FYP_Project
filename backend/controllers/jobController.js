@@ -84,7 +84,7 @@ module.exports.getAllJobs = (req, res, next) => {
     let filters = req.query;
     
     const page = parseInt(filters.page) || 1;
-    const limit = parseInt(filters.limit) || 10;
+    const limit = parseInt(filters.limit) || 50;
     const offset = (page - 1) * limit;
     filters.limit = limit;
     filters.offset = offset;
@@ -559,7 +559,7 @@ module.exports.saveJob = (req, res, next) => {
 
 // DELETE - Unsave a job
 module.exports.unsaveJob = (req, res, next) => {
-    let userId = req.body.userId || 1;
+    const userId = res.locals.userId;
     let jobId = req.params.id;
     
     return jobModel.unsaveJob(userId, jobId)
@@ -589,7 +589,7 @@ module.exports.getSavedJobs = (req, res, next) => {
 
 // CHECK - Check if job is saved
 module.exports.isJobSaved = (req, res, next) => {
-    let userId = req.query.userId || 1;
+    const userId = res.locals.userId;
     let jobId = req.params.id;
     
     return jobModel.isJobSaved(userId, jobId)

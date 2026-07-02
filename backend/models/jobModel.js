@@ -764,7 +764,11 @@ module.exports.updateApplicationStatus = function updateApplicationStatus(applic
 
 // CREATE - Save a job
 module.exports.saveJob = function saveJob(userId, jobId) {
-    let sql = `INSERT INTO saved_job (user_id, job_id) VALUES ($1, $2) RETURNING *;`;
+    let sql = `INSERT INTO saved_job (user_id, job_id)
+               VALUES ($1, $2)
+               ON CONFLICT (user_id, job_id)
+               DO NOTHING
+               RETURNING *;`;
     return query(sql, [userId, jobId]).then(function(result) {
         return result.rows;
     });

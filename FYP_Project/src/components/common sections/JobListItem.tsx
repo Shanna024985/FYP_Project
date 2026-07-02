@@ -1,5 +1,5 @@
 import { Bookmark, MapPin, Eye } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -32,6 +32,63 @@ export default function JobListItem({
   salaryPeriod,
 }: JobListItemProps) {
   const [bookmarked, setBookmarked] = useState(false);
+  useEffect(() => {
+    const checkSaved = async () => {
+      const token = localStorage.getItem("token");
+
+      if (!token) return;
+
+      try {
+        const response = await fetch(
+          `http://localhost:3000/api/jobs/${jobId}/is-saved`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+
+        const data = await response.json();
+
+        setBookmarked(data.isSaved);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    checkSaved();
+  }, [jobId]);
+  const handleBookmark = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/jobs/${jobId}/save`,
+        {
+          method: bookmarked ? "DELETE" : "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error);
+      }
+
+      setBookmarked(!bookmarked);
+    } catch (error) {
+      console.error(error);
+      alert("Failed to update bookmark.");
+    }
+  };
   const navigate = useNavigate();
   return (
     <Card className="relative flex gap-4 p-4 hover:shadow-md transition">
@@ -80,10 +137,7 @@ export default function JobListItem({
       </div>
 
       {/* TOP RIGHT: BOOKMARK */}
-      <button
-        onClick={() => setBookmarked(!bookmarked)}
-        className="absolute top-3 right-3"
-      >
+      <button onClick={handleBookmark} className="absolute top-3 right-3">
         <Bookmark
           size={18}
           className={
