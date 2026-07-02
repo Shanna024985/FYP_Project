@@ -13,9 +13,8 @@ function checkUserOwnsCompany(userId, companyId) {
 
 // ==================== JOB CRUD ====================
 
-// CREATE - Post a new job (with ownership check)
+// CREATE - Post a new job
 module.exports.createJob = (req, res, next) => {
-    // Check if req.body exists
     if (!req.body) {
         return res.status(400).json({ error: "Request body is missing" });
     }
@@ -34,9 +33,6 @@ module.exports.createJob = (req, res, next) => {
         return res.status(400).json({ error: "Company ID is required" });
     }
     
-    // ============================================
-    // CHECK: User must own the company to post a job
-    // ============================================
     return checkUserOwnsCompany(userId, companyId)
         .then(function(ownership) {
             if (ownership.length === 0) {
@@ -45,7 +41,6 @@ module.exports.createJob = (req, res, next) => {
                 });
             }
             
-            // Validate required fields
             if (!title || !description || !category || !type || !salary_range_from || !salary_range_to || !deadline) {
                 return res.status(400).json({ 
                     error: "Required fields missing: title, description, category, type, salary_range_from, salary_range_to, deadline" 
@@ -74,7 +69,6 @@ module.exports.createJob = (req, res, next) => {
                 res.status(201).json({ message: "Job posted successfully", job: jobDetails[0] });
             });
         }).catch(function(error) {
-            console.error('Error creating job:', error);
             return res.status(500).json({ error: error.message });
         });
 }
@@ -109,7 +103,6 @@ module.exports.getAllJobs = (req, res, next) => {
             }
         });
     }).catch(function(error) {
-        console.error('Error creating job:', error);
         return res.status(500).json({ error: error.message });
     });
 }
@@ -123,7 +116,6 @@ module.exports.getRecommendedJobs = (req, res, next) => {
         .then(function(jobs) {
             res.json({ count: jobs.length, jobs: jobs });
         }).catch(function(error) {
-            console.error(error);
             return res.status(500).json({ error: error.message });
         });
 }
@@ -140,35 +132,73 @@ module.exports.getJobById = (req, res, next) => {
             }
             res.json({ job: jobDetails[0] });
         }).catch(function(error) {
-            console.error(error);
             return res.status(500).json({ error: error.message });
         });
 }
 
-// READ - Get jobs by company (WITH DEBUGGING)
+// READ - Get jobs by company
 module.exports.getJobsByCompany = (req, res, next) => {
     let companyId = req.params.companyId;
     
-    console.log('========================================');
-    console.log('GET /api/jobs/company/' + companyId + '/jobs');
-    console.log('========================================');
-    
     return jobModel.getJobsByCompany(companyId)
         .then(function(jobs) {
-            console.log('Jobs found:', jobs.length);
-            console.log('Job statuses:');
-            jobs.forEach(function(job) {
-                console.log('  - ID:', job.id, '| Title:', job.title, '| Status:', job.status);
-            });
-            console.log('========================================');
             res.json({ count: jobs.length, jobs: jobs });
         }).catch(function(error) {
-            console.error('Error in getJobsByCompany:', error);
             return res.status(500).json({ error: error.message });
         });
 }
 
-// UPDATE - Edit a job (with ownership check)
+// READ - Get employer dashboard (NEW)
+module.exports.getEmployerDashboard = (req, res, next) => {
+    let userId = req.query.userId || 1;
+    
+    let companySql = `SELECT c.id FROM company c
+                      JOIN company_ownership co ON c.id = co.company_id
+                      WHERE co.user_id = $1;`;
+    
+    return query(companySql, [userId])
+        .then(function(companyResult) {
+            const companyIds = companyResult.rows.map(row => row.id);
+            
+            if (companyIds.length === 0) {
+                return res.json({
+                    companies: [],
+                    jobs: [],
+                    total_jobs: 0,
+                    active_jobs: 0,
+                    closed_jobs: 0,
+                    stats: { total: 0, active: 0, closed: 0 }
+                });
+            }
+            
+            let jobSql = `SELECT j.*, c.name as company_name
+                         FROM job j
+                         JOIN company c ON j.company_id = c.id
+                         WHERE j.company_id = ANY($1)
+                         ORDER BY j.id DESC;`;
+            
+            return query(jobSql, [companyIds])
+                .then(function(jobResult) {
+                    const jobs = jobResult.rows;
+                    const total = jobs.length;
+                    const active = jobs.filter(j => j.status === 'Active').length;
+                    const closed = jobs.filter(j => j.status === 'Closed').length;
+                    
+                    res.json({
+                        companies: companyResult.rows,
+                        jobs: jobs,
+                        total_jobs: total,
+                        active_jobs: active,
+                        closed_jobs: closed,
+                        stats: { total, active, closed }
+                    });
+                });
+        }).catch(function(error) {
+            return res.status(500).json({ error: error.message });
+        });
+}
+
+// UPDATE - Edit a job
 module.exports.updateJob = (req, res, next) => {
     let jobId = req.params.id;
     let jobData = req.body;
@@ -179,9 +209,6 @@ module.exports.updateJob = (req, res, next) => {
         return res.status(400).json({ error: "Company ID is required" });
     }
     
-    // ============================================
-    // CHECK: User must own the company to update a job
-    // ============================================
     return checkUserOwnsCompany(userId, companyId)
         .then(function(ownership) {
             if (ownership.length === 0) {
@@ -204,12 +231,11 @@ module.exports.updateJob = (req, res, next) => {
                         });
                 });
         }).catch(function(error) {
-            console.error(error);
             return res.status(500).json({ error: error.message });
         });
 }
 
-// DELETE - Delete a job (with ownership check)
+// DELETE - Delete a job
 module.exports.deleteJob = (req, res, next) => {
     let jobId = req.params.id;
     let companyId = req.body.companyId;
@@ -219,9 +245,6 @@ module.exports.deleteJob = (req, res, next) => {
         return res.status(400).json({ error: "Company ID is required" });
     }
     
-    // ============================================
-    // CHECK: User must own the company to delete a job
-    // ============================================
     return checkUserOwnsCompany(userId, companyId)
         .then(function(ownership) {
             if (ownership.length === 0) {
@@ -244,35 +267,23 @@ module.exports.deleteJob = (req, res, next) => {
                         });
                 });
         }).catch(function(error) {
-            console.error(error);
             return res.status(500).json({ error: error.message });
         });
 }
 
-// UPDATE - Close a job (with ownership check)
+// UPDATE - Close a job
 module.exports.closeJob = (req, res, next) => {
     let jobId = req.params.id;
     let companyId = req.body.companyId;
     let userId = req.body.userId || 1;
     
-    console.log('========================================');
-    console.log('PATCH /api/jobs/' + jobId + '/close');
-    console.log('Company ID:', companyId);
-    console.log('User ID:', userId);
-    console.log('========================================');
-    
     if (!companyId) {
-        console.log('ERROR: Company ID is required');
         return res.status(400).json({ error: "Company ID is required" });
     }
     
-    // ============================================
-    // CHECK: User must own the company to close a job
-    // ============================================
     return checkUserOwnsCompany(userId, companyId)
         .then(function(ownership) {
             if (ownership.length === 0) {
-                console.log('ERROR: User does not own this company');
                 return res.status(403).json({ 
                     error: "Unauthorized: You don't own this company. Only company owners can close jobs." 
                 });
@@ -281,55 +292,34 @@ module.exports.closeJob = (req, res, next) => {
             return jobModel.checkJobBelongsToCompany(jobId, companyId)
                 .then(function(ownership) {
                     if (ownership.length == 0) {
-                        console.log('ERROR: Job does not belong to company');
                         return res.status(403).json({ error: "Unauthorized: You don't own this job" });
                     }
-                    console.log('Job belongs to company, updating status...');
                     return jobModel.updateJobStatus(jobId, 'Closed', companyId)
                         .then(function(closedJob) {
                             if (closedJob.length == 0) {
                                 return res.status(404).json({ error: "Job not found or you don't own it" });
                             }
-                            console.log('SUCCESS: Job closed successfully');
-                            console.log('========================================');
                             res.json({ message: "Job closed successfully", job: closedJob[0] });
                         });
                 });
         }).catch(function(error) {
-            console.error('Error in closeJob:', error);
             return res.status(500).json({ error: error.message });
         });
 }
 
-// UPDATE - Open a job (Closed → Active) with ownership check
+// UPDATE - Open a job (Closed → Active) (NEW)
 module.exports.openJob = (req, res, next) => {
     let jobId = req.params.id;
     let companyId = req.body.companyId;
     let userId = req.body.userId || 1;
     
-    console.log('========================================');
-    console.log('PATCH /api/jobs/' + jobId + '/open');
-    console.log('Company ID:', companyId);
-    console.log('User ID:', userId);
-    console.log('========================================');
-    
-    console.log('========================================');
-    console.log('PATCH /api/jobs/' + jobId + '/close');
-    console.log('Company ID:', companyId);
-    console.log('========================================');
-    
     if (!companyId) {
-        console.log('ERROR: Company ID is required');
         return res.status(400).json({ error: "Company ID is required" });
     }
     
-    // ============================================
-    // CHECK: User must own the company to open a job
-    // ============================================
     return checkUserOwnsCompany(userId, companyId)
         .then(function(ownership) {
             if (ownership.length === 0) {
-                console.log('ERROR: User does not own this company');
                 return res.status(403).json({ 
                     error: "Unauthorized: You don't own this company. Only company owners can open jobs." 
                 });
@@ -338,22 +328,17 @@ module.exports.openJob = (req, res, next) => {
             return jobModel.checkJobBelongsToCompany(jobId, companyId)
                 .then(function(ownership) {
                     if (ownership.length == 0) {
-                        console.log('ERROR: Job does not belong to company');
                         return res.status(403).json({ error: "Unauthorized: You don't own this job" });
                     }
-                    console.log('Job belongs to company, updating status...');
                     return jobModel.updateJobStatus(jobId, 'Active', companyId)
                         .then(function(openedJob) {
                             if (openedJob.length == 0) {
                                 return res.status(404).json({ error: "Job not found or you don't own it" });
                             }
-                            console.log('SUCCESS: Job opened successfully');
-                            console.log('========================================');
                             res.json({ message: "Job opened successfully", job: openedJob[0] });
                         });
                 });
         }).catch(function(error) {
-            console.error('Error in openJob:', error);
             return res.status(500).json({ error: error.message });
         });
 }
@@ -383,37 +368,6 @@ module.exports.applyForJob = (req, res, next) => {
                 application: result.application 
             });
         }).catch(function(error) {
-            console.error('Error in closeJob:', error);
-            return res.status(500).json({ error: error.message });
-        });
-}
-
-// ==================== APPLICATIONS ====================
-
-// CREATE - Apply for a job
-module.exports.applyForJob = (req, res, next) => {
-    let userId = req.body.userId || 1;
-    let jobId = req.params.id;
-    let resumeId = req.body.resumeId;
-    
-    if (!resumeId) {
-        return res.status(400).json({ error: "Resume ID is required" });
-    }
-    
-    return jobModel.applyForJob(userId, jobId, resumeId)
-        .then(function(result) {
-            if (result.alreadyApplied) {
-                return res.status(400).json({ 
-                    error: "Already applied", 
-                    status: result.status 
-                });
-            }
-            res.status(201).json({ 
-                message: "Application submitted successfully", 
-                application: result.application 
-            });
-        }).catch(function(error) {
-            console.error(error);
             return res.status(500).json({ error: error.message });
         });
 }
@@ -432,26 +386,6 @@ module.exports.getMyApplications = (req, res, next) => {
                 });
             });
         }).catch(function(error) {
-            console.error(error);
-            return res.status(500).json({ error: error.message });
-        });
-}
-
-// READ - Get my applications
-module.exports.getMyApplications = (req, res, next) => {
-    let userId = req.query.userId || 1;
-    
-    return jobModel.getApplicationsByUser(userId)
-        .then(function(applications) {
-            return jobModel.getApplicationStatusCount(userId).then(function(stats) {
-                res.json({ 
-                    count: applications.length, 
-                    applications: applications,
-                    stats: stats
-                });
-            });
-        }).catch(function(error) {
-            console.error(error);
             return res.status(500).json({ error: error.message });
         });
 }
@@ -468,7 +402,6 @@ module.exports.getApplicationStats = (req, res, next) => {
             });
             res.json({ stats: stats, total: total });
         }).catch(function(error) {
-            console.error(error);
             return res.status(500).json({ error: error.message });
         });
 }
@@ -481,7 +414,6 @@ module.exports.getJobApplications = (req, res, next) => {
         .then(function(applications) {
             res.json({ count: applications.length, applications: applications });
         }).catch(function(error) {
-            console.error(error);
             return res.status(500).json({ error: error.message });
         });
 }
@@ -502,7 +434,6 @@ module.exports.updateApplicationStatus = (req, res, next) => {
             }
             res.json({ message: "Application status updated", application: updated[0] });
         }).catch(function(error) {
-            console.error(error);
             return res.status(500).json({ error: error.message });
         });
 }
@@ -512,7 +443,6 @@ module.exports.deleteApplication = (req, res, next) => {
     let applicationId = req.params.applicationId;
     let userId = req.body.userId || 1;
 
-    // First check if application exists and belongs to user
     let checkSql = `SELECT id FROM application WHERE id = $1 AND user_id = $2;`;
     
     return query(checkSql, [applicationId, userId])
@@ -532,7 +462,6 @@ module.exports.deleteApplication = (req, res, next) => {
                     });
                 });
         }).catch(function(error) {
-            console.error(error);
             return res.status(500).json({ error: error.message });
         });
 }
@@ -551,7 +480,6 @@ module.exports.saveJob = (req, res, next) => {
             }
             res.status(201).json({ message: "Job saved successfully", saved: savedJob[0] });
         }).catch(function(error) {
-            console.error(error);
             return res.status(500).json({ error: error.message });
         });
 }
@@ -568,7 +496,6 @@ module.exports.unsaveJob = (req, res, next) => {
             }
             res.json({ message: "Job unsaved successfully", unsavedId: unsavedJob[0].id });
         }).catch(function(error) {
-            console.error(error);
             return res.status(500).json({ error: error.message });
         });
 }
@@ -581,7 +508,6 @@ module.exports.getSavedJobs = (req, res, next) => {
         .then(function(savedJobs) {
             res.json({ count: savedJobs.length, saved_jobs: savedJobs });
         }).catch(function(error) {
-            console.error(error);
             return res.status(500).json({ error: error.message });
         });
 }
@@ -595,7 +521,6 @@ module.exports.isJobSaved = (req, res, next) => {
         .then(function(result) {
             res.json({ isSaved: result.length > 0 });
         }).catch(function(error) {
-            console.error(error);
             return res.status(500).json({ error: error.message });
         });
 }
@@ -610,7 +535,6 @@ module.exports.getCompletedJobs = (req, res, next) => {
         .then(function(completedJobs) {
             res.json({ count: completedJobs.length, completed_jobs: completedJobs });
         }).catch(function(error) {
-            console.error(error);
             return res.status(500).json({ error: error.message });
         });
 }
@@ -623,7 +547,6 @@ module.exports.getCompanyCompletedJobs = (req, res, next) => {
         .then(function(completedJobs) {
             res.json({ count: completedJobs.length, completed_jobs: completedJobs });
         }).catch(function(error) {
-            console.error(error);
             return res.status(500).json({ error: error.message });
         });
 }
@@ -637,7 +560,6 @@ module.exports.canReviewCompany = (req, res, next) => {
         .then(function(result) {
             res.json(result);
         }).catch(function(error) {
-            console.error(error);
             return res.status(500).json({ error: error.message });
         });
 }
@@ -652,7 +574,6 @@ module.exports.getJobSeekerDashboard = (req, res, next) => {
         .then(function(dashboardData) {
             res.json(dashboardData);
         }).catch(function(error) {
-            console.error(error);
             return res.status(500).json({ error: error.message });
         });
 }
@@ -674,7 +595,6 @@ module.exports.getUserResumes = (req, res, next) => {
         });
         res.json({ count: resumes.length, resumes: resumes });
     }).catch(function(error) {
-        console.error(error);
         return res.status(500).json({ error: error.message });
     });
 }
