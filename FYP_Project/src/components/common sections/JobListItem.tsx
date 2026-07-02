@@ -1,10 +1,11 @@
-import { Bookmark, MapPin, Eye } from "lucide-react";
-import { useState, useEffect } from "react";
+import { MapPin, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import BookmarkButton from "./BookmarkButton";
 
 type JobListItemProps = {
+  currentUrl: string;
   jobId: number;
   title: string;
   description: string;
@@ -19,6 +20,7 @@ type JobListItemProps = {
 };
 
 export default function JobListItem({
+  currentUrl,
   jobId,
   title,
   description,
@@ -31,64 +33,6 @@ export default function JobListItem({
   companyLogo,
   salaryPeriod,
 }: JobListItemProps) {
-  const [bookmarked, setBookmarked] = useState(false);
-  useEffect(() => {
-    const checkSaved = async () => {
-      const token = localStorage.getItem("token");
-
-      if (!token) return;
-
-      try {
-        const response = await fetch(
-          `http://localhost:3000/api/jobs/${jobId}/is-saved`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
-
-        const data = await response.json();
-
-        setBookmarked(data.isSaved);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    checkSaved();
-  }, [jobId]);
-  const handleBookmark = async () => {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      navigate("/login");
-      return;
-    }
-
-    try {
-      const response = await fetch(
-        `http://localhost:3000/api/jobs/${jobId}/save`,
-        {
-          method: bookmarked ? "DELETE" : "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error);
-      }
-
-      setBookmarked(!bookmarked);
-    } catch (error) {
-      console.error(error);
-      alert("Failed to update bookmark.");
-    }
-  };
   const navigate = useNavigate();
   return (
     <Card className="relative flex gap-4 p-4 hover:shadow-md transition">
@@ -137,14 +81,11 @@ export default function JobListItem({
       </div>
 
       {/* TOP RIGHT: BOOKMARK */}
-      <button onClick={handleBookmark} className="absolute top-3 right-3">
-        <Bookmark
-          size={18}
-          className={
-            bookmarked ? "fill-black text-black" : "text-muted-foreground"
-          }
-        />
-      </button>
+      <BookmarkButton
+        currentUrl={currentUrl}
+        jobId={jobId}
+        className="absolute top-3 right-3"
+      />
 
       {/* BOTTOM RIGHT: VIEW BUTTON */}
       <div className="absolute bottom-3 right-3">
