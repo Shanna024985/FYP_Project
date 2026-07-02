@@ -1,4 +1,5 @@
 const companyModel = require("../models/companyModel");
+const { query } = require("../services/dbConnection");
 
 // CREATE - Create a company
 module.exports.createCompany = (req, res, next) => {
@@ -41,7 +42,6 @@ module.exports.createCompany = (req, res, next) => {
             company: companyDetails[0] 
         });
     }).catch(function(error) {
-        console.error(error);
         return res.status(500).json({ error: error.message });
     });
 }
@@ -52,18 +52,29 @@ module.exports.getAllCompanies = (req, res, next) => {
         .then(function(companies) {
             res.json({ count: companies.length, companies: companies });
         }).catch(function(error) {
-            console.error(error);
             return res.status(500).json({ error: error.message });
         });
 }
 
-// READ - Get all deleted companies (for admin)
-module.exports.getDeletedCompanies = (req, res, next) => {
-    return companyModel.getDeletedCompanies()
-        .then(function(deletedCompanies) {
-            res.json({ count: deletedCompanies.length, deleted_companies: deletedCompanies });
+// READ - Get all companies owned by a user (NEW)
+module.exports.getCompaniesByUser = (req, res, next) => {
+    let userId = req.query.userId || 1;
+    
+    let sql = `SELECT c.*, 
+               (SELECT COUNT(*) FROM job WHERE company_id = c.id) as total_jobs,
+               (SELECT COUNT(*) FROM job WHERE company_id = c.id AND status = 'Active') as active_jobs
+               FROM company c
+               JOIN company_ownership co ON c.id = co.company_id
+               WHERE co.user_id = $1
+               ORDER BY c.id DESC;`;
+    
+    return query(sql, [userId])
+        .then(function(result) {
+            res.json({ 
+                count: result.rows.length, 
+                companies: result.rows 
+            });
         }).catch(function(error) {
-            console.error(error);
             return res.status(500).json({ error: error.message });
         });
 }
@@ -79,7 +90,6 @@ module.exports.getCompanyById = (req, res, next) => {
             }
             res.json({ company: companyDetails[0] });
         }).catch(function(error) {
-            console.error(error);
             return res.status(500).json({ error: error.message });
         });
 }
@@ -95,7 +105,6 @@ module.exports.getCompanyPageData = (req, res, next) => {
             }
             res.json({ company: companyData[0] });
         }).catch(function(error) {
-            console.error(error);
             return res.status(500).json({ error: error.message });
         });
 }
@@ -121,7 +130,6 @@ module.exports.updateCompany = (req, res, next) => {
                     });
                 });
         }).catch(function(error) {
-            console.error(error);
             return res.status(500).json({ error: error.message });
         });
 }
@@ -145,7 +153,6 @@ module.exports.updateCompanyLogo = (req, res, next) => {
                 logo: result[0] 
             });
         }).catch(function(error) {
-            console.error(error);
             return res.status(500).json({ error: error.message });
         });
 }
@@ -169,7 +176,6 @@ module.exports.updateCompanyBanner = (req, res, next) => {
                 banner: result[0] 
             });
         }).catch(function(error) {
-            console.error(error);
             return res.status(500).json({ error: error.message });
         });
 }
@@ -193,26 +199,40 @@ module.exports.updateCompanyProfile = (req, res, next) => {
                 profile: result[0] 
             });
         }).catch(function(error) {
-            console.error(error);
             return res.status(500).json({ error: error.message });
         });
 }
 
-// DELETE - Soft delete a company (move to deleted_companies table)
+// DELETE - Soft delete a company
 module.exports.deleteCompany = (req, res, next) => {
     let companyId = req.params.id;
+    let userId = req.body.userId || 1;
     
-    return companyModel.deleteCompany(companyId)
-        .then(function(deletedCompany) {
-            if (deletedCompany.length == 0) {
-                return res.status(404).json({ error: "Company not found or already deleted" });
+    return companyModel.getCompanyById(companyId)
+        .then(function(existingCompany) {
+            if (existingCompany.length == 0) {
+                return res.status(404).json({ error: "Company not found" });
             }
-            res.json({ 
-                message: "Company deleted successfully. You can restore this company.", 
-                deletedId: deletedCompany[0].id 
-            });
+            
+            // Check if user owns this company
+            let ownershipSql = `SELECT id FROM company_ownership WHERE user_id = $1 AND company_id = $2;`;
+            return query(ownershipSql, [userId, companyId])
+                .then(function(ownership) {
+                    if (ownership.rows.length === 0) {
+                        return res.status(403).json({ 
+                            error: "Unauthorized: You don't own this company" 
+                        });
+                    }
+                    
+                    return companyModel.deleteCompany(companyId)
+                        .then(function(deletedCompany) {
+                            res.json({ 
+                                message: "Company deleted successfully. You can restore this company.", 
+                                deletedId: deletedCompany[0].id 
+                            });
+                        });
+                });
         }).catch(function(error) {
-            console.error(error);
             return res.status(500).json({ error: error.message });
         });
 }
@@ -220,18 +240,39 @@ module.exports.deleteCompany = (req, res, next) => {
 // RESTORE - Restore a soft-deleted company
 module.exports.restoreCompany = (req, res, next) => {
     let companyId = req.params.id;
+    let userId = req.body.userId || 1;
     
-    return companyModel.restoreCompany(companyId)
-        .then(function(restoredCompany) {
-            if (restoredCompany.length == 0) {
-                return res.status(404).json({ error: "Company not found in deleted records" });
+    // Check if user owns this company
+    let ownershipSql = `SELECT id FROM company_ownership WHERE user_id = $1 AND company_id = $2;`;
+    return query(ownershipSql, [userId, companyId])
+        .then(function(ownership) {
+            if (ownership.rows.length === 0) {
+                return res.status(403).json({ 
+                    error: "Unauthorized: You don't own this company" 
+                });
             }
-            res.json({ 
-                message: "Company restored successfully", 
-                restoredId: restoredCompany[0].id 
-            });
+            
+            return companyModel.restoreCompany(companyId)
+                .then(function(restoredCompany) {
+                    if (restoredCompany.length == 0) {
+                        return res.status(404).json({ error: "Company not found or not deleted" });
+                    }
+                    res.json({ 
+                        message: "Company restored successfully", 
+                        restoredId: restoredCompany[0].id 
+                    });
+                });
         }).catch(function(error) {
-            console.error(error);
+            return res.status(500).json({ error: error.message });
+        });
+}
+
+// GET - Get all deleted companies (admin)
+module.exports.getDeletedCompanies = (req, res, next) => {
+    return companyModel.getDeletedCompanies()
+        .then(function(deletedCompanies) {
+            res.json({ count: deletedCompanies.length, deleted_companies: deletedCompanies });
+        }).catch(function(error) {
             return res.status(500).json({ error: error.message });
         });
 }

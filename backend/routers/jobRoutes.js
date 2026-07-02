@@ -8,12 +8,15 @@ router.get("/recommended", jobController.getRecommendedJobs);
 router.get("/:id", jobController.getJobById);
 router.get("/company/:companyId/jobs", jobController.getJobsByCompany);
 
+// ==================== EMPLOYER DASHBOARD ====================
+router.get("/employer/dashboard", jobController.getEmployerDashboard); // NEW
+
 // ==================== JOB CRUD (Protected) ====================
 router.post("/", jobController.createJob);
 router.put("/:id", jobController.updateJob);
 router.delete("/:id", jobController.deleteJob);
 router.patch("/:id/close", jobController.closeJob);
-router.patch("/:id/open", jobController.openJob);  // ← NEW: Open job
+router.patch("/:id/open", jobController.openJob); // NEW
 
 // ==================== APPLICATIONS ====================
 router.post("/:id/apply", jobController.applyForJob);
