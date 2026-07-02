@@ -12,7 +12,7 @@ const userRoutes = require("./userRoutes");
 router.get("/", (req, res, next) => {
     res.send("You are connected!");
 });
-
+router.use("/auth", loginRoutes);
 router.use("/jobs", jobRoutes);
 router.use("/company", companyRoutes);
 router.use("/upload", uploadRoutes);
@@ -20,5 +20,4 @@ router.use("/locations", locationRoutes);
 router.use("/resumes", resumeRoutes);
 router.use("/reviews", reviewRoutes);  // ← UNCOMMENTED
 router.use("/user", userRoutes);
-
 module.exports = router;
