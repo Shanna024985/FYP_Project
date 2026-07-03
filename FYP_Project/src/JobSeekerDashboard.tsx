@@ -34,16 +34,8 @@ type AppliedJob = {
   status: string;
 };
 
-type SavedJob = {
-  title: string;
-  companyName: string;
-  companyLogo: string;
-  salary: string;
-  type: string;
-  location: string;
-  postedDate: string;
-  savedDate: string;
-};
+import type { SavedJob } from "../src/types/saved-job";
+import SavedJobCard from "@/components/common sections/SavedJobCard";
 
 type Props = {
   currentUrl: string;
@@ -88,42 +80,77 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
     status: i % 2 === 0 ? "Pending" : "Reviewed",
   }));
 
-  // ---------------------------------------
-  // Dummy Saved Jobs
-  // ---------------------------------------
-  const savedJobs: SavedJob[] = Array.from({ length: 14 }).map((_, i) => ({
-    title: `UI/UX Designer ${i + 1}`,
-    companyName: "Creative Studio",
-    companyLogo: "https://via.placeholder.com/50",
-    salary: "$2500 / month",
-    type: i % 2 === 0 ? "Full-time" : "Internship",
-    location: "Singapore",
-    postedDate: "19 May 2026",
-    savedDate: "22 May 2026",
-  }));
+  const [savedJobs, setSavedJobs] = useState<SavedJob[]>([]);
+  const [loadingSaved, setLoadingSaved] = useState(true);
+  useEffect(() => {
+    const fetchSavedJobs = async () => {
+      try {
+        setLoadingSaved(true);
 
+        const token = localStorage.getItem("token");
+
+        const res = await axios.get(`${currentUrl}/jobs/saved/user`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const jobs: SavedJob[] = res.data.saved_jobs.map((item: any) => ({
+          id: item.id,
+          jobId: item.job_id,
+
+          companyName: item.company_name,
+          companyLogo: `${currentUrl.replace("/api", "")}/uploads/company-logos/${item.logo_file_name}`,
+
+          title: item.title,
+
+          salaryFrom: item.salary_range_from,
+          salaryTo: item.salary_range_to,
+          salaryPeriod: item.salary_period,
+
+          jobType: item.type,
+
+          location: item.location,
+
+          postedDate: new Date(item.posted_date).toLocaleDateString("en-SG", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          }),
+
+          savedDate: new Date(item.created_at).toLocaleDateString("en-SG", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          }),
+        }));
+
+        setSavedJobs(jobs);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoadingSaved(false);
+      }
+    };
+
+    fetchSavedJobs();
+  }, [currentUrl]);
   // ---------------------------------------
   // Pagination
   // ---------------------------------------
   const appliedPerPage = 5;
-  const savedPerPage = 6;
 
   const [appliedPage, setAppliedPage] = useState(1);
-  const [savedPage, setSavedPage] = useState(1);
 
   const appliedTotalPages = Math.ceil(appliedJobs.length / appliedPerPage);
 
-  const savedTotalPages = Math.ceil(savedJobs.length / savedPerPage);
 
   const currentAppliedJobs = appliedJobs.slice(
     (appliedPage - 1) * appliedPerPage,
     appliedPage * appliedPerPage,
   );
 
-  const currentSavedJobs = savedJobs.slice(
-    (savedPage - 1) * savedPerPage,
-    savedPage * savedPerPage,
-  );
+  const currentSavedJobs = savedJobs.slice(0, 6);
   const navigate = useNavigate();
 
   return (
@@ -207,7 +234,9 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
                 <div>
                   <p className="text-sm text-muted-foreground">Saved Jobs</p>
 
-                  <h2 className="mt-2 text-4xl font-bold title-black">14</h2>
+                  <h2 className="mt-2 text-4xl font-bold title-black">
+                    {savedJobs.length}
+                  </h2>
                 </div>
 
                 <Button
@@ -376,127 +405,51 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-semibold title-black">Saved Jobs</h2>
 
-            <Button
-              variant="outline"
-              onClick={() => navigate("/jobSeeker/savedJobs")}
-            >
-              View All
-            </Button>
+            {savedJobs.length > 0 && (
+              <Button
+                variant="outline"
+                onClick={() => navigate("/jobSeeker/savedJobs")}
+              >
+                View All
+              </Button>
+            )}
           </div>
 
-          {/* SAVED JOB GRID */}
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {currentSavedJobs.map((job, index) => (
-              <Card key={index} className="hover:shadow-md transition">
-                <CardContent className="space-y-4 p-6">
-                  {/* ROW 1 */}
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={job.companyLogo}
-                      alt={job.companyName}
-                      className="h-12 w-12 rounded-md object-cover"
-                    />
+          {savedJobs.length === 0 ? (
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center gap-4 py-12 text-center">
+                <Bookmark className="h-12 w-12 text-muted-foreground" />
 
-                    <h3 className="font-semibold">{job.title}</h3>
-                  </div>
-
-                  {/* ROW 2 */}
-                  <p className="text-sm text-muted-foreground text-left">
-                    From {job.companyName}
+                <div>
+                  <h3 className="text-lg font-semibold">No saved jobs yet</h3>
+                  <p className="text-muted-foreground">
+                    Save jobs you're interested in so you can easily find them later.
                   </p>
+                </div>
 
-                  {/* ROW 3 */}
-                  <p className="font-medium text-left">{job.salary}</p>
-
-                  {/* ROW 4 */}
-                  <div className="flex justify-start">
-                    <span className="rounded-full bg-muted px-3 py-1 text-xs">
-                      {job.type}
-                    </span>
-                  </div>
-
-                  {/* ROW 5 */}
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <MapPin size={15} />
-                    <span className="text-left">{job.location}</span>
-                  </div>
-
-                  {/* ROW 6 */}
-                  <p className="text-xs text-muted-foreground text-left">
-                    Posted on {job.postedDate}
-                  </p>
-
-                  {/* ROW 7 */}
-                  <p className="text-xs text-muted-foreground text-left">
-                    Saved on {job.savedDate}
-                  </p>
-
-                  {/* ROW 8 */}
-                  <div className="flex items-center justify-between pt-2">
-                    <Button variant="ghost" size="icon">
-                      <Bookmark className="fill-current" />
-                    </Button>
-
-                    <div className="flex gap-2">
-                      <Button onClick={() => navigate("/applyjob")}>
-                        Apply Now
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => navigate(`/jobDetails`)}
-                      >
-                        View
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          {/* PAGINATION */}
-          {/* PAGINATION */}
-          <div className="flex items-center justify-end gap-2">
-            {/* PREVIOUS BUTTON */}
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={savedPage === 1}
-              onClick={() => setSavedPage((prev) => prev - 1)}
-            >
-              Previous
-            </Button>
-
-            {/* PAGE NUMBERS */}
-            <div className="flex items-center gap-1">
-              {Array.from({
-                length: savedTotalPages,
-              }).map((_, i) => {
-                const page = i + 1;
-
-                return (
-                  <Button
-                    key={page}
-                    variant={savedPage === page ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setSavedPage(page)}
-                  >
-                    {page}
-                  </Button>
-                );
-              })}
+                <Button onClick={() => navigate("/browsejobs")}>
+                  Browse Jobs
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+              {currentSavedJobs.map((job) => (
+                <SavedJobCard
+                  key={job.id}
+                  currentUrl={currentUrl}
+                  job={job}
+                  onView={(jobId) => navigate(`/jobDetails?id=${jobId}`)}
+                  onApply={(jobId) => navigate(`/applyjob?id=${jobId}`)}
+                  onUnsave={(removedJob) => {
+                    setSavedJobs((prev) =>
+                      prev.filter((j) => j.jobId !== removedJob.jobId)
+                    );
+                  }}
+                />
+              ))}
             </div>
-
-            {/* NEXT BUTTON */}
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={savedPage === savedTotalPages}
-              onClick={() => setSavedPage((prev) => prev + 1)}
-            >
-              Next
-            </Button>
-          </div>
+          )}
         </section>
       </div>
     </div>
