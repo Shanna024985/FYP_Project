@@ -1,7 +1,8 @@
 // pages/job-seeker/SavedJobsPage.tsx
 
-import { useMemo, useState } from "react";
-
+import { useEffect, useMemo, useState } from "react";
+import axios from "axios";
+import { toast } from "sonner";
 import SavedJobCard from "../src/components/common sections/SavedJobCard";
 import SavedJobPagination from "../src/components/common sections/SavedJobPagination";
 
@@ -16,23 +17,56 @@ export default function SavedJobsPage({ currentUrl }: Props) {
 
   const jobsPerPage = 9;
 
-  // Replace later with API call
-  const [savedJobs] = useState<SavedJob[]>([
-    {
-      id: 1,
-      jobId: 101,
-      companyName: "Google",
-      companyLogo: "https://placehold.co/100x100",
-      title: "Frontend Developer",
-      salaryFrom: 1000,
-      salaryTo: 3000,
-      salaryPeriod: "Month",
-      jobType: "Internship",
-      location: "Singapore",
-      postedDate: "01 Jun 2026",
-      savedDate: "07 Jun 2026",
-    },
-  ]);
+  const [savedJobs, setSavedJobs] = useState<SavedJob[]>([]);
+  useEffect(() => {
+    const fetchSavedJobs = async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+        const res = await axios.get(`${currentUrl}/jobs/saved/user`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const jobs: SavedJob[] = res.data.saved_jobs.map((item: any) => ({
+          id: item.id,
+          jobId: item.job_id,
+
+          companyName: item.company_name,
+          companyLogo: `http://localhost:3000/uploads/company-logos/${item.logo_file_name}`,
+
+          title: item.title,
+
+          salaryFrom: item.salary_range_from,
+          salaryTo: item.salary_range_to,
+          salaryPeriod: item.salary_period,
+
+          jobType: item.type,
+
+          location: item.location,
+
+          postedDate: new Date(item.posted_date).toLocaleDateString("en-SG", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          }),
+
+          savedDate: new Date(item.created_at).toLocaleDateString("en-SG", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          }),
+        }));
+
+        setSavedJobs(jobs);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchSavedJobs();
+  }, [currentUrl]);
 
   const totalPages = Math.ceil(savedJobs.length / jobsPerPage);
 
@@ -53,8 +87,28 @@ export default function SavedJobsPage({ currentUrl }: Props) {
     console.log("Apply", jobId);
   };
 
-  const handleUnsave = (jobId: number) => {
-    console.log("Unsave", jobId);
+  const handleUnsave = (removedJob: SavedJob) => {
+    setSavedJobs((prev) =>
+      prev.filter((job) => job.jobId !== removedJob.jobId),
+    );
+
+    toast("Removed from Saved Jobs", {
+      action: {
+        label: "Undo",
+        onClick: async () => {
+          const token = localStorage.getItem("token");
+
+          await fetch(`${currentUrl}/jobs/${removedJob.jobId}/save`, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          setSavedJobs((prev) => [removedJob, ...prev]);
+        },
+      },
+    });
   };
 
   return (
@@ -73,6 +127,7 @@ export default function SavedJobsPage({ currentUrl }: Props) {
         {paginatedJobs.map((job) => (
           <SavedJobCard
             key={job.id}
+            currentUrl={currentUrl}
             job={job}
             onView={handleView}
             onApply={handleApply}

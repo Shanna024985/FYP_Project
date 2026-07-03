@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Toaster } from "@/components/ui/sonner";
 import reactLogo from "./assets/react.svg";
 import viteLogo from "./assets/vite.svg";
 import heroImg from "./assets/hero.png";
@@ -75,6 +76,7 @@ function App() {
           />
         </Route>
       </Routes>
+      <Toaster position="bottom-right" />
     </>
   );
 }

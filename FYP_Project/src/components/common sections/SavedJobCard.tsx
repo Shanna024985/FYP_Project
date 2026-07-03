@@ -7,13 +7,15 @@ import { Button } from "@/components/ui/button";
 import type { SavedJob } from "../../types/saved-job";
 
 type Props = {
+  currentUrl: string;
   job: SavedJob;
   onView: (jobId: number) => void;
   onApply: (jobId: number) => void;
-  onUnsave: (jobId: number) => void;
+  onUnsave: (job: SavedJob) => void;
 };
 
 export default function SavedJobCard({
+  currentUrl,
   job,
   onView,
   onApply,
@@ -21,9 +23,36 @@ export default function SavedJobCard({
 }: Props) {
   const navigate = useNavigate();
   const [isSaved, setIsSaved] = useState(true);
-  const handleToggleSave = () => {
-    setIsSaved((prev) => !prev);
-    onUnsave(job.jobId); // backend later
+
+  const handleToggleSave = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${currentUrl}/jobs/${job.jobId}/save`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to unsave job.");
+      }
+
+      // Only update after success
+      setIsSaved(false);
+      onUnsave(job);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to unsave job.");
+    }
   };
   return (
     <Card className="h-full">
@@ -80,10 +109,7 @@ export default function SavedJobCard({
             <Button variant="default" onClick={() => navigate(`/applyjob`)}>
               Apply Job
             </Button>
-            <Button
-              variant="outline"
-              onClick={() => navigate(`/jobDetails`)}
-            >
+            <Button variant="outline" onClick={() => navigate(`/jobDetails`)}>
               View
             </Button>
           </div>
