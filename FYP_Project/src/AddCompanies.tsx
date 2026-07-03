@@ -275,10 +275,9 @@ const AddCompanies = (prop: Props) => {
               const formDataForProfile = new FormData();
               if (uploadedImageOfProfile) {
                 formDataForProfile.append("file", uploadedImageOfProfile);
-                let body = JSON.stringify({ logo: formDataForProfile });
               fetch(prop.currentUrl + "/upload/company-logo", {
                 method: "POST",
-                body: body,
+                body: formDataForProfile,
                 headers: {
                   "Content-Type": "application/json",
                   Authorization: "Bearer " + localStorage.getItem("token"),
@@ -294,12 +293,10 @@ const AddCompanies = (prop: Props) => {
                   let newFormDataForBanner = new FormData();
                   if (uploadedImageOfBanner) {
                     newFormDataForBanner.append("file", uploadedImageOfBanner);
-                    let newBody = JSON.stringify({
-                    logo: newFormDataForBanner,
-                  });
+                    
                   fetch(prop.currentUrl + "/upload/company-banner", {
                     method: "POST",
-                    body: newBody,
+                    body: newFormDataForBanner,
                     headers: {
                       "Content-Type": "application/json",
                       Authorization: "Bearer " + localStorage.getItem("token"),
