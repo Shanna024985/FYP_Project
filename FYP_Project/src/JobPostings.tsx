@@ -20,6 +20,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectLabel
 } from "./components/ui/select";
 import { Button } from "./components/ui/button";
 type Props = {
@@ -29,7 +30,9 @@ type stages = {
   stage: Number;
   setStage: Function;
 };
+
 const StepOneOfJobPostings = (props: stages) => {
+  let [itemsForCompanySelect, setItemsForCompanySelect] = useState<string[]>([""])
   return (
     <>
       <div>
@@ -65,20 +68,16 @@ const StepOneOfJobPostings = (props: stages) => {
                   <SelectItem value={"admin"}>Admin & Secretarial</SelectItem>
                   <SelectItem value={"business"}>Business & Finance</SelectItem>
                   <SelectItem value={"engineering"}>Engineering</SelectItem>
-                  <SelectItem value={"customersupport"}>Customer Support</SelectItem>
-                  <SelectItem value={"it"}>IT & Software</SelectItem>
-                  <SelectItem value="design">
-                    Design & Creatives
+                  <SelectItem value={"customersupport"}>
+                    Customer Support
                   </SelectItem>
+                  <SelectItem value={"it"}>IT & Software</SelectItem>
+                  <SelectItem value="design">Design & Creatives</SelectItem>
                   <SelectItem value="education">
                     Education & Training
                   </SelectItem>
-                  <SelectItem value="science">
-                    Healthcare & Science
-                  </SelectItem>
-                  <SelectItem value="security">
-                    Legal & Security
-                  </SelectItem>
+                  <SelectItem value="science">Healthcare & Science</SelectItem>
+                  <SelectItem value="security">Legal & Security</SelectItem>
                   <SelectItem value="transportation">
                     Logistics & Transportation
                   </SelectItem>
@@ -88,15 +87,9 @@ const StepOneOfJobPostings = (props: stages) => {
                   <SelectItem value="parttimer">
                     Part-time & Freelance
                   </SelectItem>
-                  <SelectItem value="sales">
-                    Sales & Retail
-                  </SelectItem>
-                  <SelectItem value="trading">
-                    Trades & Services 
-                  </SelectItem>
-                  <SelectItem value="writing">
-                    Writing & Translation
-                  </SelectItem>
+                  <SelectItem value="sales">Sales & Retail</SelectItem>
+                  <SelectItem value="trading">Trades & Services</SelectItem>
+                  <SelectItem value="writing">Writing & Translation</SelectItem>
                 </SelectGroup>
               </SelectContent>
             </Select>
@@ -117,7 +110,7 @@ const StepOneOfJobPostings = (props: stages) => {
             </Select>
             <FieldDescription>
               Click{" "}
-              <a href="" className="text-[#2A88E0]">
+              <a href="/addcompanies" className="text-[#2A88E0]">
                 here
               </a>{" "}
               to add a company
@@ -196,6 +189,75 @@ const StepTwoOfJobPostings = (props: stages) => {
 };
 
 const StepThreeOfJobPostings = (props: stages) => {
+  let [cities, setCities] = React.useState({
+    Singapore: ["Singapore"],
+
+    Japan: ["Tokyo", "Osaka", "Kyoto", "Nagoya", "Sapporo", "Fukuoka"],
+
+    "South Korea": ["Seoul", "Busan", "Incheon", "Daegu"],
+
+    China: [
+      "Beijing",
+      "Shanghai",
+      "Guangzhou",
+      "Shenzhen",
+      "Chengdu",
+      "Hangzhou",
+    ],
+
+    India: ["Mumbai", "Delhi", "Bangalore", "Hyderabad", "Chennai", "Kolkata"],
+
+    Thailand: ["Bangkok", "Chiang Mai", "Phuket"],
+
+    Malaysia: ["Kuala Lumpur", "George Town", "Johor Bahru"],
+
+    Indonesia: ["Jakarta", "Surabaya", "Bandung", "Denpasar"],
+
+    Vietnam: ["Ho Chi Minh City", "Hanoi", "Da Nang"],
+
+    "United Kingdom": [
+      "London",
+      "Manchester",
+      "Birmingham",
+      "Edinburgh",
+      "Glasgow",
+    ],
+
+    France: ["Paris", "Lyon", "Marseille", "Nice"],
+
+    Germany: ["Berlin", "Munich", "Hamburg", "Frankfurt", "Cologne"],
+
+    Italy: ["Rome", "Milan", "Naples", "Florence", "Venice"],
+
+    Spain: ["Madrid", "Barcelona", "Valencia", "Seville"],
+
+    Netherlands: ["Amsterdam", "Rotterdam", "The Hague"],
+
+    "United States": [
+      "New York",
+      "Los Angeles",
+      "Chicago",
+      "Houston",
+      "San Francisco",
+      "Seattle",
+      "Miami",
+      "Boston",
+    ],
+
+    Canada: ["Toronto", "Vancouver", "Montreal", "Calgary"],
+
+    Australia: ["Sydney", "Melbourne", "Brisbane", "Perth", "Adelaide"],
+
+    "New Zealand": ["Auckland", "Wellington", "Christchurch"],
+
+    "United Arab Emirates": ["Dubai", "Abu Dhabi"],
+
+    "South Africa": ["Cape Town", "Johannesburg", "Durban"],
+
+    Brazil: ["São Paulo", "Rio de Janeiro", "Brasília"],
+
+    Mexico: ["Mexico City", "Guadalajara", "Monterrey"],
+  });
   return (
     <>
       <div>
@@ -232,22 +294,31 @@ const StepThreeOfJobPostings = (props: stages) => {
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectItem value={"central"}>Central</SelectItem>
-                  <SelectItem value={"west"}>West</SelectItem>
-                  <SelectItem value={"east"}>East</SelectItem>
-                  <SelectItem value={"north"}>North</SelectItem>
+                  {Object.entries(cities).map(([country, citiesLoop]) => {
+                    return (
+                      <>
+                        <React.Fragment key={country}>
+                          <SelectLabel>{country}</SelectLabel>
+                          {citiesLoop.map((city) => (
+                            <SelectItem
+                              key={city}
+                              value={city.toLowerCase().replace(/\s+/g, "-")}
+                            >
+                              {city}
+                            </SelectItem>
+                          ))}
+                        </React.Fragment>
+                      </>
+                    );
+                  })}
                 </SelectGroup>
               </SelectContent>
             </Select>
           </Field>
         </FieldGroup>
-              <div
-        className="flex"
-        onClick={(e) => {
-        }}
-      >
-        <Button className="mt-10">Save</Button>
-      </div>
+        <div className="flex" onClick={(e) => {}}>
+          <Button className="mt-10">Save</Button>
+        </div>
       </div>
     </>
   );

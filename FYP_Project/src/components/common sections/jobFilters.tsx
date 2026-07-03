@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Search, MapPin, ChevronDown, ChevronUp } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -10,7 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
 import {
   InputGroup,
   InputGroupAddon,
@@ -23,7 +22,35 @@ export default function JobFilters({ currentUrl }: Props) {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [salaryType, setSalaryType] = useState("negotiable");
 
+  const [title, setTitle] = useState("");
+  const [city, setCity] = useState("");
+  const [search, setSearch] = useState("");
+  const [location, setLocation] = useState("");
+  const [jobType, setJobType] = useState("");
+  const [category, setCategory] = useState("");
+  const [careerLevel, setCareerLevel] = useState("");
+  const [company, setCompany] = useState("");
+  const [minSalary, setMinSalary] = useState("");
+  const [maxSalary, setMaxSalary] = useState("");
+  const [salaryPeriod, setSalaryPeriod] = useState("");
+
   const navigate = useNavigate();
+  const handleSearch = () => {
+    const params = new URLSearchParams();
+
+    if (search) params.append("search", search);
+    if (city) params.append("city", city);
+    if (location) params.append("location", location);
+    if (jobType) params.append("type", jobType);
+    if (category) params.append("category", category);
+    if (careerLevel) params.append("career_level", careerLevel);
+    if (company) params.append("company", company);
+    if (minSalary) params.append("min_salary", minSalary);
+    if (maxSalary) params.append("max_salary", maxSalary);
+    if (salaryPeriod) params.append("salary_period", salaryPeriod);
+    navigate(`/browsejobs?${params.toString()}`);
+  };
+
   return (
     <div className="w-full rounded-2xl border bg-background p-6 shadow-sm space-y-5">
       {/* ROW 1 */}
@@ -34,7 +61,11 @@ export default function JobFilters({ currentUrl }: Props) {
             <Search size={18} />
           </InputGroupAddon>
 
-          <InputGroupInput placeholder="Search job..." />
+          <InputGroupInput
+            placeholder="Search job..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </InputGroup>
 
         {/* City */}
@@ -43,10 +74,14 @@ export default function JobFilters({ currentUrl }: Props) {
             <MapPin size={18} />
           </InputGroupAddon>
 
-          <InputGroupInput placeholder="Enter city..." />
+          <InputGroupInput
+            placeholder="Enter city..."
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+          />
         </InputGroup>
 
-        <Button className="h-11 px-8" onClick={() => navigate("/browsejobs")}>
+        <Button className="h-11 px-8" onClick={handleSearch}>
           Find Jobs
         </Button>
       </div>
@@ -68,38 +103,39 @@ export default function JobFilters({ currentUrl }: Props) {
             <Input
               placeholder="Enter company"
               className="w-full lg:w-[280px]"
+              value={company}
+              onChange={(e) => setCompany(e.target.value)}
             />
 
-            <Select>
+            <Select onValueChange={setJobType}>
               <SelectTrigger className="w-full lg:w-[220px]">
                 <SelectValue placeholder="Duration" />
               </SelectTrigger>
-
               <SelectContent>
-                <SelectItem value="full-time">Full-time</SelectItem>
-                <SelectItem value="part-time">Part-time</SelectItem>
-                <SelectItem value="contract">Contract</SelectItem>
-                <SelectItem value="internship">Internship</SelectItem>
+                <SelectItem value="Full-Time">Full-time</SelectItem>
+                <SelectItem value="Part-Time">Part-time</SelectItem>
+                <SelectItem value="Contract">Contract</SelectItem>
+                <SelectItem value="Internship">Internship</SelectItem>
               </SelectContent>
             </Select>
 
-            <Select>
+            <Select onValueChange={setLocation}>
               <SelectTrigger className="w-full lg:w-[220px]">
                 <SelectValue placeholder="Region" />
               </SelectTrigger>
 
               <SelectContent>
-                <SelectItem value="north">North</SelectItem>
-                <SelectItem value="south">South</SelectItem>
-                <SelectItem value="east">East</SelectItem>
-                <SelectItem value="west">West</SelectItem>
-                <SelectItem value="central">Central</SelectItem>
+                <SelectItem value="North">North</SelectItem>
+                <SelectItem value="South">South</SelectItem>
+                <SelectItem value="East">East</SelectItem>
+                <SelectItem value="West">West</SelectItem>
+                <SelectItem value="Central">Central</SelectItem>
               </SelectContent>
             </Select>
           </div>
           {/* ROW 2 */}
           <div className="flex flex-wrap gap-4">
-            <Select>
+            <Select onValueChange={setCategory}>
               <SelectTrigger>
                 <SelectValue placeholder="Job Categories" />
               </SelectTrigger>
@@ -133,8 +169,6 @@ export default function JobFilters({ currentUrl }: Props) {
                   Marketing & Advertising
                 </SelectItem>
 
-                <SelectItem value="freelance">Part-time & Freelance</SelectItem>
-
                 <SelectItem value="sales">Sales & Retail</SelectItem>
 
                 <SelectItem value="trades">Trades & Services</SelectItem>
@@ -143,7 +177,7 @@ export default function JobFilters({ currentUrl }: Props) {
               </SelectContent>
             </Select>
 
-            <Select>
+            <Select onValueChange={setCareerLevel}>
               <SelectTrigger>
                 <SelectValue placeholder="Career Level" />
               </SelectTrigger>
@@ -181,45 +215,53 @@ export default function JobFilters({ currentUrl }: Props) {
             </Select>
           </div>
 
-          {/* FIXED */}
           {salaryType === "fixed" && (
             <div className="grid gap-4 lg:grid-cols-2">
-              <Input type="number" placeholder="Amount" />
+              <Input
+                type="number"
+                placeholder="Amount"
+                value={minSalary}
+                onChange={(e) => setMinSalary(e.target.value)}
+              />
 
-              <Select>
+              <Select onValueChange={setSalaryPeriod}>
                 <SelectTrigger>
                   <SelectValue placeholder="Salary Type" />
                 </SelectTrigger>
 
                 <SelectContent>
-                  <SelectItem value="month">Per month</SelectItem>
-
-                  <SelectItem value="year">Per year</SelectItem>
-
-                  <SelectItem value="hour">Per hour</SelectItem>
+                  <SelectItem value="Month">Per month</SelectItem>
+                  <SelectItem value="Year">Per year</SelectItem>
+                  <SelectItem value="Hour">Per hour</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           )}
 
-          {/* RANGE */}
           {salaryType === "range" && (
             <div className="grid gap-4 lg:grid-cols-3">
-              <Input type="number" placeholder="Min" />
+              <Input
+                type="number"
+                placeholder="Min"
+                value={minSalary}
+                onChange={(e) => setMinSalary(e.target.value)}
+              />
 
-              <Input type="number" placeholder="Max" />
+              <Input
+                type="number"
+                placeholder="Max"
+                value={maxSalary}
+                onChange={(e) => setMaxSalary(e.target.value)}
+              />
 
-              <Select>
+              <Select onValueChange={setSalaryPeriod}>
                 <SelectTrigger>
                   <SelectValue placeholder="Salary Type" />
                 </SelectTrigger>
-
                 <SelectContent>
-                  <SelectItem value="month">Per month</SelectItem>
-
-                  <SelectItem value="year">Per year</SelectItem>
-
-                  <SelectItem value="hour">Per hour</SelectItem>
+                  <SelectItem value="Month">Per month</SelectItem>
+                  <SelectItem value="Year">Per year</SelectItem>
+                  <SelectItem value="Hour">Per hour</SelectItem>
                 </SelectContent>
               </Select>
             </div>

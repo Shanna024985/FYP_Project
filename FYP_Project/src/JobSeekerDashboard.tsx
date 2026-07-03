@@ -1,6 +1,5 @@
 // JobSeekerDashboard.tsx
 import NavigationMenus from "./NavigationMenu";
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   MapPin,
@@ -13,7 +12,7 @@ import {
 import "./title.css";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
+import { Star } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -22,8 +21,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
+import { Badge } from "@/components/ui/badge";
 import JobCard from "@/components/common sections/JobCard";
+import JobSeekerRatingsPage from "./JobSeekerRating";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 type AppliedJob = {
   title: string;
@@ -48,18 +50,33 @@ type Props = {
 };
 
 export default function JobSeekerDashboard({ currentUrl }: Props) {
-  // ---------------------------------------
-  // Dummy Recommended Jobs
-  // ---------------------------------------
-  const recommendedJobs = Array.from({ length: 3 }).map((_, i) => ({
-    title: `Frontend Developer ${i + 1}`,
-    companyName: "Tech Company",
-    companyLogo: "https://via.placeholder.com/40",
-    salary: "$3000 / month",
-    location: "Singapore",
-    tags: ["Full-time", "Urgent"],
-    postedDate: "21 May 2026",
-  }));
+  const [recommendedJobs, setRecommendedJobs] = useState<any[]>([]);
+  const [loadingRecommended, setLoadingRecommended] = useState(true);
+  useEffect(() => {
+    const fetchRecommendedJobs = async () => {
+      try {
+        setLoadingRecommended(true);
+
+        const res = await axios.get(`${currentUrl}/jobs`);
+
+        const sorted = res.data.jobs
+          .sort(
+            (a: any, b: any) =>
+              new Date(b.created_at).getTime() -
+              new Date(a.created_at).getTime(),
+          )
+          .slice(0, 3);
+
+        setRecommendedJobs(sorted);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoadingRecommended(false);
+      }
+    };
+
+    fetchRecommendedJobs();
+  }, [currentUrl]);
 
   // ---------------------------------------
   // Dummy Applied Jobs
@@ -108,7 +125,7 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
     savedPage * savedPerPage,
   );
   const navigate = useNavigate();
-  
+
   return (
     <div className="flex flex-col gap-6">
       <NavigationMenus />
@@ -140,11 +157,23 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
           <Card className="flex flex-col justify-center p-6">
             <CardContent className="space-y-4 p-0">
               <div>
+                {/* Name */}
                 <h2 className="text-2xl font-semibold title-black">John Doe</h2>
 
+                {/* Rating */}
+                <Button
+                  variant="ghost"
+                  className="cursor-pointer transition-all hover:bg-primary/10 hover:text-primary hover:scale-105"
+                  onClick={() => navigate("/jobSeeker/ratings")}
+                >
+                  <Badge variant="secondary" className="cursor-pointer">
+                    ⭐ 4.8 (25 Reviews)
+                    <Eye className="h-4 w-4" />
+                  </Badge>
+                </Button>
+                {/* Email */}
                 <p className="text-muted-foreground">johndoe@gmail.com</p>
               </div>
-
               <Button className="w-fit" onClick={() => navigate("/profile")}>
                 <Pencil />
                 Edit Profile
@@ -163,7 +192,10 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
                   <h2 className="mt-2 text-4xl font-bold title-black">12</h2>
                 </div>
 
-                <Button variant="outline" onClick={() => navigate("/jobSeeker/applications")}>
+                <Button
+                  variant="outline"
+                  onClick={() => navigate("/jobSeeker/applications")}
+                >
                   View Details
                 </Button>
               </CardContent>
@@ -178,7 +210,12 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
                   <h2 className="mt-2 text-4xl font-bold title-black">14</h2>
                 </div>
 
-                <Button variant="outline">View Details</Button>
+                <Button
+                  variant="outline"
+                  onClick={() => navigate("/jobSeeker/savedJobs")}
+                >
+                  View Details
+                </Button>
               </CardContent>
             </Card>
 
@@ -191,7 +228,12 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
                   <h2 className="mt-2 text-4xl font-bold title-black">5</h2>
                 </div>
 
-                <Button variant="outline">View Details</Button>
+                <Button
+                  variant="outline"
+                  onClick={() => navigate("/jobSeeker/myReviews")}
+                >
+                  View Details
+                </Button>
               </CardContent>
             </Card>
           </div>
@@ -208,11 +250,31 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
           </div>
 
           {/* 3 CARDS IN 1 ROW */}
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            {recommendedJobs.map((job, i) => (
-              <JobCard key={i} {...job} />
-            ))}
-          </div>
+          {loadingRecommended ? (
+            <p>Loading...</p>
+          ) : (
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+              {recommendedJobs.map((job) => (
+                <JobCard
+                  key={job.id}
+                  id={job.id}
+                  title={job.title}
+                  companyName={job.company_name}
+                  companyLogo={`data:image/png;base64,AA==`}
+                  salaryRangeFrom={job.salary_range_from}
+                  salaryRangeTo={job.salary_range_to}
+                  salaryType={job.salary_type}
+                  salaryPeriod={job.salary_period}
+                  location={`${job.location}`}
+                  type={job.type}
+                  category={job.category}
+                  postedDate={new Date(job.created_at).toLocaleDateString(
+                    "en-SG",
+                  )}
+                />
+              ))}
+            </div>
+          )}
         </section>
 
         {/* ========================================= */}
@@ -222,7 +284,12 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-semibold title-black">Jobs Applied</h2>
 
-            <Button variant="outline" onClick={() => navigate("/jobSeeker/applications")}>View All</Button>
+            <Button
+              variant="outline"
+              onClick={() => navigate("/jobSeeker/applications")}
+            >
+              View All
+            </Button>
           </div>
 
           <Card>
@@ -309,7 +376,12 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-semibold title-black">Saved Jobs</h2>
 
-            <Button variant="outline">View All</Button>
+            <Button
+              variant="outline"
+              onClick={() => navigate("/jobSeeker/savedJobs")}
+            >
+              View All
+            </Button>
           </div>
 
           {/* SAVED JOB GRID */}
@@ -366,8 +438,15 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
                     </Button>
 
                     <div className="flex gap-2">
-                      <Button>Apply Now</Button>
-                      <Button variant="outline">View</Button>
+                      <Button onClick={() => navigate("/applyjob")}>
+                        Apply Now
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => navigate(`/jobDetails`)}
+                      >
+                        View
+                      </Button>
                     </div>
                   </div>
                 </CardContent>
