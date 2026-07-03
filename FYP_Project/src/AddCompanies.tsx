@@ -261,21 +261,45 @@ const AddCompanies = (prop: Props) => {
   let [companyTypeChosen, setCompanyTypeChosen] = useState("");
   let [imageOfProfile, setImageOfProfile] = useState("");
   let [imageOfBanner, setBannerImage] = useState("");
-
+  let [uploadedImageOfProfile, setUploadedImageOfProfile] = useState<File>();
+  let [uploadedImageOfBanner, setUploadedImageOfBanner] = useState<File>();
   return (
     <div>
       <p className="text-left text-3xl font-semibold">Add companies</p>
       <hr className="mt-4" />
       <div className="flex gap-4 mt-5">
         <div className="flex-1 justify-start">
-          <form onSubmit={(e) => {
-                  e.preventDefault();
-                  const formDataForProfile = new FormData();
-                  formDataForProfile.append("file", imageOfProfile);
-                  let body = JSON.stringify({ logo: formDataForProfile });
-                  fetch(prop.currentUrl + "/upload/company-logo", {
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const formDataForProfile = new FormData();
+              if (uploadedImageOfProfile) {
+                formDataForProfile.append("file", uploadedImageOfProfile);
+                let body = JSON.stringify({ logo: formDataForProfile });
+              fetch(prop.currentUrl + "/upload/company-logo", {
+                method: "POST",
+                body: body,
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: "Bearer " + localStorage.getItem("token"),
+                },
+              })
+                .then((value) => {
+                  if (value.status == 200) {
+                    console.log("Uploaded profile pic");
+                    return value.json();
+                  }
+                })
+                .then((valueOfProfile) => {
+                  let newFormDataForBanner = new FormData();
+                  if (uploadedImageOfBanner) {
+                    newFormDataForBanner.append("file", uploadedImageOfBanner);
+                    let newBody = JSON.stringify({
+                    logo: newFormDataForBanner,
+                  });
+                  fetch(prop.currentUrl + "/upload/company-banner", {
                     method: "POST",
-                    body: body,
+                    body: newBody,
                     headers: {
                       "Content-Type": "application/json",
                       Authorization: "Bearer " + localStorage.getItem("token"),
@@ -283,60 +307,43 @@ const AddCompanies = (prop: Props) => {
                   })
                     .then((value) => {
                       if (value.status == 200) {
-                        console.log("Uploaded profile pic");
                         return value.json();
                       }
                     })
-                    .then((valueOfProfile) => {
-                      let newFormDataForBanner = new FormData();
-                      formDataForProfile.append("file", imageOfBanner);
-
-                      let newBody = JSON.stringify({
-                        logo: newFormDataForBanner,
+                    .then((valueOfBanner) => {
+                      let bodyForAddingCompany = JSON.stringify({
+                        name: name,
+                        url: linkOfCompany,
+                        contact_email: emailOfCompany,
+                        logo_file_name: valueOfProfile.logo_file_name,
+                        logo_file_data: valueOfProfile.logo_file_data,
+                        banner_file_name: valueOfBanner.banner_file_name,
+                        banner_file_data: valueOfBanner.banner_file_data,
+                        description: overviewPage,
+                        city: location.split(",")[0],
                       });
-                      fetch(prop.currentUrl + "/upload/company-banner", {
+
+                      fetch(prop.currentUrl + "/api/company", {
                         method: "POST",
-                        body: newBody,
+                        body: bodyForAddingCompany,
                         headers: {
                           "Content-Type": "application/json",
                           Authorization:
                             "Bearer " + localStorage.getItem("token"),
                         },
-                      })
-                        .then((value) => {
-                          if (value.status == 200) {
-                            return value.json();
-                          }
-                        })
-                        .then((valueOfBanner) => {
-                          let bodyForAddingCompany = JSON.stringify({
-                            name: name,
-                            url: linkOfCompany,
-                            contact_email: emailOfCompany,
-                            logo_file_name: valueOfProfile.logo_file_name,
-                            logo_file_data: valueOfProfile.logo_file_data,
-                            banner_file_name: valueOfBanner.banner_file_name,
-                            banner_file_data: valueOfBanner.banner_file_data,
-                            description: overviewPage,
-                            city: location.split(",")[0],
-                          });
-
-                          fetch(prop.currentUrl + "/api/company", {
-                            method: "POST",
-                            body: bodyForAddingCompany,
-                            headers: {
-                              "Content-Type": "application/json",
-                              Authorization:
-                                "Bearer " + localStorage.getItem("token"),
-                            },
-                          }).then((valuesReturned) => {
-                            if (valuesReturned.status == 201){
-                              alert("Successfully added the company")
-                            }
-                          })
-                        });
+                      }).then((valuesReturned) => {
+                        if (valuesReturned.status == 201) {
+                          alert("Successfully added the company");
+                        }
+                      });
                     });
-                }}>
+                  }
+                  
+                });
+              }
+              
+            }}
+          >
             <p className="text-xl text-left">Company details</p>
             <FieldGroup className="mt-8">
               <Field>
@@ -484,6 +491,8 @@ const AddCompanies = (prop: Props) => {
                     if (files) {
                       if (files.length > 0) {
                         const file = files[0];
+                        setUploadedImageOfBanner(file);
+
                         let url = URL.createObjectURL(file);
                         setBannerImage(url);
                       }
@@ -508,6 +517,7 @@ const AddCompanies = (prop: Props) => {
                         console.log("File Type:", file.type); // MIME type, e.g., "application/pdf"
                         let url = URL.createObjectURL(file);
                         setImageOfProfile(url);
+                        setUploadedImageOfProfile(file);
                       }
                     }
                   }}
@@ -515,10 +525,7 @@ const AddCompanies = (prop: Props) => {
               </Field>
             </FieldGroup>
             <div className="justify-self-start">
-              <Button
-                className="mt-5"
-                type="submit"
-              >
+              <Button className="mt-5" type="submit">
                 Create
               </Button>
             </div>
