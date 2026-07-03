@@ -109,7 +109,10 @@ export default function SavedJobCard({
             <Button variant="default" onClick={() => navigate(`/applyjob`)}>
               Apply Job
             </Button>
-            <Button variant="outline" onClick={() => navigate(`/jobDetails`)}>
+            <Button
+              variant="outline"
+              onClick={() => navigate(`/jobDetails?id=${job.jobId}`)}
+            >
               View
             </Button>
           </div>
