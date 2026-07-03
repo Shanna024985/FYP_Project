@@ -261,190 +261,268 @@ const AddCompanies = (prop: Props) => {
   let [companyTypeChosen, setCompanyTypeChosen] = useState("");
   let [imageOfProfile, setImageOfProfile] = useState("");
   let [imageOfBanner, setBannerImage] = useState("");
+
   return (
     <div>
       <p className="text-left text-3xl font-semibold">Add companies</p>
       <hr className="mt-4" />
       <div className="flex gap-4 mt-5">
         <div className="flex-1 justify-start">
-          <p className="text-xl text-left">Company details</p>
-          <FieldGroup className="mt-8">
-            <Field>
-              <FieldLabel htmlFor="titleName">Company Name</FieldLabel>
-              <Input
-                id="titleName"
-                placeholder="Backend Engineer"
-                onInput={(e) => {
-                  setName(e.currentTarget.value);
-                }}
-              />
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="description">Description</FieldLabel>
-              <Textarea
-                id="description"
-                placeholder="We need..."
-                onInput={(e) => {
-                  setOverviewPage(e.currentTarget.value);
-                }}
-              />
-            </Field>
-            <Field>
-              <FieldLabel>Company Type</FieldLabel>
-              <Select
-                required
-                onValueChange={(e) => {
-                  companyType.forEach((value) => {
-                    if (value.value == e) {
-                      setCompanyTypeChosen(value.label);
-                    }
-                  });
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {companyType.map((type) => {
-                      return (
-                        <>
-                          <SelectItem value={type.value} key={type.value}>
-                            {type.label}
-                          </SelectItem>
-                        </>
-                      );
-                    })}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="email">Email</FieldLabel>
-              <Input
-                type="email"
-                placeholder="example@gmail.com"
-                id="email"
-                onInput={(e) => {
-                  setEmailOfCompany(e.currentTarget.value);
-                }}
-              />
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="locationDropdown">Location</FieldLabel>
-              <Select
-                required
-                onValueChange={(e) => {
-                  console.log(e);
-                  Object.entries(cities).forEach(([countries, citiesLoop]) => {
-                    citiesLoop.forEach((value) => {
-                      let citiesInValueFormat = value
-                        .toLowerCase()
-                        .replace(/\s+/g, "-");
-                      if (citiesInValueFormat === e) {
-                        setLocation(value + ", " + countries);
+          <form onSubmit={(e) => {
+                  e.preventDefault();
+                  const formDataForProfile = new FormData();
+                  formDataForProfile.append("file", imageOfProfile);
+                  let body = JSON.stringify({ logo: formDataForProfile });
+                  fetch(prop.currentUrl + "/upload/company-logo", {
+                    method: "POST",
+                    body: body,
+                    headers: {
+                      "Content-Type": "application/json",
+                      Authorization: "Bearer " + localStorage.getItem("token"),
+                    },
+                  })
+                    .then((value) => {
+                      if (value.status == 200) {
+                        console.log("Uploaded profile pic");
+                        return value.json();
+                      }
+                    })
+                    .then((valueOfProfile) => {
+                      let newFormDataForBanner = new FormData();
+                      formDataForProfile.append("file", imageOfBanner);
+
+                      let newBody = JSON.stringify({
+                        logo: newFormDataForBanner,
+                      });
+                      fetch(prop.currentUrl + "/upload/company-banner", {
+                        method: "POST",
+                        body: newBody,
+                        headers: {
+                          "Content-Type": "application/json",
+                          Authorization:
+                            "Bearer " + localStorage.getItem("token"),
+                        },
+                      })
+                        .then((value) => {
+                          if (value.status == 200) {
+                            return value.json();
+                          }
+                        })
+                        .then((valueOfBanner) => {
+                          let bodyForAddingCompany = JSON.stringify({
+                            name: name,
+                            url: linkOfCompany,
+                            contact_email: emailOfCompany,
+                            logo_file_name: valueOfProfile.logo_file_name,
+                            logo_file_data: valueOfProfile.logo_file_data,
+                            banner_file_name: valueOfBanner.banner_file_name,
+                            banner_file_data: valueOfBanner.banner_file_data,
+                            description: overviewPage,
+                            city: location.split(",")[0],
+                          });
+
+                          fetch(prop.currentUrl + "/api/company", {
+                            method: "POST",
+                            body: bodyForAddingCompany,
+                            headers: {
+                              "Content-Type": "application/json",
+                              Authorization:
+                                "Bearer " + localStorage.getItem("token"),
+                            },
+                          }).then((valuesReturned) => {
+                            if (valuesReturned.status == 201){
+                              alert("Successfully added the company")
+                            }
+                          })
+                        });
+                    });
+                }}>
+            <p className="text-xl text-left">Company details</p>
+            <FieldGroup className="mt-8">
+              <Field>
+                <FieldLabel htmlFor="titleName">Company Name</FieldLabel>
+                <Input
+                  id="titleName"
+                  required
+                  placeholder="Backend Engineer"
+                  onInput={(e) => {
+                    setName(e.currentTarget.value);
+                  }}
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="description">Description</FieldLabel>
+                <Textarea
+                  id="description"
+                  placeholder="We need..."
+                  required
+                  onInput={(e) => {
+                    setOverviewPage(e.currentTarget.value);
+                  }}
+                />
+              </Field>
+              <Field>
+                <FieldLabel>Company Type</FieldLabel>
+                <Select
+                  required
+                  onValueChange={(e) => {
+                    companyType.forEach((value) => {
+                      if (value.value == e) {
+                        setCompanyTypeChosen(value.label);
                       }
                     });
-                  });
-                }}
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {companyType.map((type) => {
+                        return (
+                          <>
+                            <SelectItem value={type.value} key={type.value}>
+                              {type.label}
+                            </SelectItem>
+                          </>
+                        );
+                      })}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="email">Email</FieldLabel>
+                <Input
+                  type="email"
+                  placeholder="example@gmail.com"
+                  id="email"
+                  required
+                  onInput={(e) => {
+                    setEmailOfCompany(e.currentTarget.value);
+                  }}
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="locationDropdown">Location</FieldLabel>
+                <Select
+                  required
+                  onValueChange={(e) => {
+                    console.log(e);
+                    Object.entries(cities).forEach(
+                      ([countries, citiesLoop]) => {
+                        citiesLoop.forEach((value) => {
+                          if (value === e) {
+                            setLocation(value + ", " + countries);
+                          }
+                        });
+                      },
+                    );
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {Object.entries(cities).map(([country, citiesLoop]) => {
+                        return (
+                          <>
+                            <React.Fragment key={country}>
+                              <SelectLabel>{country}</SelectLabel>
+                              {citiesLoop.map((city) => (
+                                <SelectItem key={city} value={city}>
+                                  {city}
+                                </SelectItem>
+                              ))}
+                            </React.Fragment>
+                          </>
+                        );
+                      })}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="addressOfCompany">Address</FieldLabel>
+                <Input
+                  placeholder="12 john st, 123456"
+                  id="addressOfCompany"
+                  onInput={(e) => {
+                    let value = e.currentTarget.value;
+                    let newvalue = "";
+                    for (const char of value) {
+                      if (char === " ") {
+                        newvalue += "+";
+                      } else {
+                        newvalue += char;
+                      }
+                      setLocationCoordinates(newvalue);
+                    }
+                  }}
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="noofjobs">Website</FieldLabel>
+                <Input
+                  required
+                  id="noofjobs"
+                  placeholder="example.com"
+                  onInput={(e) => {
+                    setLinkOfCompany(e.currentTarget.value);
+                  }}
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="imageForBanner">Banner Image</FieldLabel>
+                <Input
+                  required
+                  id="imageForBanner"
+                  type="file"
+                  onInput={(event) => {
+                    let files = event.currentTarget.files;
+                    if (files) {
+                      if (files.length > 0) {
+                        const file = files[0];
+                        let url = URL.createObjectURL(file);
+                        setBannerImage(url);
+                      }
+                    }
+                  }}
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="imageForProfile">Profile Image</FieldLabel>
+                <Input
+                  id="imageForProfile"
+                  type="file"
+                  required
+                  onInput={(event) => {
+                    let files = event.currentTarget.files;
+                    if (files) {
+                      if (files.length > 0) {
+                        const file = files[0]; // Get the first file
+
+                        console.log("File Name:", file.name); // e.g., "document.pdf"
+                        console.log("File Size:", file.size); // Size in bytes
+                        console.log("File Type:", file.type); // MIME type, e.g., "application/pdf"
+                        let url = URL.createObjectURL(file);
+                        setImageOfProfile(url);
+                      }
+                    }
+                  }}
+                />
+              </Field>
+            </FieldGroup>
+            <div className="justify-self-start">
+              <Button
+                className="mt-5"
+                type="submit"
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {Object.entries(cities).map(([country, citiesLoop]) => {
-                      return (
-                        <>
-                          <React.Fragment key={country}>
-                            <SelectLabel>{country}</SelectLabel>
-                            {citiesLoop.map((city) => (
-                              <SelectItem
-                                key={city}
-                                value={city.toLowerCase().replace(/\s+/g, "-")}
-                              >
-                                {city}
-                              </SelectItem>
-                            ))}
-                          </React.Fragment>
-                        </>
-                      );
-                    })}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="addressOfCompany">Address</FieldLabel>
-              <Input
-                placeholder="12 john st, 123456"
-                id="addressOfCompany"
-                onInput={(e) => {
-                  let value = e.currentTarget.value;
-                  let newvalue = "";
-                  for (const char of value) {
-                    if (char === " ") {
-                      newvalue += "+";
-                    } else {
-                      newvalue += char;
-                    }
-                    setLocationCoordinates(newvalue);
-                  }
-                }}
-              />
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="noofjobs">Website</FieldLabel>
-              <Input
-                id="noofjobs"
-                placeholder="example.com"
-                onInput={(e) => {
-                  setLinkOfCompany(e.currentTarget.value);
-                }}
-              />
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="imageForBanner">Banner Image</FieldLabel>
-              <Input
-                id="imageForBanner"
-                type="file"
-                onInput={(event) => {
-                  let files = event.currentTarget.files;
-                  if (files) {
-                    if (files.length > 0) {
-                      const file = files[0]; // Get the first file
-
-                      console.log("File Name:", file.name); // e.g., "document.pdf"
-                      console.log("File Size:", file.size); // Size in bytes
-                      console.log("File Type:", file.type); // MIME type, e.g., "application/pdf"
-                      let url = URL.createObjectURL(file)
-                      setBannerImage(url)
-                    }
-                  }
-                }}
-              />
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="imageForProfile">Profile Image</FieldLabel>
-              <Input id="imageForProfile" type="file"                 onInput={(event) => {
-                  let files = event.currentTarget.files;
-                  if (files) {
-                    if (files.length > 0) {
-                      const file = files[0]; // Get the first file
-
-                      console.log("File Name:", file.name); // e.g., "document.pdf"
-                      console.log("File Size:", file.size); // Size in bytes
-                      console.log("File Type:", file.type); // MIME type, e.g., "application/pdf"
-                      let url = URL.createObjectURL(file)
-                      setImageOfProfile(url)
-                    }
-                  }
-                }}/>
-            </Field>
-          </FieldGroup>
-          <div className="justify-self-start">
-            <Button className="mt-5 ">Create</Button>
-          </div>
+                Create
+              </Button>
+            </div>
+          </form>
         </div>
         <div className="flex-1">
           <p className="text-xl text-left">Preview</p>

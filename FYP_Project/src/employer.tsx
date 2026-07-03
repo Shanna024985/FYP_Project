@@ -210,8 +210,7 @@ let EmployerPage = (props: Props) => {
                               companyId: localStorage.getItem("companyId"),
                             });
                             if (
-                              value.status == "Active" &&
-                              value.status != valueOfInput
+                              valueOfInput == "Active"
                             ) {
                               fetch(
                                 props.currentUrl +
@@ -232,8 +231,7 @@ let EmployerPage = (props: Props) => {
                                   alert("Job status have been saved");
                                 }
                               });
-                            } else if ( value.status == "Closed" &&
-                              value.status != valueOfInput){
+                            } else if ( valueOfInput == "Closed"){
                               fetch(
                                 props.currentUrl +
                                   "/jobs/" +

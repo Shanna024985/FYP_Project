@@ -171,22 +171,30 @@ export const CompanyPageRenderer = (prop: Props) => {
     let queryParameters = address.searchParams;
     let id = queryParameters.get("id");
     fetch(prop.currentUrl + "/company/" + id + "/page")
-    .then((value)=>{
-      return value.json()
-    }).then((valueOfResult)=>{
-      let company = valueOfResult.company
-      console.log(company)
-      setAverageRating(company.average_rating)
-      setName(company.name)
-      setOverviewPage(company.description)
-      setEmailOfCompany(company.contact_email)
-      setJobPostings(company.jobs)
-      setTotalReviews(company.total_reviews)
-      setCompanyType(company.tagline)
-      setLinkOfCompany(company.url)
-      setImageOfBanner(company.banner_file_name)
-      setImageOfTea(company.logo_file_name)
-    })
+      .then((value) => {
+        return value.json();
+      })
+      .then((valueOfResult) => {
+        let company = valueOfResult.company;
+        console.log(company);
+        setAverageRating(company.average_rating);
+        setName(company.name);
+        setOverviewPage(company.description);
+        setEmailOfCompany(company.contact_email);
+        setJobPostings(company.jobs);
+        setTotalReviews(company.total_reviews);
+        setCompanyType(company.tagline);
+        setLinkOfCompany(company.url);
+        setImageOfBanner(company.banner_file_name);
+        setImageOfTea(company.logo_file_name);
+        Object.entries(cities).forEach(([countries, citiesLoop]) => {
+          citiesLoop.forEach((value) => {
+            if (value === company.city) {
+              setLocation(value + ", " + countries);
+            }
+          });
+        });
+      });
   }, []);
   return (
     <>
@@ -247,12 +255,10 @@ let ReviewsToString = (averageRating: number) => {
 };
 function formatString(str: string) {
   return str
-    .replace(/-/g, " ")          // Replace all dashes with spaces
+    .replace(/-/g, " ") // Replace all dashes with spaces
     .split(" ")
-    .filter(Boolean)             // Remove extra spaces
-    .map(word =>
-      word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-    )
+    .filter(Boolean) // Remove extra spaces
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(" ");
 }
 export const CompanyPage = (prop: PropsForCompanyPage) => {
