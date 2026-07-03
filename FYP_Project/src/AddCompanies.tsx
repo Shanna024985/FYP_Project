@@ -274,71 +274,73 @@ const AddCompanies = (prop: Props) => {
               e.preventDefault();
               const formDataForProfile = new FormData();
               if (uploadedImageOfProfile) {
-                formDataForProfile.append("file", uploadedImageOfProfile);
-              fetch(prop.currentUrl + "/upload/company-logo", {
-                method: "POST",
-                body: formDataForProfile,
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: "Bearer " + localStorage.getItem("token"),
-                },
-              })
-                .then((value) => {
-                  if (value.status == 200) {
-                    console.log("Uploaded profile pic");
-                    return value.json();
-                  }
+                formDataForProfile.append("logo", uploadedImageOfProfile);
+                fetch(prop.currentUrl + "/upload/company-logo", {
+                  method: "POST",
+                  body: formDataForProfile,
+                  headers: {
+                    Authorization: "Bearer " + localStorage.getItem("token"),
+                  },
                 })
-                .then((valueOfProfile) => {
-                  let newFormDataForBanner = new FormData();
-                  if (uploadedImageOfBanner) {
-                    newFormDataForBanner.append("file", uploadedImageOfBanner);
-                    
-                  fetch(prop.currentUrl + "/upload/company-banner", {
-                    method: "POST",
-                    body: newFormDataForBanner,
-                    headers: {
-                      "Content-Type": "application/json",
-                      Authorization: "Bearer " + localStorage.getItem("token"),
-                    },
+                  .then((value) => {
+                    if (value.status == 201) {
+                      console.log("Uploaded profile pic");
+                      return value.json();
+                    }
                   })
-                    .then((value) => {
-                      if (value.status == 200) {
-                        return value.json();
-                      }
-                    })
-                    .then((valueOfBanner) => {
-                      let bodyForAddingCompany = JSON.stringify({
-                        name: name,
-                        url: linkOfCompany,
-                        contact_email: emailOfCompany,
-                        logo_file_name: valueOfProfile.logo_file_name,
-                        logo_file_data: valueOfProfile.logo_file_data,
-                        banner_file_name: valueOfBanner.banner_file_name,
-                        banner_file_data: valueOfBanner.banner_file_data,
-                        description: overviewPage,
-                        city: location.split(",")[0],
-                      });
+                  .then((valueOfProfile) => {
+                    console.log(valueOfProfile)
+                    let newFormDataForBanner = new FormData();
+                    if (uploadedImageOfBanner) {
+                      newFormDataForBanner.append(
+                        "banner",
+                        uploadedImageOfBanner,
+                      );
 
-                      fetch(prop.currentUrl + "/api/company", {
+                      fetch(prop.currentUrl + "/upload/company-banner", {
                         method: "POST",
-                        body: bodyForAddingCompany,
+                        body: newFormDataForBanner,
                         headers: {
-                          "Content-Type": "application/json",
                           Authorization:
                             "Bearer " + localStorage.getItem("token"),
                         },
-                      }).then((valuesReturned) => {
-                        if (valuesReturned.status == 201) {
-                          alert("Successfully added the company");
-                        }
-                      });
-                    });
-                  }
-                  
-                });
+                      })
+                        .then((value) => {
+                          if (value.status == 201) {
+                            return value.json();
+                          }
+                        })
+                        .then((valueOfBanner) => {
+                          console.log(valueOfBanner);
+                          let bodyForAddingCompany = JSON.stringify({
+                            name: name,
+                            url: linkOfCompany,
+                            contact_email: emailOfCompany,
+                            logo_file_name: valueOfProfile.logo_file_name,
+                            logo_file_data: valueOfProfile.logo_file_data,
+                            banner_file_name: valueOfBanner.banner_file_name,
+                            banner_file_data: valueOfBanner.banner_file_data,
+                            description: overviewPage,
+                            city: location.split(",")[0],
+                          });
+
+                          fetch(prop.currentUrl + "/company", {
+                            method: "POST",
+                            body: bodyForAddingCompany,
+                            headers: {
+                              "Content-Type": "application/json",
+                              Authorization:
+                                "Bearer " + localStorage.getItem("token"),
+                            },
+                          }).then((valuesReturned) => {
+                            if (valuesReturned.status == 201) {
+                              alert("Successfully added the company");
+                            }
+                          });
+                        });
+                    }
+                  });
               }
-              
             }}
           >
             <p className="text-xl text-left">Company details</p>
