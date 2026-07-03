@@ -1,6 +1,5 @@
 import { useSearchParams } from "react-router-dom";
 import {
-  Bookmark,
   Eye,
   BriefcaseBusiness,
   Clock3,
@@ -8,6 +7,7 @@ import {
   Users,
   CalendarDays,
 } from "lucide-react";
+import BookmarkButton from "@/components/common sections/BookmarkButton";
 import "./title.css";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -23,7 +23,6 @@ type Props = {
 };
 export default function JobDetailsPage({ currentUrl }: Props) {
   const navigate = useNavigate();
-  const [bookmarked, setBookmarked] = useState(false);
   const token = localStorage.getItem("token");
   const [searchParams] = useSearchParams();
   const jobId = searchParams.get("id");
@@ -100,17 +99,12 @@ export default function JobDetailsPage({ currentUrl }: Props) {
           {/* MAIN CARD */}
           <div className="relative rounded-3xl border bg-background p-8 shadow-sm">
             {/* TOP RIGHT: BOOKMARK */}
-            <button
-              onClick={() => setBookmarked(!bookmarked)}
+            <BookmarkButton
+              currentUrl={currentUrl}
+              jobId={job.id}
+              size={22}
               className="absolute right-6 top-6 transition"
-            >
-              <Bookmark
-                size={22}
-                className={
-                  bookmarked ? "fill-black text-black" : "text-muted-foreground"
-                }
-              />
-            </button>
+            />
 
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
               {/* LEFT SIDE */}
