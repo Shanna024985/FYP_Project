@@ -76,7 +76,7 @@ function App() {
           />
         </Route>
       </Routes>
-      <Toaster position="bottom-right" />
+      <Toaster position="top-center" />
     </>
   );
 }
