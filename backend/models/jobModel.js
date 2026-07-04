@@ -785,7 +785,7 @@ module.exports.unsaveJob = function unsaveJob(userId, jobId) {
 // READ - Get all saved jobs for a user
 module.exports.getSavedJobsByUser = function getSavedJobsByUser(userId) {
     let sql = `SELECT sj.*, j.title, j.description, j.location, 
-               j.salary_range_from, j.salary_range_to, j.type, j.duration,
+               j.salary_range_from, j.salary_range_to, j.salary_period, j.type, j.duration, j.created_at AS posted_date,
                c.name as company_name, c.id as company_id, c.logo_file_name,
                c.city as company_city
                FROM saved_job sj

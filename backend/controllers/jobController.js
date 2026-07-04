@@ -503,7 +503,7 @@ module.exports.unsaveJob = (req, res, next) => {
 
 // READ - Get all saved jobs
 module.exports.getSavedJobs = (req, res, next) => {
-    let userId = req.query.userId || 1;
+    const userId = res.locals.userId;
     
     return jobModel.getSavedJobsByUser(userId)
         .then(function(savedJobs) {
