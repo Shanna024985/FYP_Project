@@ -138,7 +138,7 @@ module.exports.uploadProfilePhoto = (req, res, next) => {
       return res.status(400).json({ error: "No file uploaded" });
     }
 
-    const userId = req.body.userId || 1;
+    const userId = res.locals.userId;
 
     const allowedTypes = [
       "image/jpeg",
@@ -232,7 +232,7 @@ module.exports.uploadProfilePhoto = (req, res, next) => {
 
 // DELETE - Delete profile photo
 module.exports.deleteProfilePhoto = (req, res, next) => {
-  let userId = req.body.userId || 1;
+  const userId = res.locals.userId;
 
   return userModel
     .userProfileExists(userId)

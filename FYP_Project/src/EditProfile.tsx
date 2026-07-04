@@ -4,6 +4,7 @@ import { Save, Upload, Plus } from "lucide-react";
 import "./title.css";
 import { Button } from "@/components/ui/button";
 import NavigationMenus from "./NavigationMenu";
+import { toast } from "sonner";
 import {
   InputGroup,
   InputGroupAddon,
@@ -35,6 +36,7 @@ export default function EditProfilePage({ currentUrl }: Props) {
   const emailRef = useRef<HTMLInputElement>(null);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const resumeInputRef = useRef<HTMLInputElement>(null);
+  const profileInputRef = useRef<HTMLInputElement>(null);
 
   const [profile, setProfile] = useState({
     first_name: "",
@@ -70,7 +72,15 @@ export default function EditProfilePage({ currentUrl }: Props) {
         linkedin_profile: res.data.profile.linkedin_profile || "",
         github_profile: res.data.profile.github_profile || "",
       });
+      const profileData = res.data.profile;
 
+      if (profileData.profile_picture_file_data) {
+        setProfileImage(
+          `data:image/jpeg;base64,${profileData.profile_picture_file_data}`,
+        );
+      } else {
+        setProfileImage(null);
+      }
       setHasProfile(true);
     } catch (err: any) {
       if (err.response?.status === 404) {
@@ -120,12 +130,39 @@ export default function EditProfilePage({ currentUrl }: Props) {
     }
   };
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = event.target.files?.[0];
 
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setProfileImage(imageUrl);
+    if (!file) return;
+
+    // Preview immediately
+    setProfileImage(URL.createObjectURL(file));
+
+    const formData = new FormData();
+    formData.append("profile", file); // <-- must match multer field name
+
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await axios.post(
+        `${currentUrl}/user/profile/photo`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        },
+      );
+
+      // Replace preview with Cloudinary URL
+      setProfileImage(res.data.profile.profile_picture_url);
+
+      toast.success("Profile photo uploaded successfully.");
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || "Failed to upload profile photo.");
     }
   };
   const isValidEmail = (email: string) => {
@@ -210,9 +247,9 @@ export default function EditProfilePage({ currentUrl }: Props) {
         github_profile: res.data.profile.github_profile || "",
       });
 
-      alert("Profile saved successfully.");
+      toast.success("Profile saved successfully.");
     } catch (err: any) {
-      alert(err.response?.data?.error || "Failed to save profile.");
+      toast.error(err.response?.data?.error || "Failed to save profile.");
     }
   };
   const fetchResumes = async () => {
@@ -253,9 +290,9 @@ export default function EditProfilePage({ currentUrl }: Props) {
 
       await fetchResumes();
 
-      alert("Resume uploaded successfully.");
+      toast.success("Resume uploaded successfully.");
     } catch (err: any) {
-      alert(err.response?.data?.error || "Upload failed.");
+      toast.error(err.response?.data?.error || "Upload failed.");
     }
   };
   const handleSetDefault = async (resumeId: number) => {
@@ -274,7 +311,7 @@ export default function EditProfilePage({ currentUrl }: Props) {
 
       await fetchResumes();
     } catch (err: any) {
-      alert(err.response?.data?.error || "Failed to set default resume.");
+      toast.error(err.response?.data?.error || "Failed to set default resume.");
     }
   };
   const handleDeleteResume = async (resumeId: number) => {
@@ -291,7 +328,7 @@ export default function EditProfilePage({ currentUrl }: Props) {
 
       await fetchResumes();
     } catch (err: any) {
-      alert(err.response?.data?.error || "Failed to delete resume.");
+      toast.error(err.response?.data?.error || "Failed to delete resume.");
     }
   };
   const handleViewResume = (resume: Resume) => {
@@ -340,6 +377,30 @@ export default function EditProfilePage({ currentUrl }: Props) {
 
     URL.revokeObjectURL(url);
   };
+  const handleDeleteProfilePhoto = async () => {
+    if (!window.confirm("Delete your profile photo?")) return;
+
+    try {
+      const token = localStorage.getItem("token");
+
+      await axios.delete(`${currentUrl}/user/profile/photo`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setProfileImage(null);
+
+      // Reset file input so the same image can be selected again
+      if (profileInputRef.current) {
+        profileInputRef.current.value = "";
+      }
+
+      toast.success("Profile photo deleted successfully.");
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || "Failed to delete profile photo.");
+    }
+  };
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -379,20 +440,34 @@ export default function EditProfilePage({ currentUrl }: Props) {
                 )}
               </div>
 
-              <label htmlFor="profile-upload">
-                <div className="absolute bottom-0 right-0 flex cursor-pointer items-center gap-1 rounded-full border bg-background px-3 py-1 text-xs shadow-sm transition hover:bg-muted">
-                  <Upload className="size-3" />
-                  Upload Photo
-                </div>
-              </label>
-
               <input
                 id="profile-upload"
+                ref={profileInputRef}
                 type="file"
                 accept="image/*"
                 className="hidden"
                 onChange={handleImageUpload}
               />
+            </div>
+
+            {/* Buttons */}
+            <div className="mt-4 flex gap-3">
+              <Button
+                variant="outline"
+                onClick={() => profileInputRef.current?.click()}
+              >
+                <Upload className="mr-2 size-4" />
+                Upload Photo
+              </Button>
+
+              {profileImage && (
+                <Button
+                  variant="destructive"
+                  onClick={handleDeleteProfilePhoto}
+                >
+                  Delete Photo
+                </Button>
+              )}
             </div>
           </div>
 
@@ -507,7 +582,7 @@ export default function EditProfilePage({ currentUrl }: Props) {
           </div>
 
           {/* Education */}
-          <div className="mt-10 border-t pt-8">
+          {/* <div className="mt-10 border-t pt-8">
             <div className="mb-6 flex items-center justify-center gap-3">
               <h2 className="text-2xl font-bold title-black">Education</h2>
 
@@ -516,11 +591,10 @@ export default function EditProfilePage({ currentUrl }: Props) {
               </Button>
             </div>
 
-            {/* Empty State */}
             <div className="rounded-2xl border border-dashed p-8 text-center text-muted-foreground">
               No education added yet
             </div>
-          </div>
+          </div> */}
 
           {/* Resume */}
           <div className="mt-10 border-t pt-8">

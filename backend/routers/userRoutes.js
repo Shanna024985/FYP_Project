@@ -16,9 +16,9 @@ router.get("/profile", jwtMiddleware.verifyToken, userController.getUserProfile)
 router.put("/profile", jwtMiddleware.verifyToken, userController.updateUserProfile);
 
 // Upload profile photo (form-data: profile)
-router.post("/profile/photo", upload.single("profile"), userController.uploadProfilePhoto);
+router.post("/profile/photo", jwtMiddleware.verifyToken, upload.single("profile"), userController.uploadProfilePhoto);
 
 // Delete profile photo
-router.delete("/profile/photo", userController.deleteProfilePhoto);
+router.delete("/profile/photo", jwtMiddleware.verifyToken, userController.deleteProfilePhoto);
 
 module.exports = router;
