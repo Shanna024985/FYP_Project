@@ -17,7 +17,7 @@ module.exports.createUserProfile = (req, res, next) => {
     github_profile,
   } = req.body;
 
-  if (!first_name || !last_name || !phone_number || !email) {
+  if (!first_name || !last_name || !email) {
     return res.status(400).json({
       error: "First name, last name, phone number, and email are required",
     });
@@ -57,7 +57,7 @@ module.exports.createUserProfile = (req, res, next) => {
 
 // READ - Get user profile
 module.exports.getUserProfile = (req, res, next) => {
-  let userId = req.query.userId || 1;
+const userId = res.locals.userId;
 
   return userModel
     .getUserProfile(userId)
@@ -84,8 +84,9 @@ module.exports.getUserProfile = (req, res, next) => {
 
 // UPDATE - Update user profile
 module.exports.updateUserProfile = (req, res, next) => {
-  let {
-    userId,
+  const userId = res.locals.userId;
+
+  const {
     first_name,
     last_name,
     phone_number,
@@ -93,8 +94,6 @@ module.exports.updateUserProfile = (req, res, next) => {
     linkedin_profile,
     github_profile,
   } = req.body;
-
-  userId = userId || 1;
 
   return userModel
     .userProfileExists(userId)

@@ -10,10 +10,10 @@ const jwtMiddleware = require("../middlewares/jwtmiddleware");
 router.post("/profile", jwtMiddleware.verifyToken, userController.createUserProfile);
 
 // Get user profile
-router.get("/profile", userController.getUserProfile);
+router.get("/profile", jwtMiddleware.verifyToken, userController.getUserProfile);
 
 // Update user profile
-router.put("/profile", userController.updateUserProfile);
+router.put("/profile", jwtMiddleware.verifyToken, userController.updateUserProfile);
 
 // Upload profile photo (form-data: profile)
 router.post("/profile/photo", upload.single("profile"), userController.uploadProfilePhoto);
