@@ -5,10 +5,10 @@ const { query } = require("../services/dbConnection");
 module.exports.createCompany = (req, res, next) => {
     let { 
         name, url, contact_email, 
-        logo_file_name, logo_file_data,
-        banner_file_name, banner_file_data,
-        profile_file_name, profile_file_data,
-        tagline, description, city 
+        logo_url,
+        banner_url, 
+        profile_url,
+        tagline, description, city, address
     } = req.body;
     
     if (!name) {
@@ -22,16 +22,16 @@ module.exports.createCompany = (req, res, next) => {
     }
     
     return companyModel.createCompany({
-        name, url, contact_email,
-        logo_file_name: logo_file_name || '',
-        logo_file_data: logo_file_data || '',
-        banner_file_name: banner_file_name || '',
-        banner_file_data: banner_file_data || '',
-        profile_file_name: profile_file_name || '',
-        profile_file_data: profile_file_data || '',
+        name, 
+        url, 
+        contact_email,
+        logo_url: logo_url || '',
+        banner_url: banner_url || '',
+        profile_url: profile_url || '',
         tagline: tagline || '',
         description: description || '',
-        city: city || ''
+        city: city || '',
+        address: address || ''
     })
     .then(function(companyDetails) {
         if (companyDetails.length == 0) {
@@ -56,7 +56,7 @@ module.exports.getAllCompanies = (req, res, next) => {
         });
 }
 
-// READ - Get all companies owned by a user (NEW)
+// READ - Get all companies owned by a user
 module.exports.getCompaniesByUser = (req, res, next) => {
     let userId = req.query.userId || 1;
     
@@ -137,13 +137,13 @@ module.exports.updateCompany = (req, res, next) => {
 // UPDATE - Update company logo only
 module.exports.updateCompanyLogo = (req, res, next) => {
     let companyId = req.params.id;
-    let { logo_file_name, logo_file_data } = req.body;
+    let { logo_url } = req.body;
     
-    if (!logo_file_name || !logo_file_data) {
-        return res.status(400).json({ error: "Logo file name and data are required" });
+    if (!logo_url) {
+        return res.status(400).json({ error: "Logo URL is required" });
     }
     
-    return companyModel.updateCompanyLogo(companyId, logo_file_name, logo_file_data)
+    return companyModel.updateCompanyLogo(companyId, logo_url)
         .then(function(result) {
             if (result.length == 0) {
                 return res.status(404).json({ error: "Company not found" });
@@ -160,13 +160,13 @@ module.exports.updateCompanyLogo = (req, res, next) => {
 // UPDATE - Update company banner only
 module.exports.updateCompanyBanner = (req, res, next) => {
     let companyId = req.params.id;
-    let { banner_file_name, banner_file_data } = req.body;
+    let { banner_url } = req.body;
     
-    if (!banner_file_name || !banner_file_data) {
-        return res.status(400).json({ error: "Banner file name and data are required" });
+    if (!banner_url) {
+        return res.status(400).json({ error: "Banner URL is required" });
     }
     
-    return companyModel.updateCompanyBanner(companyId, banner_file_name, banner_file_data)
+    return companyModel.updateCompanyBanner(companyId, banner_url)
         .then(function(result) {
             if (result.length == 0) {
                 return res.status(404).json({ error: "Company not found" });
@@ -180,22 +180,22 @@ module.exports.updateCompanyBanner = (req, res, next) => {
         });
 }
 
-// UPDATE - Update company profile image only
+// UPDATE - Update company profile only
 module.exports.updateCompanyProfile = (req, res, next) => {
     let companyId = req.params.id;
-    let { profile_file_name, profile_file_data } = req.body;
+    let { profile_url } = req.body;
     
-    if (!profile_file_name || !profile_file_data) {
-        return res.status(400).json({ error: "Profile file name and data are required" });
+    if (!profile_url) {
+        return res.status(400).json({ error: "Profile URL is required" });
     }
     
-    return companyModel.updateCompanyProfile(companyId, profile_file_name, profile_file_data)
+    return companyModel.updateCompanyProfile(companyId, profile_url)
         .then(function(result) {
             if (result.length == 0) {
                 return res.status(404).json({ error: "Company not found" });
             }
             res.json({ 
-                message: "Company profile image updated successfully", 
+                message: "Company profile updated successfully", 
                 profile: result[0] 
             });
         }).catch(function(error) {
