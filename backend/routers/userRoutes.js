@@ -2,11 +2,12 @@ const express = require("express");
 const router = express.Router();
 const userController = require("../controllers/userController");
 const upload = require("../middlewares/upload");
+const jwtMiddleware = require("../middlewares/jwtmiddleware");
 
 // ==================== USER PROFILE ROUTES ====================
 
 // Create user profile
-router.post("/profile", userController.createUserProfile);
+router.post("/profile", jwtMiddleware.verifyToken, userController.createUserProfile);
 
 // Get user profile
 router.get("/profile", userController.getUserProfile);
