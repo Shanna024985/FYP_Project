@@ -1,7 +1,7 @@
 const companyModel = require("../models/companyModel");
 const { query } = require("../services/dbConnection");
 
-// Helper: Get user ID from request - FIXED
+// Helper: Get user ID from request
 const getUserIdFromReq = (req, res) => {
     return res?.locals?.userId || req.user?.userId || req.user?.id;
 };
@@ -76,7 +76,7 @@ module.exports.getAllCompanies = (req, res, next) => {
         });
 };
 
-// READ - Get companies by user (from token)
+// READ - Get companies by user (from token) with jobs
 module.exports.getCompaniesByUser = (req, res, next) => {
     const userId = getUserIdFromReq(req, res);
     
@@ -86,10 +86,27 @@ module.exports.getCompaniesByUser = (req, res, next) => {
     
     let sql = `SELECT c.*, 
                (SELECT COUNT(*) FROM job WHERE company_id = c.id) as total_jobs,
-               (SELECT COUNT(*) FROM job WHERE company_id = c.id AND status = 'Active') as active_jobs
+               (SELECT COUNT(*) FROM job WHERE company_id = c.id AND status = 'Active') as active_jobs,
+               COALESCE(
+                   (SELECT json_agg(json_build_object(
+                        'id', j.id,
+                        'title', j.title,
+                        'description', j.description,
+                        'location', j.location,
+                        'status', j.status,
+                        'salary_range_from', j.salary_range_from,
+                        'salary_range_to', j.salary_range_to,
+                        'salary_type', j.salary_type,
+                        'salary_period', j.salary_period,
+                        'duration', j.duration,
+                        'created_at', j.created_at,
+                        'updated_at', j.updated_at
+                   )) FROM job j WHERE j.company_id = c.id AND j.status = 'Active'
+               ), '[]') as active_jobs_list
                FROM company c
                JOIN company_ownership co ON c.id = co.company_id
                WHERE co.user_id = $1
+               GROUP BY c.id
                ORDER BY c.id DESC;`;
     
     return query(sql, [userId])
@@ -103,7 +120,7 @@ module.exports.getCompaniesByUser = (req, res, next) => {
         });
 };
 
-// READ - Get companies by user ID (from URL param)
+// READ - Get companies by user ID (from URL param) with jobs
 module.exports.getCompaniesByUserId = (req, res, next) => {
     let userId = req.params.userId;
     
@@ -113,10 +130,27 @@ module.exports.getCompaniesByUserId = (req, res, next) => {
     
     let sql = `SELECT c.*, 
                (SELECT COUNT(*) FROM job WHERE company_id = c.id) as total_jobs,
-               (SELECT COUNT(*) FROM job WHERE company_id = c.id AND status = 'Active') as active_jobs
+               (SELECT COUNT(*) FROM job WHERE company_id = c.id AND status = 'Active') as active_jobs,
+               COALESCE(
+                   (SELECT json_agg(json_build_object(
+                        'id', j.id,
+                        'title', j.title,
+                        'description', j.description,
+                        'location', j.location,
+                        'status', j.status,
+                        'salary_range_from', j.salary_range_from,
+                        'salary_range_to', j.salary_range_to,
+                        'salary_type', j.salary_type,
+                        'salary_period', j.salary_period,
+                        'duration', j.duration,
+                        'created_at', j.created_at,
+                        'updated_at', j.updated_at
+                   )) FROM job j WHERE j.company_id = c.id AND j.status = 'Active'
+               ), '[]') as active_jobs_list
                FROM company c
                JOIN company_ownership co ON c.id = co.company_id
                WHERE co.user_id = $1
+               GROUP BY c.id
                ORDER BY c.id DESC;`;
     
     return query(sql, [userId])
@@ -155,6 +189,29 @@ module.exports.getCompanyPageData = (req, res, next) => {
                 return res.status(404).json({ error: "Company not found" });
             }
             res.json({ company: companyData[0] });
+        }).catch(function(error) {
+            return res.status(500).json({ error: error.message });
+        });
+};
+
+// READ - Get jobs for a specific company (UPDATED with correct fields)
+module.exports.getCompanyJobs = (req, res, next) => {
+    let companyId = req.params.id;
+    
+    let sql = `SELECT id, title, description, location, status, 
+               salary_range_from, salary_range_to, salary_type, 
+               salary_period, duration, created_at, updated_at
+               FROM job 
+               WHERE company_id = $1 
+               ORDER BY created_at DESC;`;
+    
+    return query(sql, [companyId])
+        .then(function(result) {
+            res.json({ 
+                company_id: companyId,
+                count: result.rows.length,
+                jobs: result.rows 
+            });
         }).catch(function(error) {
             return res.status(500).json({ error: error.message });
         });
