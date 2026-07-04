@@ -185,8 +185,9 @@ export const CompanyPageRenderer = (prop: Props) => {
         setTotalReviews(company.total_reviews);
         setCompanyType(company.tagline);
         setLinkOfCompany(company.url);
-        setImageOfBanner(company.banner_file_name);
-        setImageOfTea(company.logo_file_name);
+        setImageOfBanner(company.banner_url);
+        setImageOfTea(company.logo_url);
+        setLocationCoordinates(company.address)
         Object.entries(cities).forEach(([countries, citiesLoop]) => {
           citiesLoop.forEach((value) => {
             if (value === company.city) {
@@ -362,7 +363,7 @@ export const CompanyPage = (prop: PropsForCompanyPage) => {
         <div className="flex-1 bg-[#F2E9D9] rounded-md text-left p-4">
           <p className="font-bold text-2xl">Job Postings</p>
           <div className="mt-4 flex flex-col gap-4 h-54 overflow-y-scroll">
-            {prop.jobPostings?.length === undefined ? (
+            {prop.jobPostings?.length === undefined || prop.jobPostings.length === 0? (
               <p className="text-xl text-gray-500">
                 There are no job postings by the company
               </p>

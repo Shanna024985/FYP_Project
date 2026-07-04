@@ -316,12 +316,12 @@ const AddCompanies = (prop: Props) => {
                             name: name,
                             url: linkOfCompany,
                             contact_email: emailOfCompany,
-                            logo_file_name: valueOfProfile.logo_file_name,
-                            logo_file_data: valueOfProfile.logo_file_data,
-                            banner_file_name: valueOfBanner.banner_file_name,
-                            banner_file_data: valueOfBanner.banner_file_data,
+                            banner_url: valueOfBanner.banner_url,
+                            logo_url: valueOfProfile.logo_url,
+                            tagline: companyTypeChosen,
                             description: overviewPage,
                             city: location.split(",")[0],
+                            address: locationCoordinates
                           });
 
                           fetch(prop.currentUrl + "/company", {
