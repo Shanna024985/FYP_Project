@@ -7,7 +7,6 @@ function normalizeCategory(category) {
     if (!category) return 'other';
     
     const categoryMap = {
-        // Lowercase values (your actual database values)
         'admin': 'admin',
         'business': 'business',
         'engineering': 'engineering',
@@ -24,8 +23,6 @@ function normalizeCategory(category) {
         'trades': 'trades',
         'writing': 'writing',
         'other': 'other',
-        
-        // Map Title Case inputs to lowercase database values
         'IT': 'it',
         'Marketing': 'marketing',
         'Sales': 'sales',
@@ -132,18 +129,15 @@ function normalizeDuration(duration) {
     return durationMap[duration] || duration;
 }
 
-// Helper function to normalize career level - FIXED for lowercase database values
+// Helper function to normalize career level
 function normalizeCareerLevel(careerLevel) {
     if (!careerLevel) return 'entry';
     
     const careerMap = {
-        // Lowercase values (your actual database values)
         'entry': 'entry',
         'experienced': 'experienced',
         'leadership': 'leadership',
         'owner': 'owner',
-        
-        // Map Title Case inputs to lowercase database values
         'Entry': 'entry',
         'Entry Level': 'entry',
         'entry level': 'entry',
@@ -180,7 +174,6 @@ function mapLocationToEnum(location) {
     if (!location) return 'Central';
     
     const locationMap = {
-        // Singapore
         'singapore': 'Central',
         'singapore central': 'Central',
         'singapore north': 'North',
@@ -192,67 +185,56 @@ function mapLocationToEnum(location) {
         'north': 'North',
         'south': 'South',
         'west': 'West',
-        // Malaysia
         'kuala lumpur': 'Central',
         'penang': 'North',
         'johor bahru': 'South',
         'selangor': 'Central',
         'malacca': 'South',
-        // Japan
         'tokyo': 'Central',
         'osaka': 'Central',
         'kyoto': 'Central',
         'nagoya': 'Central',
         'sapporo': 'North',
-        // South Korea
         'seoul': 'Central',
         'busan': 'South',
         'incheon': 'Central',
         'daegu': 'South',
         'daejeon': 'Central',
-        // USA
         'new york': 'Central',
         'los angeles': 'West',
         'chicago': 'Central',
         'san francisco': 'West',
         'miami': 'South',
-        // UK
         'london': 'Central',
         'manchester': 'North',
         'birmingham': 'Central',
         'edinburgh': 'North',
         'glasgow': 'North',
-        // Australia
         'sydney': 'East',
         'melbourne': 'South',
         'brisbane': 'East',
         'perth': 'West',
         'adelaide': 'South',
-        // China
         'beijing': 'North',
         'shanghai': 'East',
         'guangzhou': 'South',
         'shenzhen': 'South',
         'hong kong': 'East',
-        // India
         'mumbai': 'West',
         'delhi': 'North',
         'bangalore': 'South',
         'chennai': 'South',
         'hyderabad': 'South',
-        // Germany
         'berlin': 'Central',
         'munich': 'South',
         'frankfurt': 'Central',
         'hamburg': 'North',
         'cologne': 'West',
-        // France
         'paris': 'Central',
         'lyon': 'South',
         'marseille': 'South',
         'nice': 'South',
         'toulouse': 'South',
-        // Canada
         'toronto': 'East',
         'vancouver': 'West',
         'montreal': 'East',
@@ -262,19 +244,16 @@ function mapLocationToEnum(location) {
     
     const lowerLoc = location.toLowerCase().trim();
     
-    // Check if it's a direct match
     if (locationMap[lowerLoc]) {
         return locationMap[lowerLoc];
     }
     
-    // Check if it contains a known city
     for (const [key, value] of Object.entries(locationMap)) {
         if (lowerLoc.includes(key)) {
             return value;
         }
     }
     
-    // If no match, return as is
     return normalizeLocation(location);
 }
 
@@ -289,7 +268,6 @@ module.exports.createJob = function createJob(jobData, companyId) {
         jobs_needed, reports 
     } = jobData;
     
-    // Normalize all values to match database ENUMs
     const normalizedCategory = normalizeCategory(category);
     const normalizedType = normalizeType(type);
     const normalizedSalaryType = normalizeSalaryType(salary_type);
@@ -298,15 +276,6 @@ module.exports.createJob = function createJob(jobData, companyId) {
     const normalizedExperience = normalizeExperience(experience);
     const normalizedCareerLevel = normalizeCareerLevel(career_level);
     const mappedLocation = mapLocationToEnum(location);
-    
-    console.log(`Category: "${category}" → "${normalizedCategory}"`);
-    console.log(`Type: "${type}" → "${normalizedType}"`);
-    console.log(`Salary Type: "${salary_type}" → "${normalizedSalaryType}"`);
-    console.log(`Salary Period: "${salary_period}" → "${normalizedSalaryPeriod}"`);
-    console.log(`Duration: "${duration}" → "${normalizedDuration}"`);
-    console.log(`Experience: "${experience}" → "${normalizedExperience}"`);
-    console.log(`Career Level: "${career_level}" → "${normalizedCareerLevel}"`);
-    console.log(`Location: "${location}" → "${mappedLocation}"`);
     
     let sql = `INSERT INTO job(
         title, description, category, type, 
@@ -326,24 +295,23 @@ module.exports.createJob = function createJob(jobData, companyId) {
     });
 }
 
-// READ - Get all jobs with filters
+// READ - Get all jobs with filters (excluding deleted)
 module.exports.getAllJobs = function getAllJobs(filters = {}) {
     let sql = `SELECT j.*, c.name as company_name, c.city as company_city,
-               c.logo_file_name, c.tagline as company_tagline,
+               c.logo_url, c.tagline as company_tagline,
                (SELECT COUNT(*) FROM saved_job WHERE job_id = j.id) as saved_count,
                (SELECT COUNT(*) FROM application WHERE job_id = j.id) as application_count
                FROM job j 
-               JOIN company c ON j.company_id = c.id`;
+               JOIN company c ON j.company_id = c.id
+               WHERE j.deleted_at IS NULL`;
     let params = [];
     let paramIndex = 1;
     let conditions = [];
     
-    // Only show Active jobs by default
     if (!filters.show_all) {
         conditions.push(` j.status = 'Active'`);
     }
     
-    // Search filters with normalization
     if (filters.company) {
         conditions.push(` c.name ILIKE $${paramIndex}`);
         params.push(`%${filters.company}%`);
@@ -417,10 +385,9 @@ module.exports.getAllJobs = function getAllJobs(filters = {}) {
     }
     
     if (conditions.length > 0) {
-        sql += " WHERE" + conditions.join(" AND");
+        sql += " AND" + conditions.join(" AND");
     }
     
-    // Pagination
     const limit = filters.limit ? parseInt(filters.limit) : 10;
     const offset = filters.offset ? parseInt(filters.offset) : 0;
     sql += ` ORDER BY j.id DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
@@ -433,7 +400,7 @@ module.exports.getAllJobs = function getAllJobs(filters = {}) {
 
 // READ - Get total job count for pagination
 module.exports.getTotalJobCount = function getTotalJobCount(filters = {}) {
-    let sql = `SELECT COUNT(*) as total FROM job j JOIN company c ON j.company_id = c.id`;
+    let sql = `SELECT COUNT(*) as total FROM job j JOIN company c ON j.company_id = c.id WHERE j.deleted_at IS NULL`;
     let params = [];
     let paramIndex = 1;
     let conditions = [];
@@ -509,7 +476,7 @@ module.exports.getTotalJobCount = function getTotalJobCount(filters = {}) {
     }
     
     if (conditions.length > 0) {
-        sql += " WHERE" + conditions.join(" AND");
+        sql += " AND" + conditions.join(" AND");
     }
     
     return query(sql, params).then(function(result) {
@@ -526,11 +493,11 @@ module.exports.getRecommendedJobs = function getRecommendedJobs(userId, limit = 
     
     return query(userHistorySql, [userId]).then(function(historyResult) {
         if (historyResult.rows.length === 0) {
-            let sql = `SELECT j.*, c.name as company_name, c.city as company_city, c.logo_file_name,
+            let sql = `SELECT j.*, c.name as company_name, c.city as company_city, c.logo_url,
                        (SELECT COUNT(*) FROM saved_job WHERE job_id = j.id) as saved_count
                        FROM job j 
                        JOIN company c ON j.company_id = c.id 
-                       WHERE j.status = 'Active'
+                       WHERE j.status = 'Active' AND j.deleted_at IS NULL
                        ORDER BY j.id DESC 
                        LIMIT $1`;
             return query(sql, [limit]).then(function(result) {
@@ -541,11 +508,11 @@ module.exports.getRecommendedJobs = function getRecommendedJobs(userId, limit = 
         const categories = historyResult.rows.map(row => row.category);
         const types = historyResult.rows.map(row => row.type);
         
-        let sql = `SELECT j.*, c.name as company_name, c.city as company_city, c.logo_file_name,
+        let sql = `SELECT j.*, c.name as company_name, c.city as company_city, c.logo_url,
                    (SELECT COUNT(*) FROM saved_job WHERE job_id = j.id) as saved_count
                    FROM job j 
                    JOIN company c ON j.company_id = c.id 
-                   WHERE j.status = 'Active' 
+                   WHERE j.status = 'Active' AND j.deleted_at IS NULL
                    AND (j.category = ANY($1) OR j.type = ANY($2))
                    ORDER BY j.id DESC 
                    LIMIT $3`;
@@ -560,22 +527,19 @@ module.exports.getRecommendedJobs = function getRecommendedJobs(userId, limit = 
 module.exports.getJobById = function getJobById(jobId, userId = null) {
     let sql = `SELECT j.*, c.name as company_name, c.city, 
                c.description as company_description, c.contact_email as company_email,
-               c.logo_file_name, c.tagline as company_tagline, c.url as company_url,
+               c.logo_url, c.tagline as company_tagline, c.url as company_url,
                (SELECT COUNT(*) FROM application WHERE job_id = j.id) as application_count,
-               (SELECT COUNT(*) FROM saved_job WHERE job_id = j.id) as saved_count`;
+               (SELECT COUNT(*) FROM saved_job WHERE job_id = j.id) as saved_count
+               FROM job j 
+               JOIN company c ON j.company_id = c.id 
+               WHERE j.id = $1 AND j.deleted_at IS NULL`;
+    
+    const params = [jobId];
     
     if (userId) {
         sql += `, (SELECT COUNT(*) FROM saved_job WHERE job_id = j.id AND user_id = $2) as is_saved`;
         sql += `, (SELECT COUNT(*) FROM application WHERE job_id = j.id AND user_id = $2) as has_applied`;
         sql += `, (SELECT status FROM application WHERE job_id = j.id AND user_id = $2 LIMIT 1) as application_status`;
-    }
-    
-    sql += ` FROM job j 
-             JOIN company c ON j.company_id = c.id 
-             WHERE j.id = $1`;
-    
-    const params = [jobId];
-    if (userId) {
         params.push(userId);
     }
     
@@ -584,27 +548,16 @@ module.exports.getJobById = function getJobById(jobId, userId = null) {
     });
 }
 
-// READ - Get jobs by company (WITH DEBUGGING)
+// READ - Get jobs by company (excluding deleted)
 module.exports.getJobsByCompany = function getJobsByCompany(companyId) {
-    console.log('getJobsByCompany called for company:', companyId);
-    
     let sql = `SELECT j.*, 
                (SELECT COUNT(*) FROM application WHERE job_id = j.id) as application_count,
                (SELECT COUNT(*) FROM saved_job WHERE job_id = j.id) as saved_count
                FROM job j 
-               WHERE j.company_id = $1 
+               WHERE j.company_id = $1 AND j.deleted_at IS NULL
                ORDER BY j.id DESC;`;
     
     return query(sql, [companyId]).then(function(result) {
-        console.log('Jobs returned:', result.rows.length);
-        if (result.rows.length > 0) {
-            console.log('Job statuses:');
-            result.rows.forEach(function(job) {
-                console.log('  - ID:', job.id, '| Title:', job.title, '| Status:', job.status);
-            });
-        } else {
-            console.log('No jobs found for company:', companyId);
-        }
         return result.rows;
     });
 }
@@ -618,7 +571,6 @@ module.exports.updateJob = function updateJob(jobId, jobData, companyId) {
         jobs_needed, reports 
     } = jobData;
     
-    // Normalize values for update
     const normalizedCategory = category ? normalizeCategory(category) : undefined;
     const normalizedType = type ? normalizeType(type) : undefined;
     const normalizedSalaryType = salary_type ? normalizeSalaryType(salary_type) : undefined;
@@ -644,7 +596,7 @@ module.exports.updateJob = function updateJob(jobId, jobData, companyId) {
                    location = COALESCE($13, location),
                    jobs_needed = COALESCE($14, jobs_needed),
                    reports = COALESCE($15, reports)
-               WHERE id = $16 AND company_id = $17
+               WHERE id = $16 AND company_id = $17 AND deleted_at IS NULL
                RETURNING *;`;
     
     return query(sql, [
@@ -657,34 +609,71 @@ module.exports.updateJob = function updateJob(jobId, jobData, companyId) {
     });
 }
 
-// DELETE - Delete a job
-module.exports.deleteJob = function deleteJob(jobId, companyId) {
-    let sql = "DELETE FROM job WHERE id = $1 AND company_id = $2 RETURNING id;";
+// ==================== SOFT DELETE & RESTORE ====================
+
+// SOFT DELETE - Soft delete a job (set deleted_at timestamp)
+module.exports.softDeleteJob = function softDeleteJob(jobId, companyId) {
+    let sql = `UPDATE job 
+               SET deleted_at = NOW() 
+               WHERE id = $1 AND company_id = $2 AND deleted_at IS NULL
+               RETURNING id, title, deleted_at;`;
+    
     return query(sql, [jobId, companyId]).then(function(result) {
+        return result.rows;
+    });
+}
+
+// RESTORE - Restore a soft-deleted job (UNDO DELETION)
+module.exports.restoreJob = function restoreJob(jobId, companyId) {
+    let sql = `UPDATE job 
+               SET deleted_at = NULL 
+               WHERE id = $1 AND company_id = $2 AND deleted_at IS NOT NULL
+               RETURNING id, title, deleted_at;`;
+    
+    return query(sql, [jobId, companyId]).then(function(result) {
+        return result.rows;
+    });
+}
+
+// GET DELETED JOBS - Get all soft-deleted jobs for a company
+module.exports.getDeletedJobsByCompany = function getDeletedJobsByCompany(companyId) {
+    let sql = `SELECT j.*, 
+               (SELECT COUNT(*) FROM application WHERE job_id = j.id) as application_count,
+               (SELECT COUNT(*) FROM saved_job WHERE job_id = j.id) as saved_count
+               FROM job j 
+               WHERE j.company_id = $1 AND j.deleted_at IS NOT NULL
+               ORDER BY j.deleted_at DESC;`;
+    
+    return query(sql, [companyId]).then(function(result) {
+        return result.rows;
+    });
+}
+
+// GET ALL DELETED JOBS - Get all soft-deleted jobs (admin)
+module.exports.getAllDeletedJobs = function getAllDeletedJobs() {
+    let sql = `SELECT j.*, c.name as company_name
+               FROM job j
+               LEFT JOIN company c ON j.company_id = c.id
+               WHERE j.deleted_at IS NOT NULL
+               ORDER BY j.deleted_at DESC;`;
+    
+    return query(sql, []).then(function(result) {
         return result.rows;
     });
 }
 
 // CHECK - Verify job belongs to company
 module.exports.checkJobBelongsToCompany = function checkJobBelongsToCompany(jobId, companyId) {
-    console.log('checkJobBelongsToCompany:', { jobId, companyId });
     let sql = "SELECT id FROM job WHERE id = $1 AND company_id = $2;";
     return query(sql, [jobId, companyId]).then(function(result) {
-        console.log('Check result:', result.rows.length > 0 ? 'Job belongs to company' : 'Job does NOT belong to company');
         return result.rows;
     });
 }
 
-// UPDATE - Change job status (WITH DEBUGGING)
+// UPDATE - Change job status
 module.exports.updateJobStatus = function updateJobStatus(jobId, status, companyId) {
-    console.log('updateJobStatus called:', { jobId, status, companyId });
-    
-    let sql = "UPDATE job SET status = $1 WHERE id = $2 AND company_id = $3 RETURNING *;";
+    let sql = "UPDATE job SET status = $1 WHERE id = $2 AND company_id = $3 AND deleted_at IS NULL RETURNING *;";
     return query(sql, [status, jobId, companyId]).then(function(result) {
-        console.log('Update result:', result.rows.length > 0 ? 'SUCCESS' : 'FAILED');
-        if (result.rows.length > 0) {
-            console.log('Updated job:', result.rows[0].id, 'New status:', result.rows[0].status);
-        }
         return result.rows;
     });
 }
@@ -712,7 +701,7 @@ module.exports.applyForJob = function applyForJob(userId, jobId, resumeId) {
 module.exports.getApplicationsByUser = function getApplicationsByUser(userId) {
     let sql = `SELECT a.*, j.title, j.description, j.location, 
                j.salary_range_from, j.salary_range_to, j.type, j.duration,
-               c.name as company_name, c.id as company_id, c.logo_file_name,
+               c.name as company_name, c.id as company_id, c.logo_url,
                c.city as company_city
                FROM application a
                JOIN job j ON a.job_id = j.id
@@ -786,12 +775,12 @@ module.exports.unsaveJob = function unsaveJob(userId, jobId) {
 module.exports.getSavedJobsByUser = function getSavedJobsByUser(userId) {
     let sql = `SELECT sj.*, j.title, j.description, j.location, 
                j.salary_range_from, j.salary_range_to, j.salary_period, j.type, j.duration, j.created_at AS posted_date,
-               c.name as company_name, c.id as company_id, c.logo_file_name,
+               c.name as company_name, c.id as company_id, c.logo_url,
                c.city as company_city
                FROM saved_job sj
                JOIN job j ON sj.job_id = j.id
                JOIN company c ON j.company_id = c.id
-               WHERE sj.user_id = $1
+               WHERE sj.user_id = $1 AND j.deleted_at IS NULL
                ORDER BY sj.id DESC;`;
     return query(sql, [userId]).then(function(result) {
         return result.rows;
@@ -837,7 +826,7 @@ module.exports.hasUserCompletedJob = function hasUserCompletedJob(userId, jobId)
 module.exports.getCompletedJobsByUser = function getCompletedJobsByUser(userId) {
     let sql = `SELECT a.*, j.title as job_title, j.description, 
                c.name as company_name, c.id as company_id,
-               c.logo_file_name
+               c.logo_url
                FROM application a
                JOIN job j ON a.job_id = j.id
                JOIN company c ON j.company_id = c.id

@@ -1,7 +1,12 @@
 let jobModel = require("../models/jobModel");
 const { query } = require("../services/dbConnection");
 
-// ==================== HELPER FUNCTION ====================
+// ==================== HELPER FUNCTIONS ====================
+
+// Helper: Get user ID from JWT token (FIXED)
+const getUserIdFromReq = (req, res) => {
+    return res?.locals?.userId || req.user?.userId || req.user?.id;
+};
 
 // Check if user owns the company
 function checkUserOwnsCompany(userId, companyId) {
@@ -27,10 +32,14 @@ module.exports.createJob = (req, res, next) => {
     } = req.body;
     
     let companyId = req.body.companyId;
-    let userId = req.body.userId || 1;
+    const userId = getUserIdFromReq(req, res);  // ← Get from token
     
     if (!companyId) {
         return res.status(400).json({ error: "Company ID is required" });
+    }
+    
+    if (!userId) {
+        return res.status(401).json({ error: "Unauthorized: User not authenticated" });
     }
     
     return checkUserOwnsCompany(userId, companyId)
@@ -148,9 +157,13 @@ module.exports.getJobsByCompany = (req, res, next) => {
         });
 }
 
-// READ - Get employer dashboard (NEW)
+// READ - Get employer dashboard
 module.exports.getEmployerDashboard = (req, res, next) => {
-    let userId = req.query.userId || 1;
+    const userId = getUserIdFromReq(req, res);  // ← Get from token
+    
+    if (!userId) {
+        return res.status(401).json({ error: "Unauthorized: User not authenticated" });
+    }
     
     let companySql = `SELECT c.id FROM company c
                       JOIN company_ownership co ON c.id = co.company_id
@@ -167,14 +180,15 @@ module.exports.getEmployerDashboard = (req, res, next) => {
                     total_jobs: 0,
                     active_jobs: 0,
                     closed_jobs: 0,
-                    stats: { total: 0, active: 0, closed: 0 }
+                    deleted_jobs: 0,
+                    stats: { total: 0, active: 0, closed: 0, deleted: 0 }
                 });
             }
             
             let jobSql = `SELECT j.*, c.name as company_name
                          FROM job j
                          JOIN company c ON j.company_id = c.id
-                         WHERE j.company_id = ANY($1)
+                         WHERE j.company_id = ANY($1) AND j.deleted_at IS NULL
                          ORDER BY j.id DESC;`;
             
             return query(jobSql, [companyIds])
@@ -184,14 +198,21 @@ module.exports.getEmployerDashboard = (req, res, next) => {
                     const active = jobs.filter(j => j.status === 'Active').length;
                     const closed = jobs.filter(j => j.status === 'Closed').length;
                     
-                    res.json({
-                        companies: companyResult.rows,
-                        jobs: jobs,
-                        total_jobs: total,
-                        active_jobs: active,
-                        closed_jobs: closed,
-                        stats: { total, active, closed }
-                    });
+                    let deletedSql = `SELECT COUNT(*) as count FROM job WHERE company_id = ANY($1) AND deleted_at IS NOT NULL;`;
+                    return query(deletedSql, [companyIds])
+                        .then(function(deletedResult) {
+                            const deleted = parseInt(deletedResult.rows[0].count);
+                            
+                            res.json({
+                                companies: companyResult.rows,
+                                jobs: jobs,
+                                total_jobs: total,
+                                active_jobs: active,
+                                closed_jobs: closed,
+                                deleted_jobs: deleted,
+                                stats: { total, active, closed, deleted }
+                            });
+                        });
                 });
         }).catch(function(error) {
             return res.status(500).json({ error: error.message });
@@ -203,10 +224,14 @@ module.exports.updateJob = (req, res, next) => {
     let jobId = req.params.id;
     let jobData = req.body;
     let companyId = req.body.companyId;
-    let userId = req.body.userId || 1;
+    const userId = getUserIdFromReq(req, res);  // ← Get from token
     
     if (!companyId) {
         return res.status(400).json({ error: "Company ID is required" });
+    }
+    
+    if (!userId) {
+        return res.status(401).json({ error: "Unauthorized: User not authenticated" });
     }
     
     return checkUserOwnsCompany(userId, companyId)
@@ -235,35 +260,53 @@ module.exports.updateJob = (req, res, next) => {
         });
 }
 
-// DELETE - Delete a job
-module.exports.deleteJob = (req, res, next) => {
+// ==================== SOFT DELETE & RESTORE ====================
+
+// SOFT DELETE - Soft delete a job (with undo support) - FIXED
+module.exports.softDeleteJob = (req, res, next) => {
     let jobId = req.params.id;
     let companyId = req.body.companyId;
-    let userId = req.body.userId || 1;
+    const userId = getUserIdFromReq(req, res);  // ← Get from token
+    
+    console.log('=== softDeleteJob ===');
+    console.log('jobId:', jobId);
+    console.log('companyId:', companyId);
+    console.log('userId from token:', userId);
     
     if (!companyId) {
         return res.status(400).json({ error: "Company ID is required" });
     }
     
+    if (!userId) {
+        return res.status(401).json({ error: "Unauthorized: User not authenticated" });
+    }
+    
     return checkUserOwnsCompany(userId, companyId)
         .then(function(ownership) {
+            console.log('Ownership check:', ownership);
             if (ownership.length === 0) {
                 return res.status(403).json({ 
-                    error: "Unauthorized: You don't own this company. Only company owners can delete jobs." 
+                    error: `Unauthorized: User ${userId} doesn't own company ${companyId}` 
                 });
             }
             
             return jobModel.checkJobBelongsToCompany(jobId, companyId)
                 .then(function(ownership) {
+                    console.log('Job ownership:', ownership);
                     if (ownership.length == 0) {
-                        return res.status(403).json({ error: "Unauthorized: You don't own this job" });
+                        return res.status(403).json({ 
+                            error: `Unauthorized: Job ${jobId} doesn't belong to company ${companyId}` 
+                        });
                     }
-                    return jobModel.deleteJob(jobId, companyId)
+                    return jobModel.softDeleteJob(jobId, companyId)
                         .then(function(deletedJob) {
                             if (deletedJob.length == 0) {
-                                return res.status(404).json({ error: "Job not found or you don't own it" });
+                                return res.status(404).json({ error: "Job not found or already deleted" });
                             }
-                            res.json({ message: "Job deleted successfully", deletedId: deletedJob[0].id });
+                            res.json({ 
+                                message: "Job deleted successfully. You can restore this job using the restore endpoint.", 
+                                job: deletedJob[0] 
+                            });
                         });
                 });
         }).catch(function(error) {
@@ -271,14 +314,112 @@ module.exports.deleteJob = (req, res, next) => {
         });
 }
 
+// RESTORE - Restore a soft-deleted job (UNDO DELETION) - FIXED
+module.exports.restoreJob = (req, res, next) => {
+    let jobId = req.params.id;
+    let companyId = req.body.companyId;
+    const userId = getUserIdFromReq(req, res);  // ← Get from token
+    
+    console.log('=== restoreJob ===');
+    console.log('jobId:', jobId);
+    console.log('companyId:', companyId);
+    console.log('userId from token:', userId);
+    
+    if (!companyId) {
+        return res.status(400).json({ error: "Company ID is required" });
+    }
+    
+    if (!userId) {
+        return res.status(401).json({ error: "Unauthorized: User not authenticated" });
+    }
+    
+    return checkUserOwnsCompany(userId, companyId)
+        .then(function(ownership) {
+            if (ownership.length === 0) {
+                return res.status(403).json({ 
+                    error: `Unauthorized: User ${userId} doesn't own company ${companyId}` 
+                });
+            }
+            
+            return jobModel.checkJobBelongsToCompany(jobId, companyId)
+                .then(function(ownership) {
+                    if (ownership.length == 0) {
+                        return res.status(403).json({ 
+                            error: `Unauthorized: Job ${jobId} doesn't belong to company ${companyId}` 
+                        });
+                    }
+                    return jobModel.restoreJob(jobId, companyId)
+                        .then(function(restoredJob) {
+                            if (restoredJob.length == 0) {
+                                return res.status(404).json({ error: "Job not found or not deleted" });
+                            }
+                            res.json({ 
+                                message: "Job restored successfully (undo deletion)", 
+                                job: restoredJob[0] 
+                            });
+                        });
+                });
+        }).catch(function(error) {
+            return res.status(500).json({ error: error.message });
+        });
+}
+
+// GET DELETED JOBS - Get all deleted jobs for a company
+module.exports.getDeletedJobsByCompany = (req, res, next) => {
+    let companyId = req.params.companyId;
+    const userId = getUserIdFromReq(req, res);  // ← Get from token
+    
+    if (!userId) {
+        return res.status(401).json({ error: "Unauthorized: User not authenticated" });
+    }
+    
+    return checkUserOwnsCompany(userId, companyId)
+        .then(function(ownership) {
+            if (ownership.length === 0) {
+                return res.status(403).json({ 
+                    error: `Unauthorized: User ${userId} doesn't own company ${companyId}` 
+                });
+            }
+            
+            return jobModel.getDeletedJobsByCompany(companyId)
+                .then(function(deletedJobs) {
+                    res.json({ 
+                        count: deletedJobs.length, 
+                        deleted_jobs: deletedJobs 
+                    });
+                });
+        }).catch(function(error) {
+            return res.status(500).json({ error: error.message });
+        });
+}
+
+// GET ALL DELETED JOBS - Get all deleted jobs (admin)
+module.exports.getAllDeletedJobs = (req, res, next) => {
+    return jobModel.getAllDeletedJobs()
+        .then(function(deletedJobs) {
+            res.json({ 
+                count: deletedJobs.length, 
+                deleted_jobs: deletedJobs 
+            });
+        }).catch(function(error) {
+            return res.status(500).json({ error: error.message });
+        });
+}
+
+// ==================== OTHER OPERATIONS ====================
+
 // UPDATE - Close a job
 module.exports.closeJob = (req, res, next) => {
     let jobId = req.params.id;
     let companyId = req.body.companyId;
-    let userId = req.body.userId || 1;
+    const userId = getUserIdFromReq(req, res);  // ← Get from token
     
     if (!companyId) {
         return res.status(400).json({ error: "Company ID is required" });
+    }
+    
+    if (!userId) {
+        return res.status(401).json({ error: "Unauthorized: User not authenticated" });
     }
     
     return checkUserOwnsCompany(userId, companyId)
@@ -307,14 +448,18 @@ module.exports.closeJob = (req, res, next) => {
         });
 }
 
-// UPDATE - Open a job (Closed → Active) (NEW)
+// UPDATE - Open a job (Closed → Active)
 module.exports.openJob = (req, res, next) => {
     let jobId = req.params.id;
     let companyId = req.body.companyId;
-    let userId = req.body.userId || 1;
+    const userId = getUserIdFromReq(req, res);  // ← Get from token
     
     if (!companyId) {
         return res.status(400).json({ error: "Company ID is required" });
+    }
+    
+    if (!userId) {
+        return res.status(401).json({ error: "Unauthorized: User not authenticated" });
     }
     
     return checkUserOwnsCompany(userId, companyId)
@@ -347,9 +492,13 @@ module.exports.openJob = (req, res, next) => {
 
 // CREATE - Apply for a job
 module.exports.applyForJob = (req, res, next) => {
-    let userId = req.body.userId || 1;
+    const userId = getUserIdFromReq(req, res);  // ← Get from token
     let jobId = req.params.id;
     let resumeId = req.body.resumeId;
+    
+    if (!userId) {
+        return res.status(401).json({ error: "Unauthorized: User not authenticated" });
+    }
     
     if (!resumeId) {
         return res.status(400).json({ error: "Resume ID is required" });
@@ -374,7 +523,11 @@ module.exports.applyForJob = (req, res, next) => {
 
 // READ - Get my applications
 module.exports.getMyApplications = (req, res, next) => {
-    let userId = req.query.userId || 1;
+    const userId = getUserIdFromReq(req, res);  // ← Get from token
+    
+    if (!userId) {
+        return res.status(401).json({ error: "Unauthorized: User not authenticated" });
+    }
     
     return jobModel.getApplicationsByUser(userId)
         .then(function(applications) {
@@ -392,7 +545,11 @@ module.exports.getMyApplications = (req, res, next) => {
 
 // READ - Get application stats
 module.exports.getApplicationStats = (req, res, next) => {
-    let userId = req.query.userId || 1;
+    const userId = getUserIdFromReq(req, res);  // ← Get from token
+    
+    if (!userId) {
+        return res.status(401).json({ error: "Unauthorized: User not authenticated" });
+    }
     
     return jobModel.getApplicationStatusCount(userId)
         .then(function(stats) {
@@ -441,7 +598,11 @@ module.exports.updateApplicationStatus = (req, res, next) => {
 // DELETE - Delete an application
 module.exports.deleteApplication = (req, res, next) => {
     let applicationId = req.params.applicationId;
-    let userId = req.body.userId || 1;
+    const userId = getUserIdFromReq(req, res);  // ← Get from token
+    
+    if (!userId) {
+        return res.status(401).json({ error: "Unauthorized: User not authenticated" });
+    }
 
     let checkSql = `SELECT id FROM application WHERE id = $1 AND user_id = $2;`;
     
@@ -483,7 +644,6 @@ module.exports.saveJob = (req, res, next) => {
             return res.status(500).json({ error: error.message });
         });
 }
-
 
 // DELETE - Unsave a job
 module.exports.unsaveJob = (req, res, next) => {
@@ -569,7 +729,11 @@ module.exports.canReviewCompany = (req, res, next) => {
 
 // READ - Get job seeker dashboard
 module.exports.getJobSeekerDashboard = (req, res, next) => {
-    let userId = req.query.userId || 1;
+    const userId = getUserIdFromReq(req, res);  // ← Get from token
+    
+    if (!userId) {
+        return res.status(401).json({ error: "Unauthorized: User not authenticated" });
+    }
     
     return jobModel.getJobSeekerDashboard(userId)
         .then(function(dashboardData) {
