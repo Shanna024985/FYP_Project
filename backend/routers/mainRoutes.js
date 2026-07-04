@@ -6,18 +6,20 @@ const companyRoutes = require("./companyRoutes");
 const uploadRoutes = require("./uploadRoutes");
 const locationRoutes = require("./locationRoutes");
 const resumeRoutes = require("./resumeRoutes");
-const reviewRoutes = require("./reviewRoutes");  // ← UNCOMMENTED
+const reviewRoutes = require("./reviewRoutes");
 const userRoutes = require("./userRoutes");
 
 router.get("/", (req, res, next) => {
     res.send("You are connected!");
 });
+
 router.use("/auth", loginRoutes);
 router.use("/jobs", jobRoutes);
 router.use("/company", companyRoutes);
 router.use("/upload", uploadRoutes);
 router.use("/locations", locationRoutes);
 router.use("/resumes", resumeRoutes);
-router.use("/reviews", reviewRoutes);  // ← UNCOMMENTED
+router.use("/reviews", reviewRoutes);
 router.use("/user", userRoutes);
+
 module.exports = router;
