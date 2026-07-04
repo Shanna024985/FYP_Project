@@ -14,6 +14,15 @@ type Props = {
   currentUrl: string;
 };
 export default function EditProfilePage({ currentUrl }: Props) {
+  type Resume = {
+    id: number;
+    user_id: number;
+    file_name: string;
+    file_data: string;
+    is_default: boolean;
+  };
+
+  const [resumes, setResumes] = useState<Resume[]>([]);
   const [errors, setErrors] = useState({
     first_name: "",
     last_name: "",
@@ -25,6 +34,7 @@ export default function EditProfilePage({ currentUrl }: Props) {
   const lastNameRef = useRef<HTMLInputElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
   const [profileImage, setProfileImage] = useState<string | null>(null);
+  const resumeInputRef = useRef<HTMLInputElement>(null);
 
   const [profile, setProfile] = useState({
     first_name: "",
@@ -39,13 +49,14 @@ export default function EditProfilePage({ currentUrl }: Props) {
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     fetchProfile();
+    fetchResumes();
   }, []);
 
   const fetchProfile = async () => {
     try {
       const token = localStorage.getItem("token");
 
-      const res = await axios.get("http://localhost:3000/api/user/profile", {
+      const res = await axios.get(`${currentUrl}/user/profile`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -175,25 +186,17 @@ export default function EditProfilePage({ currentUrl }: Props) {
       let res;
 
       if (hasProfile) {
-        res = await axios.put(
-          "http://localhost:3000/api/user/profile",
-          profile,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+        res = await axios.put(`${currentUrl}/user/profile`, profile, {
+          headers: {
+            Authorization: `Bearer ${token}`,
           },
-        );
+        });
       } else {
-        res = await axios.post(
-          "http://localhost:3000/api/user/profile",
-          profile,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+        res = await axios.post(`${currentUrl}/user/profile`, profile, {
+          headers: {
+            Authorization: `Bearer ${token}`,
           },
-        );
+        });
 
         setHasProfile(true);
       }
@@ -211,6 +214,131 @@ export default function EditProfilePage({ currentUrl }: Props) {
     } catch (err: any) {
       alert(err.response?.data?.error || "Failed to save profile.");
     }
+  };
+  const fetchResumes = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await axios.get(`${currentUrl}/resumes/user`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log("Resume API response:", res.data);
+
+      setResumes(res.data.resumes);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  const handleResumeUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("resume", file);
+
+    try {
+      const token = localStorage.getItem("token");
+
+      await axios.post(`${currentUrl}/resumes/upload`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      await fetchResumes();
+
+      alert("Resume uploaded successfully.");
+    } catch (err: any) {
+      alert(err.response?.data?.error || "Upload failed.");
+    }
+  };
+  const handleSetDefault = async (resumeId: number) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      await axios.put(
+        `${currentUrl}/resumes/${resumeId}/default`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      await fetchResumes();
+    } catch (err: any) {
+      alert(err.response?.data?.error || "Failed to set default resume.");
+    }
+  };
+  const handleDeleteResume = async (resumeId: number) => {
+    if (!window.confirm("Delete this resume?")) return;
+
+    try {
+      const token = localStorage.getItem("token");
+
+      await axios.delete(`${currentUrl}/resumes/${resumeId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      await fetchResumes();
+    } catch (err: any) {
+      alert(err.response?.data?.error || "Failed to delete resume.");
+    }
+  };
+  const handleViewResume = (resume: Resume) => {
+    const byteCharacters = atob(resume.file_data);
+
+    const byteNumbers = new Array(byteCharacters.length);
+
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+
+    const byteArray = new Uint8Array(byteNumbers);
+
+    const blob = new Blob([byteArray], {
+      type: "application/pdf",
+    });
+
+    const url = URL.createObjectURL(blob);
+
+    window.open(url, "_blank");
+  };
+  const handleDownloadResume = (resume: Resume) => {
+    const byteCharacters = atob(resume.file_data);
+
+    const byteNumbers = new Array(byteCharacters.length);
+
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+
+    const byteArray = new Uint8Array(byteNumbers);
+
+    const blob = new Blob([byteArray], {
+      type: "application/pdf",
+    });
+
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = resume.file_name;
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    URL.revokeObjectURL(url);
   };
   if (loading) {
     return <div>Loading...</div>;
@@ -399,15 +527,75 @@ export default function EditProfilePage({ currentUrl }: Props) {
             <div className="mb-6 flex items-center justify-center gap-3">
               <h2 className="text-2xl font-bold title-black">Resume</h2>
 
-              <Button variant="outline" size="icon-sm" className="rounded-full">
+              <Button
+                variant="outline"
+                size="icon-sm"
+                className="rounded-full"
+                onClick={() => resumeInputRef.current?.click()}
+              >
                 <Plus className="size-4" />
               </Button>
+              <input
+                ref={resumeInputRef}
+                type="file"
+                accept=".pdf,.doc,.docx"
+                className="hidden"
+                onChange={handleResumeUpload}
+              />
             </div>
 
             {/* Empty State */}
-            <div className="rounded-2xl border border-dashed p-8 text-center text-muted-foreground">
-              No resume uploaded yet
-            </div>
+            {resumes.length === 0 ? (
+              <div className="rounded-2xl border border-dashed p-8 text-center text-muted-foreground">
+                No resume uploaded yet
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {resumes.map((resume) => (
+                  <div
+                    key={resume.id}
+                    className="flex items-center justify-between rounded-xl border p-4"
+                  >
+                    <div>
+                      <p className="font-medium">{resume.file_name}</p>
+
+                      {resume.is_default && (
+                        <p className="text-sm text-green-600">Default Resume</p>
+                      )}
+                    </div>
+
+                    <div className="flex gap-2">
+                      {!resume.is_default && (
+                        <Button
+                          variant="outline"
+                          onClick={() => handleSetDefault(resume.id)}
+                        >
+                          Set Default
+                        </Button>
+                      )}
+                      <Button
+                        variant="secondary"
+                        onClick={() => handleViewResume(resume)}
+                      >
+                        View
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        onClick={() => handleDownloadResume(resume)}
+                      >
+                        Download
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        onClick={() => handleDeleteResume(resume.id)}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
