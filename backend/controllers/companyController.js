@@ -1,6 +1,11 @@
 const companyModel = require("../models/companyModel");
 const { query } = require("../services/dbConnection");
 
+// Helper: Get user ID from request - FIXED
+const getUserIdFromReq = (req, res) => {
+    return res?.locals?.userId || req.user?.userId || req.user?.id;
+};
+
 // CREATE - Create a company
 module.exports.createCompany = (req, res, next) => {
     let { 
@@ -10,6 +15,8 @@ module.exports.createCompany = (req, res, next) => {
         profile_url,
         tagline, description, city, address
     } = req.body;
+    
+    const userId = getUserIdFromReq(req, res);
     
     if (!name) {
         return res.status(400).json({ error: "Company name is required" });
@@ -37,6 +44,19 @@ module.exports.createCompany = (req, res, next) => {
         if (companyDetails.length == 0) {
             return res.status(400).json({ error: "Failed to create company" });
         }
+        
+        if (userId) {
+            const companyId = companyDetails[0].id;
+            const ownershipSql = `INSERT INTO company_ownership (user_id, company_id) VALUES ($1, $2);`;
+            return query(ownershipSql, [userId, companyId])
+                .then(function() {
+                    res.status(201).json({ 
+                        message: "Company created successfully", 
+                        company: companyDetails[0] 
+                    });
+                });
+        }
+        
         res.status(201).json({ 
             message: "Company created successfully", 
             company: companyDetails[0] 
@@ -44,7 +64,7 @@ module.exports.createCompany = (req, res, next) => {
     }).catch(function(error) {
         return res.status(500).json({ error: error.message });
     });
-}
+};
 
 // READ - Get all companies
 module.exports.getAllCompanies = (req, res, next) => {
@@ -54,11 +74,15 @@ module.exports.getAllCompanies = (req, res, next) => {
         }).catch(function(error) {
             return res.status(500).json({ error: error.message });
         });
-}
+};
 
-// READ - Get all companies owned by a user
+// READ - Get companies by user (from token)
 module.exports.getCompaniesByUser = (req, res, next) => {
-    let userId = req.query.userId || 1;
+    const userId = getUserIdFromReq(req, res);
+    
+    if (!userId) {
+        return res.status(401).json({ error: "Unauthorized: User not authenticated" });
+    }
     
     let sql = `SELECT c.*, 
                (SELECT COUNT(*) FROM job WHERE company_id = c.id) as total_jobs,
@@ -77,7 +101,34 @@ module.exports.getCompaniesByUser = (req, res, next) => {
         }).catch(function(error) {
             return res.status(500).json({ error: error.message });
         });
-}
+};
+
+// READ - Get companies by user ID (from URL param)
+module.exports.getCompaniesByUserId = (req, res, next) => {
+    let userId = req.params.userId;
+    
+    if (!userId) {
+        return res.status(400).json({ error: "User ID is required" });
+    }
+    
+    let sql = `SELECT c.*, 
+               (SELECT COUNT(*) FROM job WHERE company_id = c.id) as total_jobs,
+               (SELECT COUNT(*) FROM job WHERE company_id = c.id AND status = 'Active') as active_jobs
+               FROM company c
+               JOIN company_ownership co ON c.id = co.company_id
+               WHERE co.user_id = $1
+               ORDER BY c.id DESC;`;
+    
+    return query(sql, [userId])
+        .then(function(result) {
+            res.json({ 
+                count: result.rows.length, 
+                companies: result.rows 
+            });
+        }).catch(function(error) {
+            return res.status(500).json({ error: error.message });
+        });
+};
 
 // READ - Get single company by ID
 module.exports.getCompanyById = (req, res, next) => {
@@ -92,7 +143,7 @@ module.exports.getCompanyById = (req, res, next) => {
         }).catch(function(error) {
             return res.status(500).json({ error: error.message });
         });
-}
+};
 
 // READ - Get company page data
 module.exports.getCompanyPageData = (req, res, next) => {
@@ -107,7 +158,7 @@ module.exports.getCompanyPageData = (req, res, next) => {
         }).catch(function(error) {
             return res.status(500).json({ error: error.message });
         });
-}
+};
 
 // UPDATE - Update a company
 module.exports.updateCompany = (req, res, next) => {
@@ -132,7 +183,7 @@ module.exports.updateCompany = (req, res, next) => {
         }).catch(function(error) {
             return res.status(500).json({ error: error.message });
         });
-}
+};
 
 // UPDATE - Update company logo only
 module.exports.updateCompanyLogo = (req, res, next) => {
@@ -155,7 +206,7 @@ module.exports.updateCompanyLogo = (req, res, next) => {
         }).catch(function(error) {
             return res.status(500).json({ error: error.message });
         });
-}
+};
 
 // UPDATE - Update company banner only
 module.exports.updateCompanyBanner = (req, res, next) => {
@@ -178,7 +229,7 @@ module.exports.updateCompanyBanner = (req, res, next) => {
         }).catch(function(error) {
             return res.status(500).json({ error: error.message });
         });
-}
+};
 
 // UPDATE - Update company profile only
 module.exports.updateCompanyProfile = (req, res, next) => {
@@ -201,12 +252,16 @@ module.exports.updateCompanyProfile = (req, res, next) => {
         }).catch(function(error) {
             return res.status(500).json({ error: error.message });
         });
-}
+};
 
 // DELETE - Soft delete a company
 module.exports.deleteCompany = (req, res, next) => {
     let companyId = req.params.id;
-    let userId = req.body.userId || 1;
+    const userId = getUserIdFromReq(req, res);
+    
+    if (!userId) {
+        return res.status(401).json({ error: "Unauthorized: User not authenticated" });
+    }
     
     return companyModel.getCompanyById(companyId)
         .then(function(existingCompany) {
@@ -214,7 +269,6 @@ module.exports.deleteCompany = (req, res, next) => {
                 return res.status(404).json({ error: "Company not found" });
             }
             
-            // Check if user owns this company
             let ownershipSql = `SELECT id FROM company_ownership WHERE user_id = $1 AND company_id = $2;`;
             return query(ownershipSql, [userId, companyId])
                 .then(function(ownership) {
@@ -235,14 +289,17 @@ module.exports.deleteCompany = (req, res, next) => {
         }).catch(function(error) {
             return res.status(500).json({ error: error.message });
         });
-}
+};
 
 // RESTORE - Restore a soft-deleted company
 module.exports.restoreCompany = (req, res, next) => {
     let companyId = req.params.id;
-    let userId = req.body.userId || 1;
+    const userId = getUserIdFromReq(req, res);
     
-    // Check if user owns this company
+    if (!userId) {
+        return res.status(401).json({ error: "Unauthorized: User not authenticated" });
+    }
+    
     let ownershipSql = `SELECT id FROM company_ownership WHERE user_id = $1 AND company_id = $2;`;
     return query(ownershipSql, [userId, companyId])
         .then(function(ownership) {
@@ -265,9 +322,9 @@ module.exports.restoreCompany = (req, res, next) => {
         }).catch(function(error) {
             return res.status(500).json({ error: error.message });
         });
-}
+};
 
-// GET - Get all deleted companies (admin)
+// GET - Get all deleted companies
 module.exports.getDeletedCompanies = (req, res, next) => {
     return companyModel.getDeletedCompanies()
         .then(function(deletedCompanies) {
@@ -275,4 +332,4 @@ module.exports.getDeletedCompanies = (req, res, next) => {
         }).catch(function(error) {
             return res.status(500).json({ error: error.message });
         });
-}
+};

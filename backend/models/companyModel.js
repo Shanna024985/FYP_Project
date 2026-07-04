@@ -1,6 +1,6 @@
 const { query } = require("../services/dbConnection");
 
-// CREATE - Create a company with logo, banner, and profile URLs
+// CREATE - Create a company
 module.exports.createCompany = function createCompany(companyData) {
     const { 
         name, url, contact_email, 
@@ -57,7 +57,7 @@ module.exports.getCompanyById = function getCompanyById(companyId) {
     });
 }
 
-// READ - Get company page data (jobs + reviews + rating + images)
+// READ - Get company page data
 module.exports.getCompanyPageData = function getCompanyPageData(companyId) {
     let sql = `SELECT c.id, c.name, c.url, c.contact_email, 
                c.tagline, c.description, c.city, c.address,
@@ -159,9 +159,8 @@ module.exports.updateCompanyProfile = function updateCompanyProfile(companyId, p
     });
 }
 
-// DELETE - Soft delete: Move company to deleted_companies table
+// DELETE - Soft delete
 module.exports.deleteCompany = function deleteCompany(companyId) {
-    // First, get the company data
     let getSql = `SELECT * FROM company WHERE id = $1;`;
     return query(getSql, [companyId]).then(function(companyResult) {
         if (companyResult.rows.length === 0) {
@@ -170,11 +169,9 @@ module.exports.deleteCompany = function deleteCompany(companyId) {
         
         const company = companyResult.rows[0];
         
-        // Store in deleted_companies table
         let insertSql = `INSERT INTO deleted_companies (company_id, company_data) 
                          VALUES ($1, $2) RETURNING id;`;
         return query(insertSql, [companyId, company]).then(function(insertResult) {
-            // Then delete from company table
             let deleteSql = `DELETE FROM company WHERE id = $1 RETURNING id;`;
             return query(deleteSql, [companyId]).then(function(deleteResult) {
                 return deleteResult.rows;
@@ -185,7 +182,6 @@ module.exports.deleteCompany = function deleteCompany(companyId) {
 
 // RESTORE - Restore a soft-deleted company
 module.exports.restoreCompany = function restoreCompany(companyId) {
-    // First, get the deleted company data
     let getSql = `SELECT company_data FROM deleted_companies WHERE company_id = $1 ORDER BY deleted_at DESC LIMIT 1;`;
     return query(getSql, [companyId]).then(function(deletedResult) {
         if (deletedResult.rows.length === 0) {
@@ -194,7 +190,6 @@ module.exports.restoreCompany = function restoreCompany(companyId) {
         
         const companyData = deletedResult.rows[0].company_data;
         
-        // Restore to company table
         let insertSql = `INSERT INTO company (
             id, name, url, contact_email, 
             logo_url, banner_url, profile_url,
@@ -214,7 +209,6 @@ module.exports.restoreCompany = function restoreCompany(companyId) {
             companyData.city,
             companyData.address
         ]).then(function(restoreResult) {
-            // Delete from deleted_companies
             let deleteSql = `DELETE FROM deleted_companies WHERE company_id = $1;`;
             return query(deleteSql, [companyId]).then(function() {
                 return restoreResult.rows;
@@ -223,7 +217,7 @@ module.exports.restoreCompany = function restoreCompany(companyId) {
     });
 }
 
-// GET - Get all deleted companies (for admin)
+// GET - Get all deleted companies
 module.exports.getDeletedCompanies = function getDeletedCompanies() {
     let sql = `SELECT * FROM deleted_companies ORDER BY deleted_at DESC;`;
     return query(sql, []).then(function(result) {
