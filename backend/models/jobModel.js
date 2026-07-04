@@ -560,7 +560,7 @@ module.exports.getRecommendedJobs = function getRecommendedJobs(userId, limit = 
 module.exports.getJobById = function getJobById(jobId, userId = null) {
     let sql = `SELECT j.*, c.name as company_name, c.city, 
                c.description as company_description, c.contact_email as company_email,
-               c.logo_file_name, c.tagline as company_tagline, c.url as company_url,
+                c.tagline as company_tagline, c.url as company_url,
                (SELECT COUNT(*) FROM application WHERE job_id = j.id) as application_count,
                (SELECT COUNT(*) FROM saved_job WHERE job_id = j.id) as saved_count`;
     
@@ -615,7 +615,7 @@ module.exports.updateJob = function updateJob(jobId, jobData, companyId) {
         title, description, category, type, 
         salary_range_from, salary_range_to, salary_type, salary_period,
         duration, deadline, experience, career_level, location, 
-        jobs_needed, reports 
+        jobs_needed, reports, status 
     } = jobData;
     
     // Normalize values for update
@@ -643,15 +643,16 @@ module.exports.updateJob = function updateJob(jobId, jobData, companyId) {
                    career_level = COALESCE($12, career_level),
                    location = COALESCE($13, location),
                    jobs_needed = COALESCE($14, jobs_needed),
-                   reports = COALESCE($15, reports)
-               WHERE id = $16 AND company_id = $17
+                   reports = COALESCE($15, reports),
+                   status = COALESCE($16, status)
+               WHERE id = $17 AND company_id = $18
                RETURNING *;`;
     
     return query(sql, [
         title, description, normalizedCategory, normalizedType,
         salary_range_from, salary_range_to, normalizedSalaryType,
         normalizedSalaryPeriod, normalizedDuration, deadline, normalizedExperience, 
-        normalizedCareerLevel, mappedLocation, jobs_needed, reports, jobId, companyId
+        normalizedCareerLevel, mappedLocation, jobs_needed, reports,status ,jobId, companyId
     ]).then(function(result) {
         return result.rows;
     });

@@ -19,6 +19,8 @@ import {
   SelectValue,
 } from "./components/ui/select";
 import { CompanyPage } from "./CompanyPage";
+import { Spinner } from "./components/ui/spinner";
+import SuccessfulJobScreen from "./SuccessfulJobScreen";
 type Props = {
   currentUrl: String;
 };
@@ -256,6 +258,7 @@ const AddCompanies = (prop: Props) => {
       label: "Other",
     },
   ]);
+  let [textOfButton, setTextOfButton] = React.useState("Create");
   let [totalReviews, setTotalReviews] = React.useState(0);
   let [averageRating, setAverageRating] = React.useState(4.5);
   let [companyTypeChosen, setCompanyTypeChosen] = useState("");
@@ -263,7 +266,16 @@ const AddCompanies = (prop: Props) => {
   let [imageOfBanner, setBannerImage] = useState("");
   let [uploadedImageOfProfile, setUploadedImageOfProfile] = useState<File>();
   let [uploadedImageOfBanner, setUploadedImageOfBanner] = useState<File>();
+  let [classesOfLoadingLogo, setClassesOfLoadingLogo] = React.useState("hidden");
+  let [finishedAddingCompany, setFinishAddingCompany] = React.useState(false);
+  let [linkForRedirect, setLinkForRedirect] = React.useState("/company")
+  if (finishedAddingCompany){
+    return (
+      <SuccessfulJobScreen successMessage="Your company has been successfully added! Click the button below to view your company" successTitle="Success" buttonMessage="View Company" linkForRedirect={linkForRedirect}/>
+    )
+  }
   return (
+
     <div>
       <p className="text-left text-3xl font-semibold">Add companies</p>
       <hr className="mt-4" />
@@ -272,9 +284,17 @@ const AddCompanies = (prop: Props) => {
           <form
             onSubmit={(e) => {
               e.preventDefault();
+
+              let button = document.getElementById("creatingCompanyButton");
+              if (button) {
+                setTextOfButton("Processing");
+                setClassesOfLoadingLogo("")
+                button.setAttribute("disabled", "");
+              }
               const formDataForProfile = new FormData();
               if (uploadedImageOfProfile) {
                 formDataForProfile.append("logo", uploadedImageOfProfile);
+
                 fetch(prop.currentUrl + "/upload/company-logo", {
                   method: "POST",
                   body: formDataForProfile,
@@ -289,7 +309,7 @@ const AddCompanies = (prop: Props) => {
                     }
                   })
                   .then((valueOfProfile) => {
-                    console.log(valueOfProfile)
+                    console.log(valueOfProfile);
                     let newFormDataForBanner = new FormData();
                     if (uploadedImageOfBanner) {
                       newFormDataForBanner.append(
@@ -321,7 +341,7 @@ const AddCompanies = (prop: Props) => {
                             tagline: companyTypeChosen,
                             description: overviewPage,
                             city: location.split(",")[0],
-                            address: locationCoordinates
+                            address: locationCoordinates,
                           });
 
                           fetch(prop.currentUrl + "/company", {
@@ -334,9 +354,14 @@ const AddCompanies = (prop: Props) => {
                             },
                           }).then((valuesReturned) => {
                             if (valuesReturned.status == 201) {
-                              alert("Successfully added the company");
+                              return valuesReturned.json()
+                          
                             }
-                          });
+                          }).then((valueToDoChangeInPage)=>{
+                            setLinkForRedirect("/company?id=" + valueToDoChangeInPage.company.id)
+                              setFinishAddingCompany(true)
+                          })
+                          
                         });
                     }
                   });
@@ -524,8 +549,13 @@ const AddCompanies = (prop: Props) => {
               </Field>
             </FieldGroup>
             <div className="justify-self-start">
-              <Button className="mt-5" type="submit">
-                Create
+              <Button className="mt-5" type="submit" id="creatingCompanyButton">
+                <Spinner
+                  data-icon="inline-start"
+                  className={classesOfLoadingLogo}
+                  id="loadingLogo"
+                />
+                {textOfButton}
               </Button>
             </div>
           </form>

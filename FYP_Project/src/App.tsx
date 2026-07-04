@@ -26,6 +26,7 @@ import { CompanyPageRenderer } from "./CompanyPage";
 import CompanyReviews from "./CompanyReviews";
 import AddCompanies from "./AddCompanies";
 import Messages from "./Messages";
+import SuccessfulJobScreen from "./SuccessfulJobScreen";
 const linkForBackend = "http://localhost:3000/api";
 function App() {
   const [count, setCount] = useState(0);
