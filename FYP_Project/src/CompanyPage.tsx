@@ -170,7 +170,7 @@ export const CompanyPageRenderer = (prop: Props) => {
     let address = new URL(window.location.href);
     let queryParameters = address.searchParams;
     let id = queryParameters.get("id");
-    fetch(prop.currentUrl + "/company/" + id + "/page")
+    fetch(prop.currentUrl + "/company/page/" + id )
       .then((value) => {
         return value.json();
       })
