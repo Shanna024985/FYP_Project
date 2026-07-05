@@ -681,140 +681,72 @@ module.exports.updateJobStatus = function updateJobStatus(jobId, status, company
 // ==================== APPLICATIONS ====================
 
 // CREATE - Apply for a job
-module.exports.applyForJob = (req, res, next) => {
-    const userId = getUserIdFromReq(req, res);  // ← Get from token
-    let jobId = req.params.id;
-    let resumeId = req.body.resumeId;
-    
-    if (!userId) {
-        return res.status(401).json({ error: "Unauthorized: User not authenticated" });
-    }
-    
-    if (!resumeId) {
-        return res.status(400).json({ error: "Resume ID is required" });
-    }
-    
-    return jobModel.applyForJob(userId, jobId, resumeId)
-        .then(function(result) {
-            if (result.alreadyApplied) {
-                return res.status(400).json({ 
-                    error: "Already applied", 
-                    status: result.status 
-                });
-            }
-            res.status(201).json({ 
-                message: "Application submitted successfully", 
-                application: result.application 
-            });
-        }).catch(function(error) {
-            return res.status(500).json({ error: error.message });
+module.exports.applyForJob = function applyForJob(userId, jobId, resumeId) {
+    let checkSql = `SELECT id, status FROM application WHERE user_id = $1 AND job_id = $2;`;
+    return query(checkSql, [userId, jobId]).then(function(checkResult) {
+        if (checkResult.rows.length > 0) {
+            return { alreadyApplied: true, status: checkResult.rows[0].status };
+        }
+        
+        let sql = `INSERT INTO application (job_id, user_id, resume_id, status, time_applied) 
+                   VALUES ($1, $2, $3, 'Reviewing', CURRENT_TIMESTAMP) 
+                   RETURNING *;`;
+        return query(sql, [jobId, userId, resumeId]).then(function(result) {
+            return { alreadyApplied: false, application: result.rows[0] };
         });
+    });
 }
 
-// READ - Get my applications
-module.exports.getMyApplications = (req, res, next) => {
-    const userId = getUserIdFromReq(req, res);  // ← Get from token
-    
-    if (!userId) {
-        return res.status(401).json({ error: "Unauthorized: User not authenticated" });
-    }
-    
-    return jobModel.getApplicationsByUser(userId)
-        .then(function(applications) {
-            return jobModel.getApplicationStatusCount(userId).then(function(stats) {
-                res.json({ 
-                    count: applications.length, 
-                    applications: applications,
-                    stats: stats
-                });
-            });
-        }).catch(function(error) {
-            return res.status(500).json({ error: error.message });
-        });
-}
-
-// READ - Get application stats
-module.exports.getApplicationStats = (req, res, next) => {
-    const userId = getUserIdFromReq(req, res);  // ← Get from token
-    
-    if (!userId) {
-        return res.status(401).json({ error: "Unauthorized: User not authenticated" });
-    }
-    
-    return jobModel.getApplicationStatusCount(userId)
-        .then(function(stats) {
-            let total = 0;
-            stats.forEach(function(stat) {
-                total += parseInt(stat.count);
-            });
-            res.json({ stats: stats, total: total });
-        }).catch(function(error) {
-            return res.status(500).json({ error: error.message });
-        });
+// READ - Get applications by user with job details
+module.exports.getApplicationsByUser = function getApplicationsByUser(userId) {
+    let sql = `SELECT a.*, j.title, j.description, j.location, 
+               j.salary_range_from, j.salary_range_to, j.type, j.duration,
+               c.name as company_name, c.id as company_id, c.logo_url,
+               c.city as company_city
+               FROM application a
+               JOIN job j ON a.job_id = j.id
+               JOIN company c ON j.company_id = c.id
+               WHERE a.user_id = $1
+               ORDER BY a.time_applied DESC;`;
+    return query(sql, [userId]).then(function(result) {
+        return result.rows;
+    });
 }
 
 // READ - Get applications by job (for employer)
-module.exports.getJobApplications = (req, res, next) => {
-    let jobId = req.params.id;
-    
-    return jobModel.getApplicationsByJob(jobId)
-        .then(function(applications) {
-            res.json({ count: applications.length, applications: applications });
-        }).catch(function(error) {
-            return res.status(500).json({ error: error.message });
-        });
+module.exports.getApplicationsByJob = function getApplicationsByJob(jobId) {
+    let sql = `SELECT a.*, u.singpass_id as user_identifier,
+               ud.first_name, ud.last_name, ud.email
+               FROM application a
+               JOIN user_ u ON a.user_id = u.id
+               LEFT JOIN user_detail ud ON u.id = ud.user_id
+               WHERE a.job_id = $1
+               ORDER BY a.time_applied DESC;`;
+    return query(sql, [jobId]).then(function(result) {
+        return result.rows;
+    });
+}
+
+// READ - Get application status count for a user
+module.exports.getApplicationStatusCount = function getApplicationStatusCount(userId) {
+    let sql = `SELECT status, COUNT(*) as count 
+               FROM application 
+               WHERE user_id = $1 
+               GROUP BY status;`;
+    return query(sql, [userId]).then(function(result) {
+        return result.rows;
+    });
 }
 
 // UPDATE - Update application status
-module.exports.updateApplicationStatus = (req, res, next) => {
-    let applicationId = req.params.applicationId;
-    let { status, remarks } = req.body;
-    
-    if (!status) {
-        return res.status(400).json({ error: "Status is required" });
-    }
-    
-    return jobModel.updateApplicationStatus(applicationId, status, remarks)
-        .then(function(updated) {
-            if (updated.length == 0) {
-                return res.status(404).json({ error: "Application not found" });
-            }
-            res.json({ message: "Application status updated", application: updated[0] });
-        }).catch(function(error) {
-            return res.status(500).json({ error: error.message });
-        });
-}
-
-// DELETE - Delete an application
-module.exports.deleteApplication = (req, res, next) => {
-    let applicationId = req.params.applicationId;
-    const userId = getUserIdFromReq(req, res);  // ← Get from token
-    
-    if (!userId) {
-        return res.status(401).json({ error: "Unauthorized: User not authenticated" });
-    }
-
-    let checkSql = `SELECT id FROM application WHERE id = $1 AND user_id = $2;`;
-    
-    return query(checkSql, [applicationId, userId])
-        .then(function(checkResult) {
-            if (checkResult.rows.length === 0) {
-                return res.status(404).json({ 
-                    error: "Application not found or you don't own it" 
-                });
-            }
-            
-            let deleteSql = `DELETE FROM application WHERE id = $1 AND user_id = $2 RETURNING id;`;
-            return query(deleteSql, [applicationId, userId])
-                .then(function(result) {
-                    res.json({ 
-                        message: "Application deleted successfully", 
-                        deletedId: result.rows[0].id 
-                    });
-                });
-        }).catch(function(error) {
-            return res.status(500).json({ error: error.message });
-        });
+module.exports.updateApplicationStatus = function updateApplicationStatus(applicationId, status, remarks) {
+    let sql = `UPDATE application 
+               SET status = $1, remarks = COALESCE($2, remarks)
+               WHERE id = $3
+               RETURNING *;`;
+    return query(sql, [status, remarks, applicationId]).then(function(result) {
+        return result.rows;
+    });
 }
 
 // ==================== SAVED JOBS ====================
