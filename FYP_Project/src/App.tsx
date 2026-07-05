@@ -34,7 +34,6 @@ function App() {
         <Route path="/jobDetails" element={<JobDetails currentUrl={linkForBackend} />} />
         <Route path="/login" element={<LoginPage currentUrl={linkForBackend} />} />
         <Route path="/login/callback" element={<LoginCallbackPage currentUrl={linkForBackend}/>} />
-        <Route path="/applyjob" element={<ApplyJobPage currentUrl={linkForBackend}/>} />
         {/* PROTECTED AREA */}
         <Route element={<ProtectedLayout />}>
           <Route
@@ -74,6 +73,7 @@ function App() {
             path="/jobSeeker/ratings"
             element={<JobSeekerRatingsPage currentUrl={linkForBackend} />}
           />
+          <Route path="/applyjob" element={<ApplyJobPage currentUrl={linkForBackend}/>} />
         </Route>
       </Routes>
       <Toaster position="top-center" />

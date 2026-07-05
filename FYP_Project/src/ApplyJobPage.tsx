@@ -1,11 +1,12 @@
-import { useState } from "react";
 import { Upload } from "lucide-react";
 import { useRef } from "react";
 import JobListItem from "./components/common sections/JobListItem";
-
+import { useSearchParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import axios from "axios";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-
+import { toast } from "sonner";
 import type { Job } from "@/types/job";
 import NavigationMenus from "./NavigationMenu";
 import Sidebar from "./Sidebar";
@@ -16,18 +17,78 @@ type Props = {
 
 export default function ApplyJobPage({ currentUrl }: Props) {
   const token = localStorage.getItem("token");
+  const [searchParams] = useSearchParams();
+  const jobId = searchParams.get("id");
 
-  const [job] = useState<Job>({
-    id: 1,
-    title: "Frontend Developer",
-    description: "Build responsive React applications.",
-    salary: "$3000 - $5000",
-    location: "Singapore",
-    tags: ["React", "TypeScript"],
-    date: "12 Aug 2026",
-    companyLogo: "https://placehold.co/100x100",
+  const [job, setJob] = useState<Job | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [company, setCompany] = useState<any>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const phoneRef = useRef<HTMLInputElement>(null);
+  const proposalRef = useRef<HTMLTextAreaElement>(null);
+  const [errors, setErrors] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    proposal: "",
+    resume: "",
+  });
+  const isValidEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+  type Resume = {
+    id: number;
+    user_id: number;
+    file_name: string;
+    file_data: string;
+    is_default: boolean;
+  };
+
+  const [profile, setProfile] = useState({
+    first_name: "",
+    last_name: "",
+    email: "",
+    phone_number: "",
   });
 
+  const [resumes, setResumes] = useState<Resume[]>([]);
+  const [uploadNewResume, setUploadNewResume] = useState(false);
+  const fetchProfile = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await axios.get(`${currentUrl}/user/profile`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setProfile({
+        first_name: res.data.profile.first_name || "",
+        last_name: res.data.profile.last_name || "",
+        email: res.data.profile.email || "",
+        phone_number: res.data.profile.phone_number || "",
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  const fetchResumes = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await axios.get(`${currentUrl}/resumes/user`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setResumes(res.data.resumes);
+    } catch (err) {
+      console.error(err);
+    }
+  };
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -35,271 +96,466 @@ export default function ApplyJobPage({ currentUrl }: Props) {
     proposal: "",
     resume: null as File | null,
   });
+  useEffect(() => {
+    if (!token) return;
 
-  const [useDefaultResume, setUseDefaultResume] = useState(true);
+    fetchProfile();
+    fetchResumes();
+  }, [token, currentUrl]);
+  useEffect(() => {
+    if (!jobId) return;
 
-  const hasDefaultResume = token;
+    const fetchData = async () => {
+      try {
+        // Fetch job
+        const jobRes = await axios.get(`${currentUrl}/jobs/${jobId}`);
+        const jobData = jobRes.data.job;
 
-  const handleSubmit = () => {
-    console.log({
-      currentUrl,
-      jobId: job.id,
-      ...form,
-      useDefaultResume,
-    });
+        setJob(jobData);
 
-    // backend later
+        // Fetch company
+        const companyRes = await axios.get(
+          `${currentUrl}/company/${jobData.company_id}`,
+        );
+
+        setCompany(companyRes.data.company);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [jobId, currentUrl]);
+
+  useEffect(() => {
+    setForm((prev) => ({
+      ...prev,
+      name: `${profile.first_name} ${profile.last_name}`.trim(),
+      email: profile.email,
+      phone: profile.phone_number,
+    }));
+  }, [profile]);
+  const [selectedResumeId, setSelectedResumeId] = useState<number | null>(null);
+  useEffect(() => {
+    if (resumes.length === 0) return;
+
+    const defaultResume = resumes.find((r) => r.is_default);
+
+    if (defaultResume) {
+      setSelectedResumeId(defaultResume.id);
+    } else {
+      setSelectedResumeId(resumes[0].id);
+    }
+  }, [resumes]);
+
+  const defaultResume = resumes.find((resume) => resume.is_default);
+  const hasDefaultResume = !!defaultResume;
+
+  const handleSubmit = async () => {
+    if (!job) return;
+
+    const newErrors = {
+      name: form.name.trim() ? "" : "Name is required.",
+
+      email: !form.email.trim()
+        ? "Email is required."
+        : !isValidEmail(form.email)
+          ? "Please enter a valid email address."
+          : "",
+
+      phone: form.phone.trim() ? "" : "Phone number is required.",
+
+      proposal: form.proposal.trim() ? "" : "Proposal is required.",
+
+      resume: uploadNewResume
+        ? form.resume
+          ? ""
+          : "Please upload a resume."
+        : selectedResumeId
+          ? ""
+          : "Please select a resume.",
+    };
+
+    setErrors(newErrors);
+
+    if (newErrors.name) {
+      nameRef.current?.focus();
+      return;
+    }
+
+    if (newErrors.email) {
+      emailRef.current?.focus();
+      return;
+    }
+
+    if (newErrors.phone) {
+      phoneRef.current?.focus();
+      return;
+    }
+
+    if (newErrors.proposal) {
+      proposalRef.current?.focus();
+      return;
+    }
+
+    if (newErrors.resume) {
+      return;
+    }
+
+    try {
+      const res = await axios.post(
+        `${currentUrl}/jobs/${job.id}/apply`,
+        {
+          resumeId: selectedResumeId,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      console.log(res.data);
+      toast.success("Application submitted successfully.");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to submit application.");
+    }
   };
   const fileInputRef = useRef<HTMLInputElement>(null);
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!job || !company) {
+    return <div>Job not found.</div>;
+  }
   return (
-    <div className="flex">
-      {token && <Sidebar />}
-      <div className="flex-1 p-4">
-        <NavigationMenus />
-        <div className="w-full space-y-6">
-          {/* ROW 1 */}
-          <JobListItem
-            title={job.title}
-            description={job.description}
-            salary={job.salary}
-            location={job.location}
-            tags={job.tags}
-            date={job.date}
-            companyLogo={job.companyLogo}
-          />
+    <div className="flex-1 p-4">
+      <div className="w-full space-y-6">
+        {/* ROW 1 */}
+        <JobListItem
+          currentUrl={currentUrl}
+          jobId={job.id}
+          title={job.title}
+          description={job.description}
+          salaryRangeFrom={job.salary_range_from}
+          salaryRangeTo={job.salary_range_to}
+          salaryType={job.salary_type}
+          salaryPeriod={job.salary_period}
+          location={job.location}
+          tags={[job.category, job.type]}
+          date={new Date(job.created_at).toLocaleDateString("en-SG")}
+          companyLogo={`data:image/png;base64,${company?.logo_base64 ?? ""}`}
+        />
 
-          <Card>
-            <CardContent className="space-y-5">
-              {/* ROW 2 */}
-              <div>
-                <label className="font-medium">Name *</label>
+        <Card>
+          <CardContent className="space-y-5">
+            {/* ROW 2 */}
+            <div>
+              <label className="font-medium">Name *</label>
 
-                <input
-                  className="w-full border rounded-md p-2 mt-1"
-                  value={form.name}
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      name: e.target.value,
-                    })
-                  }
-                />
-              </div>
+              <input
+                ref={nameRef}
+                className="w-full border rounded-md p-2 mt-1"
+                value={form.name}
+                onChange={(e) => {
+                  setForm({ ...form, name: e.target.value });
 
-              {/* ROW 3 */}
-              <div>
-                <label className="font-medium">Email *</label>
+                  setErrors((prev) => ({
+                    ...prev,
+                    name: "",
+                  }));
+                }}
+              />
 
-                <input
-                  type="email"
-                  className="w-full border rounded-md p-2 mt-1"
-                  value={form.email}
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      email: e.target.value,
-                    })
-                  }
-                />
-              </div>
+              {errors.name && (
+                <p className="text-sm text-red-500">{errors.name}</p>
+              )}
+            </div>
 
-              {/* ROW 4 */}
-              <div>
-                <label className="font-medium">Phone *</label>
+            {/* ROW 3 */}
+            <div>
+              <label className="font-medium">Email *</label>
 
-                <input
-                  className="w-full border rounded-md p-2 mt-1"
-                  value={form.phone}
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      phone: e.target.value,
-                    })
-                  }
-                />
-              </div>
+              <input
+                ref={emailRef}
+                type="email"
+                className="w-full border rounded-md p-2 mt-1"
+                value={form.email}
+                onChange={(e) => {
+                  setForm({ ...form, email: e.target.value });
 
-              {/* ROW 5 */}
-              <div>
-                <label className="font-medium">Proposal *</label>
+                  setErrors((prev) => ({
+                    ...prev,
+                    email: "",
+                  }));
+                }}
+              />
 
-                <textarea
-                  rows={6}
-                  className="w-full border rounded-md p-2 mt-1"
-                  value={form.proposal}
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      proposal: e.target.value,
-                    })
-                  }
-                />
-              </div>
+              {errors.email && (
+                <p className="text-sm text-red-500">{errors.email}</p>
+              )}
+            </div>
 
-              {/* ROW 6 */}
-              <div className="space-y-3">
-                <label className="font-medium">Resume *</label>
+            {/* ROW 4 */}
+            <div>
+              <label className="font-medium">Phone *</label>
 
-                {/* ================= GUEST USER ================= */}
-                {!token && (
-                  <>
-                    {/* UPLOAD BOX */}
-                    <div
-                      onClick={() => fileInputRef.current?.click()}
-                      className="cursor-pointer border-2 border-dashed rounded-lg p-6 text-center hover:bg-muted transition"
-                    >
-                      <Upload className="mx-auto mb-2 text-muted-foreground" />
+              <input
+                ref={phoneRef}
+                className="w-full border rounded-md p-2 mt-1"
+                value={form.phone}
+                onChange={(e) => {
+                  setForm({ ...form, phone: e.target.value });
 
-                      <p className="text-sm font-medium">
-                        Click to upload resume
-                      </p>
+                  setErrors((prev) => ({
+                    ...prev,
+                    phone: "",
+                  }));
+                }}
+              />
 
-                      <p className="text-xs text-muted-foreground">
-                        PDF, DOC, DOCX (max 5MB)
-                      </p>
-                    </div>
+              {errors.phone && (
+                <p className="text-sm text-red-500">{errors.phone}</p>
+              )}
+            </div>
 
-                    {/* hidden input */}
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept=".pdf,.doc,.docx"
-                      className="hidden"
-                      onChange={(e) =>
-                        setForm({
-                          ...form,
-                          resume: e.target.files?.[0] ?? null,
-                        })
+            {/* ROW 5 */}
+            <div>
+              <label className="font-medium">Proposal *</label>
+
+              <textarea
+                ref={proposalRef}
+                rows={6}
+                className="w-full border rounded-md p-2 mt-1"
+                value={form.proposal}
+                onChange={(e) => {
+                  setForm({
+                    ...form,
+                    proposal: e.target.value,
+                  });
+
+                  setErrors((prev) => ({
+                    ...prev,
+                    proposal: "",
+                  }));
+                }}
+              />
+
+              {errors.proposal && (
+                <p className="text-sm text-red-500">{errors.proposal}</p>
+              )}
+            </div>
+
+            {/* ROW 6 */}
+            <div className="space-y-3">
+              <label className="font-medium">Resume *</label>
+              {errors.resume && (
+                <p className="text-sm text-red-500">{errors.resume}</p>
+              )}
+
+              {/* ================= GUEST USER ================= */}
+              {!token && (
+                <>
+                  {/* UPLOAD BOX */}
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="cursor-pointer border-2 border-dashed rounded-lg p-6 text-center hover:bg-muted transition"
+                  >
+                    <Upload className="mx-auto mb-2 text-muted-foreground" />
+
+                    <p className="text-sm font-medium">
+                      Click to upload resume
+                    </p>
+
+                    <p className="text-xs text-muted-foreground">
+                      PDF, DOC, DOCX (max 5MB)
+                    </p>
+                  </div>
+
+                  {/* hidden input */}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0] ?? null;
+
+                      setForm((prev) => ({
+                        ...prev,
+                        resume: file,
+                      }));
+
+                      if (file) {
+                        setUploadNewResume(true);
+                        setSelectedResumeId(null);
                       }
-                    />
+                    }}
+                  />
 
-                    {/* selected file */}
-                    {form.resume && (
-                      <div className="text-sm text-muted-foreground">
-                        Selected:{" "}
-                        <span className="font-medium">{form.resume.name}</span>
-                      </div>
-                    )}
-                  </>
-                )}
-
-                {/* ================= LOGGED IN USER ================= */}
-                {token && hasDefaultResume && (
-                  <>
-                    {/* DEFAULT RESUME */}
-                    <div className="rounded-md border p-3">
-                      <p className="text-sm text-muted-foreground">
-                        Current Resume:
-                      </p>
-                      <div className="font-medium">resume.pdf</div>
+                  {/* selected file */}
+                  {form.resume && (
+                    <div className="text-sm text-muted-foreground">
+                      Selected:{" "}
+                      <span className="font-medium">{form.resume.name}</span>
                     </div>
+                  )}
+                </>
+              )}
 
-                    {/* USE DEFAULT CHECKBOX */}
-                    <label className="flex items-center gap-2 text-sm">
-                      <input
-                        type="checkbox"
-                        checked={useDefaultResume}
-                        onChange={(e) => setUseDefaultResume(e.target.checked)}
-                      />
-                      Use default resume
-                    </label>
+              {token && resumes.length > 0 && (
+                <div className="space-y-3">
+                  <label className="font-medium">Choose Resume</label>
 
-                    {/* UPLOAD BOX (override option) */}
-                    {!useDefaultResume && (
-                      <>
-                        <div
-                          onClick={() => fileInputRef.current?.click()}
-                          className="cursor-pointer border-2 border-dashed rounded-lg p-6 text-center hover:bg-muted transition"
-                        >
-                          <Upload className="mx-auto mb-2 text-muted-foreground" />
-
-                          <p className="text-sm font-medium">
-                            Upload new resume
-                          </p>
-
-                          <p className="text-xs text-muted-foreground">
-                            PDF, DOC, DOCX (max 5MB)
-                          </p>
-                        </div>
-
-                        {/* hidden input */}
+                  {resumes.map((resume) => (
+                    <label
+                      key={resume.id}
+                      className="flex items-center justify-between rounded-lg border p-3 cursor-pointer"
+                    >
+                      <div className="flex items-center gap-3">
                         <input
-                          ref={fileInputRef}
-                          type="file"
-                          accept=".pdf,.doc,.docx"
-                          className="hidden"
-                          onChange={(e) =>
-                            setForm({
-                              ...form,
-                              resume: e.target.files?.[0] ?? null,
-                            })
-                          }
+                          type="radio"
+                          name="resume"
+                          checked={selectedResumeId === resume.id}
+                          onChange={() => {
+                            setSelectedResumeId(resume.id);
+                            setUploadNewResume(false);
+
+                            setForm((prev) => ({
+                              ...prev,
+                              resume: null,
+                            }));
+
+                            setErrors((prev) => ({
+                              ...prev,
+                              resume: "",
+                            }));
+                          }}
                         />
 
-                        {/* selected file */}
-                        {form.resume && (
-                          <div className="text-sm text-muted-foreground">
-                            Selected:{" "}
-                            <span className="font-medium">
-                              {form.resume.name}
-                            </span>
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </>
-                )}
+                        <div>
+                          <div className="font-medium">{resume.file_name}</div>
 
-                {/* ================= LOGGED IN NO RESUME ================= */}
-                {token && !hasDefaultResume && (
-                  <>
-                    {/* UPLOAD BOX (required) */}
-                    <div
+                          {resume.is_default && (
+                            <p className="text-xs text-green-600">
+                              Default Resume
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </label>
+                  ))}
+                  <div className="border-t pt-4">
+                    <Button
+                      type="button"
+                      variant="outline"
                       onClick={() => fileInputRef.current?.click()}
-                      className="cursor-pointer border-2 border-dashed rounded-lg p-6 text-center hover:bg-muted transition"
                     >
-                      <Upload className="mx-auto mb-2 text-muted-foreground" />
+                      <Upload className="mr-2 h-4 w-4" />
+                      Upload New Resume Instead
+                    </Button>
 
-                      <p className="text-sm font-medium">
-                        Upload resume (required)
-                      </p>
-
-                      <p className="text-xs text-muted-foreground">
-                        PDF, DOC, DOCX (max 5MB)
-                      </p>
-                    </div>
-
-                    {/* hidden input */}
                     <input
                       ref={fileInputRef}
                       type="file"
                       accept=".pdf,.doc,.docx"
                       className="hidden"
-                      onChange={(e) =>
-                        setForm({
-                          ...form,
-                          resume: e.target.files?.[0] ?? null,
-                        })
-                      }
+                      onChange={(e) => {
+                        const file = e.target.files?.[0] ?? null;
+
+                        setForm((prev) => ({
+                          ...prev,
+                          resume: file,
+                        }));
+
+                        if (file) {
+                          setUploadNewResume(true);
+                          setSelectedResumeId(null);
+
+                          setErrors((prev) => ({
+                            ...prev,
+                            resume: "",
+                          }));
+                        }
+                      }}
                     />
 
-                    {/* selected file */}
-                    {form.resume && (
-                      <div className="text-sm text-muted-foreground">
-                        Selected:{" "}
-                        <span className="font-medium">{form.resume.name}</span>
+                    {uploadNewResume && form.resume && (
+                      <div className="mt-3 rounded-md border bg-muted p-3">
+                        <p className="font-medium">{form.resume.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          This uploaded resume will be used instead of your
+                          saved resumes.
+                        </p>
                       </div>
                     )}
-                  </>
-                )}
-              </div>
+                  </div>
+                </div>
+              )}
+              {token && resumes.length === 0 && (
+                <>
+                  {/* UPLOAD BOX (required) */}
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="cursor-pointer border-2 border-dashed rounded-lg p-6 text-center hover:bg-muted transition"
+                  >
+                    <Upload className="mx-auto mb-2 text-muted-foreground" />
 
-              <Button className="w-full" onClick={handleSubmit}>
-                Submit Application
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+                    <p className="text-sm font-medium">
+                      Upload resume (required)
+                    </p>
+
+                    <p className="text-xs text-muted-foreground">
+                      PDF, DOC, DOCX (max 5MB)
+                    </p>
+                  </div>
+
+                  {/* hidden input */}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0] ?? null;
+
+                      setForm((prev) => ({
+                        ...prev,
+                        resume: file,
+                      }));
+
+                      if (file) {
+                        setUploadNewResume(true);
+                        setSelectedResumeId(null);
+
+                        setErrors((prev) => ({
+                          ...prev,
+                          resume: "",
+                        }));
+                      }
+                    }}
+                  />
+
+                  {/* selected file */}
+                  {form.resume && (
+                    <div className="text-sm text-muted-foreground">
+                      Selected:{" "}
+                      <span className="font-medium">{form.resume.name}</span>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+
+            <Button className="w-full" onClick={handleSubmit}>
+              Submit Application
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
