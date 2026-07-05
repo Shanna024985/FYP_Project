@@ -100,8 +100,11 @@ module.exports.getCompaniesByUser = (req, res, next) => {
                         'salary_period', j.salary_period,
                         'duration', j.duration,
                         'created_at', j.created_at,
-                        'updated_at', j.updated_at
-                   )) FROM job j WHERE j.company_id = c.id AND j.status = 'Active'
+                        'updated_at', j.updated_at,
+                        'deadline', j.deadline,
+                        'type',j.type,
+                        'status', j.status
+                   )) FROM job j WHERE j.company_id = c.id 
                ), '[]') as active_jobs_list
                FROM company c
                JOIN company_ownership co ON c.id = co.company_id

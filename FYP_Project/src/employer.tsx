@@ -66,6 +66,22 @@ type JobsObject = {
   company_name: string;
   company_city: string;
 };
+type Company = {
+  id: number;
+  name: string;
+  url: string;
+  contact_email: string;
+  tagline: string;
+  description: string;
+  city: string;
+  address: string | null;
+  logo_url: string;
+  banner_url: string | null;
+  profile_url: string | null;
+  total_jobs: string;
+  active_jobs: string;
+  active_jobs_list: JobsObject[];
+};
 const Employer = (props: Props) => {
   if (localStorage.getItem("companyId") == null) {
     return (
@@ -119,24 +135,30 @@ let EmployerPage = (props: Props) => {
   let [toSearchDataOfJobs, setToSearchDataOfJobs] = useState<JobsObject[]>([]);
   const navigate = useNavigate();
   useEffect(() => {
-    fetch(
-      props.currentUrl +
-        "/jobs/company/" +
-        localStorage.getItem("companyId") +
-        "/jobs",
-    )
+    fetch(props.currentUrl + "/company/user/companies", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+    })
       .then((value) => {
         return value.json();
       })
       .then((valueForJobs) => {
         let newDataOfJobs: JobsObject[] = [];
-        let jobs: JobsObject[] = valueForJobs.jobs;
+        let jobs: Company[] = valueForJobs.companies;
         jobs.forEach((element, index) => {
-          newDataOfJobs.push(element);
-          if (index == jobs.length - 1) {
-            setDataOfJobs(newDataOfJobs);
-            setToSearchDataOfJobs(newDataOfJobs);
-          }
+          let jobList: JobsObject[] = element.active_jobs_list;
+          console.log(jobList)
+          jobList.forEach((valuesOfJobsForShown, index) => {
+            console.log(valuesOfJobsForShown)
+            newDataOfJobs.push(valuesOfJobsForShown);
+            if (index == jobs.length - 1) {
+              setDataOfJobs(newDataOfJobs);
+              setToSearchDataOfJobs(newDataOfJobs);
+            }
+          });
         });
       });
   }, []);
@@ -232,8 +254,10 @@ let EmployerPage = (props: Props) => {
                                   alert("Job status have been saved");
                                 }
                               });
-                            } else if ( value.status == "Closed" &&
-                              value.status != valueOfInput){
+                            } else if (
+                              value.status == "Closed" &&
+                              value.status != valueOfInput
+                            ) {
                               fetch(
                                 props.currentUrl +
                                   "/jobs/" +

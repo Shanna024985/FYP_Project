@@ -31,6 +31,30 @@ type stages = {
   setStage: Function;
   currentUrl: String;
 };
+type JobsObject = {
+  id: number;
+  company_id: number;
+  title: string;
+  description: string;
+  category: string;
+  type: string;
+  status: string;
+  salary_range_from: number;
+  salary_range_to: number;
+  salary_type: string;
+  salary_period: string;
+  duration: string;
+  deadline: string;
+  experience: string;
+  career_level: string;
+  location: string;
+  jobs_needed: number;
+  reports: string;
+  created_at: string;
+  updated_at: string;
+  company_name: string;
+  company_city: string;
+};
 type Company = {
   id: number;
   name: string;
@@ -45,6 +69,7 @@ type Company = {
   profile_url: string | null;
   total_jobs: string;
   active_jobs: string;
+  active_job_list: JobsObject[]
 };
 const StepOneOfJobPostings = (props: stages) => {
   let [itemsForCompanySelect, setItemsForCompanySelect] = useState<string[]>([
