@@ -505,19 +505,23 @@ module.exports.applyForJob = (req, res, next) => {
     }
     
     return jobModel.applyForJob(userId, jobId, resumeId)
-        .then(function(result) {
-            if (result.alreadyApplied) {
-                return res.status(400).json({ 
-                    error: "Already applied", 
-                    status: result.status 
+        .then(application => {
+            res.status(201).json({
+                message: "Application submitted successfully",
+                application
+            });
+        })
+        .catch(error => {
+
+            if (error.code === "23505") {
+                return res.status(409).json({
+                    error: "You have already applied for this job."
                 });
             }
-            res.status(201).json({ 
-                message: "Application submitted successfully", 
-                application: result.application 
+
+            res.status(500).json({
+                error: error.message
             });
-        }).catch(function(error) {
-            return res.status(500).json({ error: error.message });
         });
 }
 

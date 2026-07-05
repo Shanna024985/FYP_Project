@@ -255,9 +255,12 @@ export default function ApplyJobPage({ currentUrl }: Props) {
 
       console.log(res.data);
       toast.success("Application submitted successfully.");
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to submit application.");
+    } catch (err: any) {
+      if (err.response?.status === 409) {
+        toast.error("You have already applied for this job.");
+      } else {
+        toast.error("Failed to submit application.");
+      }
     }
   };
   const fileInputRef = useRef<HTMLInputElement>(null);
