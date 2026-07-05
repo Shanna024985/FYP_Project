@@ -20,7 +20,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-  SelectLabel
+  SelectLabel,
 } from "./components/ui/select";
 import { Button } from "./components/ui/button";
 type Props = {
@@ -29,10 +29,47 @@ type Props = {
 type stages = {
   stage: Number;
   setStage: Function;
+  currentUrl: String;
 };
-
+type Company = {
+  id: number;
+  name: string;
+  url: string;
+  contact_email: string;
+  tagline: string;
+  description: string;
+  city: string;
+  address: string | null;
+  logo_url: string;
+  banner_url: string | null;
+  profile_url: string | null;
+  total_jobs: string;
+  active_jobs: string;
+};
 const StepOneOfJobPostings = (props: stages) => {
-  let [itemsForCompanySelect, setItemsForCompanySelect] = useState<string[]>([""])
+  let [itemsForCompanySelect, setItemsForCompanySelect] = useState<string[]>([
+    "Birds", "Apple","tea",
+  ]);
+  useEffect(() => {
+    fetch(props.currentUrl + "/company/user/companies", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+    }).then((value)=>{
+      return value.json()
+    }).then((values)=>{
+      let companysarray: Company[] = values.companies 
+      let newArray: string[]= []
+      if (companysarray){
+        companysarray.forEach(element => {
+          newArray.push(element.name)
+        });
+      }
+      setItemsForCompanySelect(newArray)
+    })
+  }, []);
   return (
     <>
       <div>
@@ -102,9 +139,17 @@ const StepOneOfJobPostings = (props: stages) => {
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectItem value={"birds"}>Birds</SelectItem>
+                  {/* <SelectItem value={"birds"}>Birds</SelectItem>
                   <SelectItem value={"apple"}>Apple</SelectItem>
-                  <SelectItem value={"tealive"}>Tealive</SelectItem>
+                  <SelectItem value={"tealive"}>Tealive</SelectItem> */}
+                  {
+                    itemsForCompanySelect.map((valuesOfCompany)=>{
+                      return (
+                      <>
+                      <SelectItem value={valuesOfCompany}>{valuesOfCompany}</SelectItem>
+                      </>)
+                    })
+                  }
                 </SelectGroup>
               </SelectContent>
             </Select>
@@ -349,15 +394,27 @@ export const Tick = () => {
 const ConditionalRenderer = (props: stages) => {
   if (props.stage == 1) {
     return (
-      <StepOneOfJobPostings setStage={props.setStage} stage={props.stage} />
+      <StepOneOfJobPostings
+        setStage={props.setStage}
+        stage={props.stage}
+        currentUrl={props.currentUrl}
+      />
     );
   } else if (props.stage == 2) {
     return (
-      <StepTwoOfJobPostings setStage={props.setStage} stage={props.stage} />
+      <StepTwoOfJobPostings
+        setStage={props.setStage}
+        stage={props.stage}
+        currentUrl={props.currentUrl}
+      />
     );
   } else if (props.stage == 3) {
     return (
-      <StepThreeOfJobPostings setStage={props.setStage} stage={props.stage} />
+      <StepThreeOfJobPostings
+        setStage={props.setStage}
+        stage={props.stage}
+        currentUrl={props.currentUrl}
+      />
     );
   }
 };
@@ -530,7 +587,11 @@ const JobPostings = (props: Props) => {
         </div>
       </div>
       <div id="questions">
-        <ConditionalRenderer stage={stage} setStage={setStage} />
+        <ConditionalRenderer
+          stage={stage}
+          setStage={setStage}
+          currentUrl={props.currentUrl}
+        />
       </div>
     </div>
   );
