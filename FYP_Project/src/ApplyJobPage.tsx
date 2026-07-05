@@ -8,8 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import type { Job } from "@/types/job";
-import NavigationMenus from "./NavigationMenu";
-import Sidebar from "./Sidebar";
+import { Navigate } from "react-router-dom";
 
 type Props = {
   currentUrl: string;
@@ -53,10 +52,8 @@ export default function ApplyJobPage({ currentUrl }: Props) {
   });
 
   const [resumes, setResumes] = useState<Resume[]>([]);
-  const [uploadNewResume, setUploadNewResume] = useState(false);
   const fetchProfile = async () => {
     try {
-      const token = localStorage.getItem("token");
 
       const res = await axios.get(`${currentUrl}/user/profile`, {
         headers: {
@@ -76,7 +73,6 @@ export default function ApplyJobPage({ currentUrl }: Props) {
   };
   const fetchResumes = async () => {
     try {
-      const token = localStorage.getItem("token");
 
       const res = await axios.get(`${currentUrl}/resumes/user`, {
         headers: {
@@ -94,7 +90,6 @@ export default function ApplyJobPage({ currentUrl }: Props) {
     email: "",
     phone: "",
     proposal: "",
-    resume: null as File | null,
   });
   useEffect(() => {
     if (!token) return;
@@ -150,9 +145,56 @@ export default function ApplyJobPage({ currentUrl }: Props) {
     }
   }, [resumes]);
 
-  const defaultResume = resumes.find((resume) => resume.is_default);
-  const hasDefaultResume = !!defaultResume;
+  const handleResumeUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
 
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("resume", file);
+
+    try {
+
+      await axios.post(`${currentUrl}/resumes/upload`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      toast.success("Resume uploaded successfully.");
+
+      // Refresh resume list
+      const res = await axios.get(`${currentUrl}/resumes/user`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setResumes(res.data.resumes);
+
+      // Select newest uploaded resume
+      const resumes = res.data.resumes as Resume[];
+
+      setResumes(resumes);
+
+      const uploadedResume = resumes.reduce<Resume>(
+        (latest, current) => (current.id > latest.id ? current : latest),
+        resumes[0],
+      );
+
+      setSelectedResumeId(uploadedResume.id);
+
+      setErrors((prev) => ({
+        ...prev,
+        resume: "",
+      }));
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || "Upload failed.");
+    }
+  };
   const handleSubmit = async () => {
     if (!job) return;
 
@@ -169,13 +211,7 @@ export default function ApplyJobPage({ currentUrl }: Props) {
 
       proposal: form.proposal.trim() ? "" : "Proposal is required.",
 
-      resume: uploadNewResume
-        ? form.resume
-          ? ""
-          : "Please upload a resume."
-        : selectedResumeId
-          ? ""
-          : "Please select a resume.",
+      resume: selectedResumeId ? "" : "Please select or upload a resume.",
     };
 
     setErrors(newErrors);
@@ -225,6 +261,9 @@ export default function ApplyJobPage({ currentUrl }: Props) {
     }
   };
   const fileInputRef = useRef<HTMLInputElement>(null);
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -357,57 +396,7 @@ export default function ApplyJobPage({ currentUrl }: Props) {
                 <p className="text-sm text-red-500">{errors.resume}</p>
               )}
 
-              {/* ================= GUEST USER ================= */}
-              {!token && (
-                <>
-                  {/* UPLOAD BOX */}
-                  <div
-                    onClick={() => fileInputRef.current?.click()}
-                    className="cursor-pointer border-2 border-dashed rounded-lg p-6 text-center hover:bg-muted transition"
-                  >
-                    <Upload className="mx-auto mb-2 text-muted-foreground" />
-
-                    <p className="text-sm font-medium">
-                      Click to upload resume
-                    </p>
-
-                    <p className="text-xs text-muted-foreground">
-                      PDF, DOC, DOCX (max 5MB)
-                    </p>
-                  </div>
-
-                  {/* hidden input */}
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".pdf,.doc,.docx"
-                    className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0] ?? null;
-
-                      setForm((prev) => ({
-                        ...prev,
-                        resume: file,
-                      }));
-
-                      if (file) {
-                        setUploadNewResume(true);
-                        setSelectedResumeId(null);
-                      }
-                    }}
-                  />
-
-                  {/* selected file */}
-                  {form.resume && (
-                    <div className="text-sm text-muted-foreground">
-                      Selected:{" "}
-                      <span className="font-medium">{form.resume.name}</span>
-                    </div>
-                  )}
-                </>
-              )}
-
-              {token && resumes.length > 0 && (
+              {resumes.length > 0 ? (
                 <div className="space-y-3">
                   <label className="font-medium">Choose Resume</label>
 
@@ -423,12 +412,6 @@ export default function ApplyJobPage({ currentUrl }: Props) {
                           checked={selectedResumeId === resume.id}
                           onChange={() => {
                             setSelectedResumeId(resume.id);
-                            setUploadNewResume(false);
-
-                            setForm((prev) => ({
-                              ...prev,
-                              resume: null,
-                            }));
 
                             setErrors((prev) => ({
                               ...prev,
@@ -449,6 +432,7 @@ export default function ApplyJobPage({ currentUrl }: Props) {
                       </div>
                     </label>
                   ))}
+
                   <div className="border-t pt-4">
                     <Button
                       type="button"
@@ -464,44 +448,15 @@ export default function ApplyJobPage({ currentUrl }: Props) {
                       type="file"
                       accept=".pdf,.doc,.docx"
                       className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0] ?? null;
-
-                        setForm((prev) => ({
-                          ...prev,
-                          resume: file,
-                        }));
-
-                        if (file) {
-                          setUploadNewResume(true);
-                          setSelectedResumeId(null);
-
-                          setErrors((prev) => ({
-                            ...prev,
-                            resume: "",
-                          }));
-                        }
-                      }}
+                      onChange={handleResumeUpload}
                     />
-
-                    {uploadNewResume && form.resume && (
-                      <div className="mt-3 rounded-md border bg-muted p-3">
-                        <p className="font-medium">{form.resume.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          This uploaded resume will be used instead of your
-                          saved resumes.
-                        </p>
-                      </div>
-                    )}
                   </div>
                 </div>
-              )}
-              {token && resumes.length === 0 && (
+              ) : (
                 <>
-                  {/* UPLOAD BOX (required) */}
                   <div
                     onClick={() => fileInputRef.current?.click()}
-                    className="cursor-pointer border-2 border-dashed rounded-lg p-6 text-center hover:bg-muted transition"
+                    className="cursor-pointer rounded-lg border-2 border-dashed p-6 text-center transition hover:bg-muted"
                   >
                     <Upload className="mx-auto mb-2 text-muted-foreground" />
 
@@ -514,39 +469,13 @@ export default function ApplyJobPage({ currentUrl }: Props) {
                     </p>
                   </div>
 
-                  {/* hidden input */}
                   <input
                     ref={fileInputRef}
                     type="file"
                     accept=".pdf,.doc,.docx"
                     className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0] ?? null;
-
-                      setForm((prev) => ({
-                        ...prev,
-                        resume: file,
-                      }));
-
-                      if (file) {
-                        setUploadNewResume(true);
-                        setSelectedResumeId(null);
-
-                        setErrors((prev) => ({
-                          ...prev,
-                          resume: "",
-                        }));
-                      }
-                    }}
+                    onChange={handleResumeUpload}
                   />
-
-                  {/* selected file */}
-                  {form.resume && (
-                    <div className="text-sm text-muted-foreground">
-                      Selected:{" "}
-                      <span className="font-medium">{form.resume.name}</span>
-                    </div>
-                  )}
                 </>
               )}
             </div>
