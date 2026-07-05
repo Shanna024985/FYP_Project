@@ -11,7 +11,7 @@ module.exports.uploadResume = (req, res, next) => {
         }
 
         // Get userId from request body or use default
-        const userId = req.body.userId || 1;
+        const userId = res.locals.userId;
 
         // Validate file type - allow PDF, DOC, DOCX
         const allowedTypes = [
@@ -52,15 +52,39 @@ module.exports.uploadResume = (req, res, next) => {
             }
 
             // Save resume to database
-            const sql = `INSERT INTO resume (user_id, file_name, file_data) 
-                         VALUES ($1, $2, $3) RETURNING *;`;
-            
+            // const sql = `INSERT INTO resume (user_id, file_name, file_data) 
+            //              VALUES ($1, $2, $3) RETURNING *;`;
+
             // Store file_data as base64 for database
-            const fileData = req.file.buffer.toString('base64');
-            const fileName = result.public_id.split('/').pop() + '.pdf';
-            
-            query(sql, [userId, fileName, fileData])
-                .then(function(dbResult) {
+            const fileData = req.file.buffer;
+            const fileName = req.file.originalname;
+
+            // Check if user already has a default resume
+            const checkSql = `
+    SELECT COUNT(*) AS total
+    FROM resume
+    WHERE user_id = $1;
+`;
+
+            query(checkSql, [userId])
+                .then((countResult) => {
+                    const isDefault = Number(countResult.rows[0].total) === 0;
+
+                    const insertSql = `
+            INSERT INTO resume
+            (user_id, file_name, file_data, is_default)
+            VALUES ($1, $2, $3, $4)
+            RETURNING *;
+        `;
+
+                    return query(insertSql, [
+                        userId,
+                        fileName,
+                        fileData,
+                        isDefault
+                    ]);
+                })
+                .then(function (dbResult) {
                     res.status(201).json({
                         message: 'Resume uploaded successfully',
                         resume: {
@@ -85,9 +109,9 @@ module.exports.uploadResume = (req, res, next) => {
 
 // READ - Get all resumes for a user
 module.exports.getResumesByUser = (req, res, next) => {
-    let userId = req.query.userId || 1;
+    const userId = res.locals.userId;
 
-    let sql = `SELECT id, user_id, file_name, file_data 
+    let sql = `SELECT id, user_id, file_name, file_data, is_default
                FROM resume 
                WHERE user_id = $1 
                ORDER BY id DESC;`;
@@ -100,7 +124,8 @@ module.exports.getResumesByUser = (req, res, next) => {
                     id: row.id,
                     user_id: row.user_id,
                     file_name: row.file_name,
-                    file_data: row.file_data ? row.file_data.toString('base64') : null
+                    file_data: row.file_data ? row.file_data.toString('base64') : null,
+                    is_default: row.is_default
                 };
             });
             
@@ -117,9 +142,9 @@ module.exports.getResumesByUser = (req, res, next) => {
 // READ - Get a specific resume by ID
 module.exports.getResumeById = (req, res, next) => {
     let resumeId = req.params.id;
-    let userId = req.query.userId || 1;
+    const userId = res.locals.userId;
 
-    let sql = `SELECT id, user_id, file_name, file_data 
+    let sql = `SELECT id, user_id, file_name, file_data, is_default
                FROM resume 
                WHERE id = $1 AND user_id = $2;`;
     
@@ -134,7 +159,8 @@ module.exports.getResumeById = (req, res, next) => {
                 id: result.rows[0].id,
                 user_id: result.rows[0].user_id,
                 file_name: result.rows[0].file_name,
-                file_data: result.rows[0].file_data ? result.rows[0].file_data.toString('base64') : null
+                file_data: result.rows[0].file_data ? result.rows[0].file_data.toString('base64') : null,
+                is_default: result.rows[0].is_default
             };
             
             res.json({ resume: resume });
@@ -145,27 +171,140 @@ module.exports.getResumeById = (req, res, next) => {
 };
 
 // DELETE - Delete a resume
-module.exports.deleteResume = (req, res, next) => {
-    let resumeId = req.params.id;
-    let userId = req.body.userId || 1;
+// module.exports.deleteResume = (req, res, next) => {
+//     let resumeId = req.params.id;
+//     const userId = res.locals.userId;
 
-    let sql = `DELETE FROM resume 
-               WHERE id = $1 AND user_id = $2 
-               RETURNING id;`;
+//     let sql = `DELETE FROM resume 
+//                WHERE id = $1 AND user_id = $2 
+//                RETURNING id;`;
     
-    return query(sql, [resumeId, userId])
-        .then(function(result) {
-            if (result.rows.length === 0) {
-                return res.status(404).json({ 
-                    error: "Resume not found or you don't own it" 
-                });
-            }
-            res.json({ 
-                message: "Resume deleted successfully", 
-                deletedId: result.rows[0].id 
+//     return query(sql, [resumeId, userId])
+//         .then(function(result) {
+//             if (result.rows.length === 0) {
+//                 return res.status(404).json({ 
+//                     error: "Resume not found or you don't own it" 
+//                 });
+//             }
+//             res.json({ 
+//                 message: "Resume deleted successfully", 
+//                 deletedId: result.rows[0].id 
+//             });
+//         }).catch(function(error) {
+//             console.error(error);
+//             return res.status(500).json({ error: error.message });
+//         });
+// };
+module.exports.deleteResume = async (req, res, next) => {
+    const resumeId = req.params.id;
+    const userId = res.locals.userId;
+
+    try {
+        // Find the resume first
+        const checkResult = await query(
+            `SELECT is_default
+             FROM resume
+             WHERE id = $1
+             AND user_id = $2;`,
+            [resumeId, userId]
+        );
+
+        if (checkResult.rows.length === 0) {
+            return res.status(404).json({
+                error: "Resume not found or you don't own it"
             });
-        }).catch(function(error) {
-            console.error(error);
-            return res.status(500).json({ error: error.message });
+        }
+
+        const wasDefault = checkResult.rows[0].is_default;
+
+        // Delete it
+        await query(
+            `DELETE FROM resume
+             WHERE id = $1
+             AND user_id = $2;`,
+            [resumeId, userId]
+        );
+
+        // If it was the default, assign another one
+        if (wasDefault) {
+            const nextResume = await query(
+                `SELECT id
+                 FROM resume
+                 WHERE user_id = $1
+                 ORDER BY id DESC
+                 LIMIT 1;`,
+                [userId]
+            );
+
+            if (nextResume.rows.length > 0) {
+                await query(
+                    `UPDATE resume
+                     SET is_default = TRUE
+                     WHERE id = $1;`,
+                    [nextResume.rows[0].id]
+                );
+            }
+        }
+
+        res.json({
+            message: "Resume deleted successfully"
         });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            error: error.message
+        });
+    }
+};
+
+// UPDATE - Set a resume as the default
+module.exports.setDefaultResume = async (req, res, next) => {
+    const resumeId = req.params.id;
+    const userId = res.locals.userId;
+
+    try {
+        // Check if the resume belongs to the user
+        const checkSql = `
+            SELECT id
+            FROM resume
+            WHERE id = $1
+            AND user_id = $2;
+        `;
+
+        const checkResult = await query(checkSql, [resumeId, userId]);
+
+        if (checkResult.rows.length === 0) {
+            return res.status(404).json({
+                error: "Resume not found."
+            });
+        }
+
+        // Remove current default
+        await query(
+            `UPDATE resume
+             SET is_default = FALSE
+             WHERE user_id = $1;`,
+            [userId]
+        );
+
+        // Set selected resume as default
+        await query(
+            `UPDATE resume
+             SET is_default = TRUE
+             WHERE id = $1
+             AND user_id = $2;`,
+            [resumeId, userId]
+        );
+
+        res.json({
+            message: "Default resume updated successfully."
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            error: error.message
+        });
+    }
 };

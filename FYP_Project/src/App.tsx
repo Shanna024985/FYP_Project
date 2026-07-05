@@ -73,7 +73,7 @@ function App() {
           <Route path="/messages" element={<Messages currentUrl={linkForBackend}/>}/>
         </Route>
       </Routes>
-      <Toaster position="bottom-right" />
+      <Toaster position="top-center" />
     </>
   );
 }

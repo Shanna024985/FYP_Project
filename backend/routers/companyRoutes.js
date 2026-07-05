@@ -7,6 +7,7 @@ const { verifyToken } = require('../middlewares/jwtmiddleware');
 router.get('/', companyController.getAllCompanies);
 router.get('/:id', companyController.getCompanyById);
 router.get('/page/:id', companyController.getCompanyPageData);
+router.get('/:id/jobs', companyController.getCompanyJobs);  // NEW: Get jobs for a company
 
 // Protected routes (authentication required)
 router.post('/', verifyToken, companyController.createCompany);
@@ -17,7 +18,7 @@ router.get('/user/companies', verifyToken, companyController.getCompaniesByUser)
 router.get('/user/:userId/companies', verifyToken, companyController.getCompaniesByUserId);
 router.get('/deleted', verifyToken, companyController.getDeletedCompanies);
 
-// Image update routes (authentication required)
+// Image update routes
 router.put('/:id/logo', verifyToken, companyController.updateCompanyLogo);
 router.put('/:id/banner', verifyToken, companyController.updateCompanyBanner);
 router.put('/:id/profile', verifyToken, companyController.updateCompanyProfile);
