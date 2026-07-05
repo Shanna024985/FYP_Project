@@ -696,36 +696,46 @@ module.exports.updateJobStatus = function updateJobStatus(jobId, status, company
 //         });
 //     });
 // }
-module.exports.applyForJob = function applyForJob(userId, jobId, resumeId) {
-  const sql = `
-        INSERT INTO application
-(
-    job_id,
-    user_id,
-    resume_id,
-    name,
+module.exports.applyForJob = function applyForJob(
+    userId,
+    jobId,
+    resumeId,
+    fullname,
     email,
     phone,
     proposal,
-    status,
-    time_applied
-)
-VALUES
-(
-    $1,
-    $2,
-    $3,
-    $4,
-    $5,
-    $6,
-    $7,
-    'Reviewing',
-    CURRENT_TIMESTAMP
-)
-RETURNING *;
-    `;
+) {
+    const sql = `
+    INSERT INTO application
+    (
+      job_id,
+      user_id,
+      resume_id,
+      fullname,
+      email,
+      phone,
+      proposal,
+      status,
+      time_applied
+    )
+    VALUES
+    (
+      $1,$2,$3,$4,$5,$6,$7,
+      'Reviewing',
+      CURRENT_TIMESTAMP
+    )
+    RETURNING *;
+  `;
 
-  return query(sql, [jobId, userId, resumeId]).then((result) => result.rows[0]);
+    return query(sql, [
+        jobId,
+        userId,
+        resumeId,
+        fullname,
+        email,
+        phone,
+        proposal,
+    ]).then((result) => result.rows[0]);
 };
 
 // READ - Get applications by user with job details

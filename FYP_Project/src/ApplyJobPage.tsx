@@ -54,7 +54,6 @@ export default function ApplyJobPage({ currentUrl }: Props) {
   const [resumes, setResumes] = useState<Resume[]>([]);
   const fetchProfile = async () => {
     try {
-
       const res = await axios.get(`${currentUrl}/user/profile`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -73,7 +72,6 @@ export default function ApplyJobPage({ currentUrl }: Props) {
   };
   const fetchResumes = async () => {
     try {
-
       const res = await axios.get(`${currentUrl}/resumes/user`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -156,7 +154,6 @@ export default function ApplyJobPage({ currentUrl }: Props) {
     formData.append("resume", file);
 
     try {
-
       await axios.post(`${currentUrl}/resumes/upload`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -245,6 +242,10 @@ export default function ApplyJobPage({ currentUrl }: Props) {
         `${currentUrl}/jobs/${job.id}/apply`,
         {
           resumeId: selectedResumeId,
+          fullname: form.name,
+          email: form.email,
+          phone: form.phone,
+          proposal: form.proposal,
         },
         {
           headers: {

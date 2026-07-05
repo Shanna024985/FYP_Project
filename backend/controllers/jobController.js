@@ -494,17 +494,31 @@ module.exports.openJob = (req, res, next) => {
 module.exports.applyForJob = (req, res, next) => {
     const userId = getUserIdFromReq(req, res);  // ← Get from token
     let jobId = req.params.id;
-    let resumeId = req.body.resumeId;
-    
+    const {
+        resumeId,
+        fullname,
+        email,
+        phone,
+        proposal
+    } = req.body;
+
     if (!userId) {
         return res.status(401).json({ error: "Unauthorized: User not authenticated" });
     }
-    
+
     if (!resumeId) {
         return res.status(400).json({ error: "Resume ID is required" });
     }
-    
-    return jobModel.applyForJob(userId, jobId, resumeId)
+
+    return jobModel.applyForJob(
+        userId,
+        jobId,
+        resumeId,
+        fullname,
+        email,
+        phone,
+        proposal
+    )
         .then(application => {
             res.status(201).json({
                 message: "Application submitted successfully",
