@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const jobController = require("../controllers/jobController");
 const jwtMiddleware = require("../middlewares/jwtmiddleware");
-
+const upload = require("../middlewares/upload");
 // ==================== PUBLIC JOB ROUTES ====================
 router.get("/", jobController.getAllJobs);
 router.get("/recommended", jobController.getRecommendedJobs);
@@ -36,7 +36,7 @@ router.patch("/:id/close", jwtMiddleware.verifyToken, jobController.closeJob);
 router.patch("/:id/open", jwtMiddleware.verifyToken, jobController.openJob);
 
 // ==================== APPLICATIONS ====================
-router.post("/:id/apply", jwtMiddleware.verifyToken, jobController.applyForJob);
+router.post("/:id/apply", jwtMiddleware.verifyToken, upload.single("resume"), jobController.applyForJob);
 router.get("/applications/my", jwtMiddleware.verifyToken, jobController.getMyApplications);
 router.get("/applications/stats", jwtMiddleware.verifyToken, jobController.getApplicationStats);
 router.get("/:id/applications", jwtMiddleware.verifyToken, jobController.getJobApplications);

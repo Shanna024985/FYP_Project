@@ -137,7 +137,7 @@ export default function JobDetailsPage({ currentUrl }: Props) {
                 {/* APPLY BUTTON */}
                 <Button
                   className="w-full rounded-xl py-6 text-base"
-                  onClick={() => navigate("/applyjob")}
+                  onClick={() => navigate(`/applyjob?id=${job.id}`)}
                 >
                   Apply Now
                 </Button>
