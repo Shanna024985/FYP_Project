@@ -131,6 +131,7 @@ export default function ApplyJobPage({ currentUrl }: Props) {
     }));
   }, [profile]);
   const [selectedResumeId, setSelectedResumeId] = useState<number | null>(null);
+  const [uploadedResume, setUploadedResume] = useState<File | null>(null);
   useEffect(() => {
     if (resumes.length === 0) return;
 
@@ -143,54 +144,24 @@ export default function ApplyJobPage({ currentUrl }: Props) {
     }
   }, [resumes]);
 
-  const handleResumeUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>,
+  const handleResumeUpload = (
+    event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const file = event.target.files?.[0];
 
     if (!file) return;
 
-    const formData = new FormData();
-    formData.append("resume", file);
+    setUploadedResume(file);
 
-    try {
-      await axios.post(`${currentUrl}/resumes/upload`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      });
+    // don't use an existing resume
+    setSelectedResumeId(null);
 
-      toast.success("Resume uploaded successfully.");
+    setErrors((prev) => ({
+      ...prev,
+      resume: "",
+    }));
 
-      // Refresh resume list
-      const res = await axios.get(`${currentUrl}/resumes/user`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      setResumes(res.data.resumes);
-
-      // Select newest uploaded resume
-      const resumes = res.data.resumes as Resume[];
-
-      setResumes(resumes);
-
-      const uploadedResume = resumes.reduce<Resume>(
-        (latest, current) => (current.id > latest.id ? current : latest),
-        resumes[0],
-      );
-
-      setSelectedResumeId(uploadedResume.id);
-
-      setErrors((prev) => ({
-        ...prev,
-        resume: "",
-      }));
-    } catch (err: any) {
-      toast.error(err.response?.data?.error || "Upload failed.");
-    }
+    toast.success("Resume selected.");
   };
   const handleSubmit = async () => {
     if (!job) return;
@@ -208,7 +179,10 @@ export default function ApplyJobPage({ currentUrl }: Props) {
 
       proposal: form.proposal.trim() ? "" : "Proposal is required.",
 
-      resume: selectedResumeId ? "" : "Please select or upload a resume.",
+      resume:
+        selectedResumeId || uploadedResume
+          ? ""
+          : "Please select or upload a resume.",
     };
 
     setErrors(newErrors);
@@ -238,23 +212,30 @@ export default function ApplyJobPage({ currentUrl }: Props) {
     }
 
     try {
-      const res = await axios.post(
+      const formData = new FormData();
+
+      formData.append("fullname", form.name);
+      formData.append("email", form.email);
+      formData.append("phone", form.phone);
+      formData.append("proposal", form.proposal);
+
+      if (uploadedResume) {
+        // upload temporary resume
+        formData.append("resume", uploadedResume);
+      } else if (selectedResumeId) {
+        // use an existing resume
+        formData.append("resumeId", String(selectedResumeId));
+      }
+
+      await axios.post(
         `${currentUrl}/jobs/${job.id}/apply`,
-        {
-          resumeId: selectedResumeId,
-          fullname: form.name,
-          email: form.email,
-          phone: form.phone,
-          proposal: form.proposal,
-        },
+        formData,
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        },
+        }
       );
-
-      console.log(res.data);
       toast.success("Application submitted successfully.");
     } catch (err: any) {
       if (err.response?.status === 409) {
@@ -417,6 +398,9 @@ export default function ApplyJobPage({ currentUrl }: Props) {
                           onChange={() => {
                             setSelectedResumeId(resume.id);
 
+                            // user chose an existing resume
+                            setUploadedResume(null);
+
                             setErrors((prev) => ({
                               ...prev,
                               resume: "",
@@ -454,6 +438,17 @@ export default function ApplyJobPage({ currentUrl }: Props) {
                       className="hidden"
                       onChange={handleResumeUpload}
                     />
+                    {uploadedResume && (
+                      <div className="rounded-md border border-green-200 bg-green-50 p-2">
+                        <p className="text-sm text-green-700">
+                          Using uploaded resume: <strong>{uploadedResume.name}</strong>
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          This resume will only be used for this application and will not be saved
+                          to your profile.
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
               ) : (

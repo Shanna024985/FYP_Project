@@ -699,43 +699,53 @@ module.exports.updateJobStatus = function updateJobStatus(jobId, status, company
 module.exports.applyForJob = function applyForJob(
     userId,
     jobId,
-    resumeId,
     fullname,
     email,
     phone,
     proposal,
+    resumeFileName,
+    resumeFileData
 ) {
     const sql = `
-    INSERT INTO application
-    (
-      job_id,
-      user_id,
-      resume_id,
-      fullname,
-      email,
-      phone,
-      proposal,
-      status,
-      time_applied
-    )
-    VALUES
-    (
-      $1,$2,$3,$4,$5,$6,$7,
-      'Reviewing',
-      CURRENT_TIMESTAMP
-    )
-    RETURNING *;
-  `;
+        INSERT INTO application
+        (
+            job_id,
+            user_id,
+            fullname,
+            email,
+            phone,
+            proposal,
+            resume_file_name,
+            resume_file_data,
+            status,
+            time_applied
+        )
+        VALUES
+        (
+            $1,
+            $2,
+            $3,
+            $4,
+            $5,
+            $6,
+            $7,
+            $8,
+            'Reviewing',
+            CURRENT_TIMESTAMP
+        )
+        RETURNING *;
+    `;
 
     return query(sql, [
         jobId,
         userId,
-        resumeId,
         fullname,
         email,
         phone,
         proposal,
-    ]).then((result) => result.rows[0]);
+        resumeFileName,
+        resumeFileData
+    ]).then(result => result.rows[0]);
 };
 
 // READ - Get applications by user with job details

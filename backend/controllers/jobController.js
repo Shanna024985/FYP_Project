@@ -491,53 +491,87 @@ module.exports.openJob = (req, res, next) => {
 // ==================== APPLICATIONS ====================
 
 // CREATE - Apply for a job
-module.exports.applyForJob = (req, res, next) => {
-    const userId = getUserIdFromReq(req, res);  // ← Get from token
-    let jobId = req.params.id;
+module.exports.applyForJob = async (req, res) => {
+    const userId = getUserIdFromReq(req, res);
+    const jobId = req.params.id;
+
     const {
-        resumeId,
         fullname,
         email,
         phone,
-        proposal
+        proposal,
+        resumeId
     } = req.body;
 
     if (!userId) {
-        return res.status(401).json({ error: "Unauthorized: User not authenticated" });
+        return res.status(401).json({
+            error: "Unauthorized: User not authenticated"
+        });
     }
 
-    if (!resumeId) {
-        return res.status(400).json({ error: "Resume ID is required" });
-    }
+    let resumeFileName;
+    let resumeFileData;
 
-    return jobModel.applyForJob(
-        userId,
-        jobId,
-        resumeId,
-        fullname,
-        email,
-        phone,
-        proposal
-    )
-        .then(application => {
-            res.status(201).json({
-                message: "Application submitted successfully",
-                application
-            });
-        })
-        .catch(error => {
+    try {
+        // User uploaded a new resume for this application
+        if (req.file) {
+            resumeFileName = req.file.originalname;
+            resumeFileData = req.file.buffer;
+        }
+        // User selected an existing resume
+        else if (resumeId) {
+            const result = await query(
+                `SELECT file_name, file_data
+                 FROM resume
+                 WHERE id = $1
+                 AND user_id = $2`,
+                [resumeId, userId]
+            );
 
-            if (error.code === "23505") {
-                return res.status(409).json({
-                    error: "You have already applied for this job."
+            if (result.rows.length === 0) {
+                return res.status(404).json({
+                    error: "Resume not found."
                 });
             }
 
-            res.status(500).json({
-                error: error.message
+            resumeFileName = result.rows[0].file_name;
+            resumeFileData = result.rows[0].file_data;
+        }
+        // No resume provided
+        else {
+            return res.status(400).json({
+                error: "Resume is required."
             });
+        }
+
+        const application = await jobModel.applyForJob(
+            userId,
+            jobId,
+            fullname,
+            email,
+            phone,
+            proposal,
+            resumeFileName,
+            resumeFileData
+        );
+
+        res.status(201).json({
+            message: "Application submitted successfully",
+            application
         });
-}
+
+    } catch (error) {
+        if (error.code === "23505") {
+            return res.status(409).json({
+                error: "You have already applied for this job."
+            });
+        }
+
+        res.status(500).json({
+            error: error.message
+        });
+    }
+};
 
 // READ - Get my applications
 module.exports.getMyApplications = (req, res, next) => {
