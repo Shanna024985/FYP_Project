@@ -163,6 +163,46 @@ export default function ApplyJobPage({ currentUrl }: Props) {
 
     toast.success("Resume selected.");
   };
+  const viewResume = (resume: Resume) => {
+    // Convert base64 to binary
+    const byteCharacters = atob(resume.file_data);
+    const byteNumbers = new Array(byteCharacters.length);
+
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+
+    const byteArray = new Uint8Array(byteNumbers);
+
+    // Detect file type
+    const extension = resume.file_name.split(".").pop()?.toLowerCase();
+
+    let mimeType = "application/pdf";
+
+    if (extension === "doc") {
+      mimeType = "application/msword";
+    } else if (extension === "docx") {
+      mimeType =
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+    }
+
+    const blob = new Blob([byteArray], { type: mimeType });
+
+    const url = URL.createObjectURL(blob);
+
+    window.open(url, "_blank");
+
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+  const viewUploadedResume = () => {
+    if (!uploadedResume) return;
+
+    const url = URL.createObjectURL(uploadedResume);
+
+    window.open(url, "_blank");
+
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
   const handleSubmit = async () => {
     if (!job) return;
 
@@ -417,6 +457,14 @@ export default function ApplyJobPage({ currentUrl }: Props) {
                             </p>
                           )}
                         </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => viewResume(resume)}
+                        >
+                          View
+                        </Button>
                       </div>
                     </label>
                   ))}
@@ -439,34 +487,87 @@ export default function ApplyJobPage({ currentUrl }: Props) {
                       onChange={handleResumeUpload}
                     />
                     {uploadedResume && (
-                      <div className="rounded-md border border-green-200 bg-green-50 p-2">
-                        <p className="text-sm text-green-700">
-                          Using uploaded resume: <strong>{uploadedResume.name}</strong>
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          This resume will only be used for this application and will not be saved
-                          to your profile.
-                        </p>
+                      <div className="rounded-md border border-green-200 bg-green-50 p-3 space-y-3">
+                        <div>
+                          <p className="text-sm font-medium text-green-700">
+                            Using uploaded resume: <strong>{uploadedResume.name}</strong>
+                          </p>
+
+                          <p className="text-xs text-muted-foreground">
+                            This resume will only be used for this application and will not be saved
+                            to your profile.
+                          </p>
+                        </div>
+
+                        <div className="flex justify-center items-center gap-3">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={viewUploadedResume}
+                          >
+                            View Resume
+                          </Button>
+
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => fileInputRef.current?.click()}
+                          >
+                            Choose Another Resume
+                          </Button>
+                        </div>
                       </div>
                     )}
                   </div>
                 </div>
               ) : (
                 <>
-                  <div
-                    onClick={() => fileInputRef.current?.click()}
-                    className="cursor-pointer rounded-lg border-2 border-dashed p-6 text-center transition hover:bg-muted"
-                  >
-                    <Upload className="mx-auto mb-2 text-muted-foreground" />
+                  {!uploadedResume ? (
+                    <div
+                      onClick={() => fileInputRef.current?.click()}
+                      className="cursor-pointer rounded-lg border-2 border-dashed p-6 text-center transition hover:bg-muted"
+                    >
+                      <Upload className="mx-auto mb-2 text-muted-foreground" />
 
-                    <p className="text-sm font-medium">
-                      Upload resume (required)
-                    </p>
+                      <p className="text-sm font-medium">
+                        Upload resume (required)
+                      </p>
 
-                    <p className="text-xs text-muted-foreground">
-                      PDF, DOC, DOCX (max 5MB)
-                    </p>
-                  </div>
+                      <p className="text-xs text-muted-foreground">
+                        PDF, DOC, DOCX (max 5MB)
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="rounded-lg border p-4 space-y-3">
+                      <div>
+                        <p className="font-medium">{uploadedResume.name}</p>
+
+                        <p className="text-xs text-muted-foreground">
+                          This resume will only be used for this application.
+                        </p>
+                      </div>
+
+                      <div className="flex justify-center items-center gap-3">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={viewUploadedResume}
+                        >
+                          View Resume
+                        </Button>
+
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => fileInputRef.current?.click()}
+                        >
+                          Choose Another Resume
+                        </Button>
+                      </div>
+                    </div>
+                  )}
 
                   <input
                     ref={fileInputRef}
