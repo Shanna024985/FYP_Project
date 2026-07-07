@@ -149,112 +149,143 @@ function normalizeCareerLevel(careerLevel) {
     return careerMap[careerLevel] || careerLevel.toLowerCase();
 }
 
-// Helper function to normalize location
+// ==================== LOCATION HELPER (COUNTRY-BASED) ====================
+
+// Helper function to normalize location - Returns the country name directly
 function normalizeLocation(location) {
-    if (!location) return 'Central';
-
+    if (!location) return 'Singapore';
+    
+    // Map of location inputs to standardized country names
     const locationMap = {
-        'north': 'North',
-        'North': 'North',
-        'east': 'East',
-        'East': 'East',
-        'south': 'South',
-        'South': 'South',
-        'west': 'West',
-        'West': 'West',
-        'central': 'Central',
-        'Central': 'Central'
-    };
-
-    return locationMap[location] || location;
-}
-
-// Helper function to map country/city to location ENUM
-function mapLocationToEnum(location) {
-    if (!location) return 'Central';
-
-    const locationMap = {
-        'singapore': 'Central',
-        'singapore central': 'Central',
-        'singapore north': 'North',
-        'singapore east': 'East',
-        'singapore south': 'South',
-        'singapore west': 'West',
-        'central': 'Central',
-        'east': 'East',
-        'north': 'North',
-        'south': 'South',
-        'west': 'West',
-        'kuala lumpur': 'Central',
-        'penang': 'North',
-        'johor bahru': 'South',
-        'selangor': 'Central',
-        'malacca': 'South',
-        'tokyo': 'Central',
-        'osaka': 'Central',
-        'kyoto': 'Central',
-        'nagoya': 'Central',
-        'sapporo': 'North',
-        'seoul': 'Central',
-        'busan': 'South',
-        'incheon': 'Central',
-        'daegu': 'South',
-        'daejeon': 'Central',
-        'new york': 'Central',
-        'los angeles': 'West',
-        'chicago': 'Central',
-        'san francisco': 'West',
-        'miami': 'South',
-        'london': 'Central',
-        'manchester': 'North',
-        'birmingham': 'Central',
-        'edinburgh': 'North',
-        'glasgow': 'North',
-        'sydney': 'East',
-        'melbourne': 'South',
-        'brisbane': 'East',
-        'perth': 'West',
-        'adelaide': 'South',
-        'beijing': 'North',
-        'shanghai': 'East',
-        'guangzhou': 'South',
-        'shenzhen': 'South',
-        'hong kong': 'East',
-        'mumbai': 'West',
-        'delhi': 'North',
-        'bangalore': 'South',
-        'chennai': 'South',
-        'hyderabad': 'South',
-        'berlin': 'Central',
-        'munich': 'South',
-        'frankfurt': 'Central',
-        'hamburg': 'North',
-        'cologne': 'West',
-        'paris': 'Central',
-        'lyon': 'South',
-        'marseille': 'South',
-        'nice': 'South',
-        'toulouse': 'South',
-        'toronto': 'East',
-        'vancouver': 'West',
-        'montreal': 'East',
-        'calgary': 'West',
-        'ottawa': 'East'
+        // Singapore
+        'singapore': 'Singapore',
+        'Singapore': 'Singapore',
+        'sg': 'Singapore',
+        'sin': 'Singapore',
+        
+        // Malaysia
+        'malaysia': 'Malaysia',
+        'Malaysia': 'Malaysia',
+        'my': 'Malaysia',
+        'kuala lumpur': 'Malaysia',
+        'penang': 'Malaysia',
+        'johor': 'Malaysia',
+        'selangor': 'Malaysia',
+        'malacca': 'Malaysia',
+        
+        // Japan
+        'japan': 'Japan',
+        'Japan': 'Japan',
+        'jp': 'Japan',
+        'tokyo': 'Japan',
+        'osaka': 'Japan',
+        'kyoto': 'Japan',
+        'nagoya': 'Japan',
+        'sapporo': 'Japan',
+        
+        // South Korea
+        'south korea': 'South Korea',
+        'South Korea': 'South Korea',
+        'korea': 'South Korea',
+        'kr': 'South Korea',
+        'seoul': 'South Korea',
+        'busan': 'South Korea',
+        'incheon': 'South Korea',
+        'daegu': 'South Korea',
+        'daejeon': 'South Korea',
+        
+        // United States
+        'united states': 'United States',
+        'usa': 'United States',
+        'US': 'United States',
+        'america': 'United States',
+        'new york': 'United States',
+        'los angeles': 'United States',
+        'chicago': 'United States',
+        'san francisco': 'United States',
+        'miami': 'United States',
+        
+        // United Kingdom
+        'united kingdom': 'United Kingdom',
+        'uk': 'United Kingdom',
+        'england': 'United Kingdom',
+        'london': 'United Kingdom',
+        'manchester': 'United Kingdom',
+        'birmingham': 'United Kingdom',
+        'edinburgh': 'United Kingdom',
+        'glasgow': 'United Kingdom',
+        
+        // Australia
+        'australia': 'Australia',
+        'au': 'Australia',
+        'sydney': 'Australia',
+        'melbourne': 'Australia',
+        'brisbane': 'Australia',
+        'perth': 'Australia',
+        'adelaide': 'Australia',
+        
+        // China
+        'china': 'China',
+        'cn': 'China',
+        'beijing': 'China',
+        'shanghai': 'China',
+        'guangzhou': 'China',
+        'shenzhen': 'China',
+        'hong kong': 'China',
+        
+        // India
+        'india': 'India',
+        'in': 'India',
+        'mumbai': 'India',
+        'delhi': 'India',
+        'bangalore': 'India',
+        'chennai': 'India',
+        'hyderabad': 'India',
+        
+        // Germany
+        'germany': 'Germany',
+        'de': 'Germany',
+        'berlin': 'Germany',
+        'munich': 'Germany',
+        'frankfurt': 'Germany',
+        'hamburg': 'Germany',
+        'cologne': 'Germany',
+        
+        // France
+        'france': 'France',
+        'fr': 'France',
+        'paris': 'France',
+        'lyon': 'France',
+        'marseille': 'France',
+        'nice': 'France',
+        'toulouse': 'France',
+        
+        // Canada
+        'canada': 'Canada',
+        'ca': 'Canada',
+        'toronto': 'Canada',
+        'vancouver': 'Canada',
+        'montreal': 'Canada',
+        'calgary': 'Canada',
+        'ottawa': 'Canada'
     };
 
     const lowerLoc = location.toLowerCase().trim();
-
+    
+    // Check for exact match
     if (locationMap[lowerLoc]) {
         return locationMap[lowerLoc];
     }
-
+    
+    // Check if input contains a known location
     for (const [key, value] of Object.entries(locationMap)) {
         if (lowerLoc.includes(key)) {
             return value;
         }
     }
-
-    return normalizeLocation(location);
+    
+    // If no match, return the original input (capitalized)
+    return location.charAt(0).toUpperCase() + location.slice(1).toLowerCase();
 }
 
 // ==================== JOB CRUD OPERATIONS ====================
@@ -264,10 +295,13 @@ module.exports.createJob = function createJob(jobData, companyId) {
     const {
         title, description, category, type,
         salary_range_from, salary_range_to, salary_type, salary_period,
-        duration, deadline, experience, career_level, location,
-        jobs_needed, reports
+        duration, deadline, experience, career_level, location, address,
+        jobs_needed, reports 
     } = jobData;
-
+    
+    console.log('=== createJob ===');
+    console.log('address received:', address);
+    
     const normalizedCategory = normalizeCategory(category);
     const normalizedType = normalizeType(type);
     const normalizedSalaryType = normalizeSalaryType(salary_type);
@@ -275,22 +309,23 @@ module.exports.createJob = function createJob(jobData, companyId) {
     const normalizedDuration = normalizeDuration(duration);
     const normalizedExperience = normalizeExperience(experience);
     const normalizedCareerLevel = normalizeCareerLevel(career_level);
-    const mappedLocation = mapLocationToEnum(location);
-
+    const normalizedLocation = normalizeLocation(location);
+    
     let sql = `INSERT INTO job(
         title, description, category, type, 
         salary_range_from, salary_range_to, salary_type, salary_period,
-        duration, deadline, experience, career_level, location, 
+        duration, deadline, experience, career_level, location, address,
         jobs_needed, reports, company_id, status
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, 'Active') 
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, 'Active') 
     RETURNING *;`;
 
     return query(sql, [
         title, description, normalizedCategory, normalizedType,
         salary_range_from, salary_range_to, normalizedSalaryType,
-        normalizedSalaryPeriod, normalizedDuration, deadline, normalizedExperience,
-        normalizedCareerLevel, mappedLocation, jobs_needed || 1, reports || 0, companyId
-    ]).then(function (result) {
+        normalizedSalaryPeriod, normalizedDuration, deadline, normalizedExperience, 
+        normalizedCareerLevel, normalizedLocation, address || '',
+        jobs_needed || 1, reports || 0, companyId
+    ]).then(function(result) {
         return result.rows;
     });
 }
@@ -333,9 +368,9 @@ module.exports.getAllJobs = function getAllJobs(filters = {}) {
     }
 
     if (filters.location) {
-        const mappedLocation = mapLocationToEnum(filters.location);
+        const normalizedLocation = normalizeLocation(filters.location);
         conditions.push(` j.location = $${paramIndex}`);
-        params.push(mappedLocation);
+        params.push(normalizedLocation);
         paramIndex++;
     }
 
@@ -430,9 +465,9 @@ module.exports.getTotalJobCount = function getTotalJobCount(filters = {}) {
     }
 
     if (filters.location) {
-        const mappedLocation = mapLocationToEnum(filters.location);
+        const normalizedLocation = normalizeLocation(filters.location);
         conditions.push(` j.location = $${paramIndex}`);
-        params.push(mappedLocation);
+        params.push(normalizedLocation);
         paramIndex++;
     }
 
@@ -567,10 +602,13 @@ module.exports.updateJob = function updateJob(jobId, jobData, companyId) {
     const {
         title, description, category, type,
         salary_range_from, salary_range_to, salary_type, salary_period,
-        duration, deadline, experience, career_level, location,
-        jobs_needed, reports
+        duration, deadline, experience, career_level, location, address,
+        jobs_needed, reports 
     } = jobData;
-
+    
+    console.log('=== updateJob ===');
+    console.log('address received:', address);
+    
     const normalizedCategory = category ? normalizeCategory(category) : undefined;
     const normalizedType = type ? normalizeType(type) : undefined;
     const normalizedSalaryType = salary_type ? normalizeSalaryType(salary_type) : undefined;
@@ -578,8 +616,8 @@ module.exports.updateJob = function updateJob(jobId, jobData, companyId) {
     const normalizedDuration = duration ? normalizeDuration(duration) : undefined;
     const normalizedExperience = experience ? normalizeExperience(experience) : undefined;
     const normalizedCareerLevel = career_level ? normalizeCareerLevel(career_level) : undefined;
-    const mappedLocation = location ? mapLocationToEnum(location) : undefined;
-
+    const normalizedLocation = location ? normalizeLocation(location) : undefined;
+    
     let sql = `UPDATE job 
                SET title = COALESCE($1, title),
                    description = COALESCE($2, description),
@@ -594,17 +632,18 @@ module.exports.updateJob = function updateJob(jobId, jobData, companyId) {
                    experience = COALESCE($11, experience),
                    career_level = COALESCE($12, career_level),
                    location = COALESCE($13, location),
-                   jobs_needed = COALESCE($14, jobs_needed),
-                   reports = COALESCE($15, reports)
-               WHERE id = $16 AND company_id = $17 AND deleted_at IS NULL
+                   address = COALESCE($14, address),
+                   jobs_needed = COALESCE($15, jobs_needed),
+                   reports = COALESCE($16, reports)
+               WHERE id = $17 AND company_id = $18 AND deleted_at IS NULL
                RETURNING *;`;
 
     return query(sql, [
         title, description, normalizedCategory, normalizedType,
         salary_range_from, salary_range_to, normalizedSalaryType,
-        normalizedSalaryPeriod, normalizedDuration, deadline, normalizedExperience,
-        normalizedCareerLevel, mappedLocation, jobs_needed, reports, jobId, companyId
-    ]).then(function (result) {
+        normalizedSalaryPeriod, normalizedDuration, deadline, normalizedExperience, 
+        normalizedCareerLevel, normalizedLocation, address, jobs_needed, reports, jobId, companyId
+    ]).then(function(result) {
         return result.rows;
     });
 }
