@@ -497,29 +497,74 @@ module.exports.applyForJob = (req, res, next) => {
     let resumeId = req.body.resumeId;
     
     if (!userId) {
-        return res.status(401).json({ error: "Unauthorized: User not authenticated" });
+        return res.status(401).json({
+            error: "Unauthorized: User not authenticated"
+        });
     }
-    
-    if (!resumeId) {
-        return res.status(400).json({ error: "Resume ID is required" });
-    }
-    
-    return jobModel.applyForJob(userId, jobId, resumeId)
-        .then(function(result) {
-            if (result.alreadyApplied) {
-                return res.status(400).json({ 
-                    error: "Already applied", 
-                    status: result.status 
+
+    let resumeFileName;
+    let resumeFileData;
+
+    try {
+        // User uploaded a new resume for this application
+        if (req.file) {
+            resumeFileName = req.file.originalname;
+            resumeFileData = req.file.buffer;
+        }
+        // User selected an existing resume
+        else if (resumeId) {
+            const result = await query(
+                `SELECT file_name, file_data
+                 FROM resume
+                 WHERE id = $1
+                 AND user_id = $2`,
+                [resumeId, userId]
+            );
+
+            if (result.rows.length === 0) {
+                return res.status(404).json({
+                    error: "Resume not found."
                 });
             }
-            res.status(201).json({ 
-                message: "Application submitted successfully", 
-                application: result.application 
+
+            resumeFileName = result.rows[0].file_name;
+            resumeFileData = result.rows[0].file_data;
+        }
+        // No resume provided
+        else {
+            return res.status(400).json({
+                error: "Resume is required."
             });
-        }).catch(function(error) {
-            return res.status(500).json({ error: error.message });
+        }
+
+        const application = await jobModel.applyForJob(
+            userId,
+            jobId,
+            fullname,
+            email,
+            phone,
+            proposal,
+            resumeFileName,
+            resumeFileData
+        );
+
+        res.status(201).json({
+            message: "Application submitted successfully",
+            application
         });
-}
+
+    } catch (error) {
+        if (error.code === "23505") {
+            return res.status(409).json({
+                error: "You have already applied for this job."
+            });
+        }
+
+        res.status(500).json({
+            error: error.message
+        });
+    }
+};
 
 // READ - Get my applications
 module.exports.getMyApplications = (req, res, next) => {

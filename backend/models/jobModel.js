@@ -5,7 +5,7 @@ const { query } = require("../services/dbConnection");
 // Helper function to normalize category - FIXED for lowercase database values
 function normalizeCategory(category) {
     if (!category) return 'other';
-    
+
     const categoryMap = {
         'admin': 'admin',
         'business': 'business',
@@ -33,14 +33,14 @@ function normalizeCategory(category) {
         'Design': 'design',
         'Other': 'other'
     };
-    
+
     return categoryMap[category] || category.toLowerCase();
 }
 
 // Helper function to normalize type
 function normalizeType(type) {
     if (!type) return 'Full-Time';
-    
+
     const typeMap = {
         'full-time': 'Full-Time',
         'Full-Time': 'Full-Time',
@@ -59,14 +59,14 @@ function normalizeType(type) {
         'temporary': 'Temporary',
         'Temporary': 'Temporary'
     };
-    
+
     return typeMap[type] || type;
 }
 
 // Helper function to normalize salary type
 function normalizeSalaryType(salaryType) {
     if (!salaryType) return 'Negotiable';
-    
+
     const salaryTypeMap = {
         'negotiable': 'Negotiable',
         'Negotiable': 'Negotiable',
@@ -75,14 +75,14 @@ function normalizeSalaryType(salaryType) {
         'range': 'Range',
         'Range': 'Range'
     };
-    
+
     return salaryTypeMap[salaryType] || salaryType;
 }
 
 // Helper function to normalize salary period
 function normalizeSalaryPeriod(salaryPeriod) {
     if (!salaryPeriod) return 'Month';
-    
+
     const salaryPeriodMap = {
         'hour': 'Hour',
         'Hour': 'Hour',
@@ -91,14 +91,14 @@ function normalizeSalaryPeriod(salaryPeriod) {
         'year': 'Year',
         'Year': 'Year'
     };
-    
+
     return salaryPeriodMap[salaryPeriod] || salaryPeriod;
 }
 
 // Helper function to normalize experience
 function normalizeExperience(experience) {
     if (!experience) return '1-3 Years';
-    
+
     const experienceMap = {
         '1-3 years': '1-3 Years',
         '1-3 Years': '1-3 Years',
@@ -109,14 +109,14 @@ function normalizeExperience(experience) {
         '>10 years': '>10 Years',
         '>10 Years': '>10 Years'
     };
-    
+
     return experienceMap[experience] || experience;
 }
 
 // Helper function to normalize duration
 function normalizeDuration(duration) {
     if (!duration) return '1-3 days';
-    
+
     const durationMap = {
         '<1 day': '<1 day',
         '1-3 days': '1-3 days',
@@ -125,14 +125,14 @@ function normalizeDuration(duration) {
         '2-4 weeks': '2-4 weeks',
         '>4 weeks': '>4 weeks'
     };
-    
+
     return durationMap[duration] || duration;
 }
 
 // Helper function to normalize career level
 function normalizeCareerLevel(careerLevel) {
     if (!careerLevel) return 'entry';
-    
+
     const careerMap = {
         'entry': 'entry',
         'experienced': 'experienced',
@@ -145,7 +145,7 @@ function normalizeCareerLevel(careerLevel) {
         'Leadership': 'leadership',
         'Owner': 'owner'
     };
-    
+
     return careerMap[careerLevel] || careerLevel.toLowerCase();
 }
 
@@ -269,7 +269,7 @@ function normalizeLocation(location) {
         'calgary': 'Canada',
         'ottawa': 'Canada'
     };
-    
+
     const lowerLoc = location.toLowerCase().trim();
     
     // Check for exact match
@@ -292,8 +292,8 @@ function normalizeLocation(location) {
 
 // CREATE - Post a new job
 module.exports.createJob = function createJob(jobData, companyId) {
-    const { 
-        title, description, category, type, 
+    const {
+        title, description, category, type,
         salary_range_from, salary_range_to, salary_type, salary_period,
         duration, deadline, experience, career_level, location, address,
         jobs_needed, reports 
@@ -318,7 +318,7 @@ module.exports.createJob = function createJob(jobData, companyId) {
         jobs_needed, reports, company_id, status
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, 'Active') 
     RETURNING *;`;
-    
+
     return query(sql, [
         title, description, normalizedCategory, normalizedType,
         salary_range_from, salary_range_to, normalizedSalaryType,
@@ -342,93 +342,93 @@ module.exports.getAllJobs = function getAllJobs(filters = {}) {
     let params = [];
     let paramIndex = 1;
     let conditions = [];
-    
+
     if (!filters.show_all) {
         conditions.push(` j.status = 'Active'`);
     }
-    
+
     if (filters.company) {
         conditions.push(` c.name ILIKE $${paramIndex}`);
         params.push(`%${filters.company}%`);
         paramIndex++;
     }
-    
+
     if (filters.category) {
         const normalizedCategory = normalizeCategory(filters.category);
         conditions.push(` j.category = $${paramIndex}`);
         params.push(normalizedCategory);
         paramIndex++;
     }
-    
+
     if (filters.type) {
         const normalizedType = normalizeType(filters.type);
         conditions.push(` j.type = $${paramIndex}`);
         params.push(normalizedType);
         paramIndex++;
     }
-    
+
     if (filters.location) {
         const normalizedLocation = normalizeLocation(filters.location);
         conditions.push(` j.location = $${paramIndex}`);
         params.push(normalizedLocation);
         paramIndex++;
     }
-    
+
     if (filters.experience) {
         const normalizedExperience = normalizeExperience(filters.experience);
         conditions.push(` j.experience = $${paramIndex}`);
         params.push(normalizedExperience);
         paramIndex++;
     }
-    
+
     if (filters.career_level) {
         const normalizedCareerLevel = normalizeCareerLevel(filters.career_level);
         conditions.push(` j.career_level = $${paramIndex}`);
         params.push(normalizedCareerLevel);
         paramIndex++;
     }
-    
+
     if (filters.duration) {
         const normalizedDuration = normalizeDuration(filters.duration);
         conditions.push(` j.duration = $${paramIndex}`);
         params.push(normalizedDuration);
         paramIndex++;
     }
-    
+
     if (filters.min_salary) {
         conditions.push(` j.salary_range_from >= $${paramIndex}`);
         params.push(parseInt(filters.min_salary));
         paramIndex++;
     }
-    
+
     if (filters.max_salary) {
         conditions.push(` j.salary_range_to <= $${paramIndex}`);
         params.push(parseInt(filters.max_salary));
         paramIndex++;
     }
-    
+
     if (filters.search) {
         conditions.push(` (j.title ILIKE $${paramIndex} OR j.description ILIKE $${paramIndex})`);
         params.push(`%${filters.search}%`);
         paramIndex++;
     }
-    
+
     if (filters.company_id) {
         conditions.push(` j.company_id = $${paramIndex}`);
         params.push(parseInt(filters.company_id));
         paramIndex++;
     }
-    
+
     if (conditions.length > 0) {
         sql += " AND" + conditions.join(" AND");
     }
-    
+
     const limit = filters.limit ? parseInt(filters.limit) : 10;
     const offset = filters.offset ? parseInt(filters.offset) : 0;
     sql += ` ORDER BY j.id DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
     params.push(limit, offset);
-    
-    return query(sql, params).then(function(result) {
+
+    return query(sql, params).then(function (result) {
         return result.rows;
     });
 }
@@ -439,82 +439,82 @@ module.exports.getTotalJobCount = function getTotalJobCount(filters = {}) {
     let params = [];
     let paramIndex = 1;
     let conditions = [];
-    
+
     if (!filters.show_all) {
         conditions.push(` j.status = 'Active'`);
     }
-    
+
     if (filters.company) {
         conditions.push(` c.name ILIKE $${paramIndex}`);
         params.push(`%${filters.company}%`);
         paramIndex++;
     }
-    
+
     if (filters.category) {
         const normalizedCategory = normalizeCategory(filters.category);
         conditions.push(` j.category = $${paramIndex}`);
         params.push(normalizedCategory);
         paramIndex++;
     }
-    
+
     if (filters.type) {
         const normalizedType = normalizeType(filters.type);
         conditions.push(` j.type = $${paramIndex}`);
         params.push(normalizedType);
         paramIndex++;
     }
-    
+
     if (filters.location) {
         const normalizedLocation = normalizeLocation(filters.location);
         conditions.push(` j.location = $${paramIndex}`);
         params.push(normalizedLocation);
         paramIndex++;
     }
-    
+
     if (filters.experience) {
         const normalizedExperience = normalizeExperience(filters.experience);
         conditions.push(` j.experience = $${paramIndex}`);
         params.push(normalizedExperience);
         paramIndex++;
     }
-    
+
     if (filters.career_level) {
         const normalizedCareerLevel = normalizeCareerLevel(filters.career_level);
         conditions.push(` j.career_level = $${paramIndex}`);
         params.push(normalizedCareerLevel);
         paramIndex++;
     }
-    
+
     if (filters.duration) {
         const normalizedDuration = normalizeDuration(filters.duration);
         conditions.push(` j.duration = $${paramIndex}`);
         params.push(normalizedDuration);
         paramIndex++;
     }
-    
+
     if (filters.min_salary) {
         conditions.push(` j.salary_range_from >= $${paramIndex}`);
         params.push(parseInt(filters.min_salary));
         paramIndex++;
     }
-    
+
     if (filters.max_salary) {
         conditions.push(` j.salary_range_to <= $${paramIndex}`);
         params.push(parseInt(filters.max_salary));
         paramIndex++;
     }
-    
+
     if (filters.search) {
         conditions.push(` (j.title ILIKE $${paramIndex} OR j.description ILIKE $${paramIndex})`);
         params.push(`%${filters.search}%`);
         paramIndex++;
     }
-    
+
     if (conditions.length > 0) {
         sql += " AND" + conditions.join(" AND");
     }
-    
-    return query(sql, params).then(function(result) {
+
+    return query(sql, params).then(function (result) {
         return parseInt(result.rows[0].total);
     });
 }
@@ -525,8 +525,8 @@ module.exports.getRecommendedJobs = function getRecommendedJobs(userId, limit = 
                           FROM application a 
                           JOIN job j ON a.job_id = j.id 
                           WHERE a.user_id = $1`;
-    
-    return query(userHistorySql, [userId]).then(function(historyResult) {
+
+    return query(userHistorySql, [userId]).then(function (historyResult) {
         if (historyResult.rows.length === 0) {
             let sql = `SELECT j.*, c.name as company_name, c.city as company_city, c.logo_url,
                        (SELECT COUNT(*) FROM saved_job WHERE job_id = j.id) as saved_count
@@ -535,14 +535,14 @@ module.exports.getRecommendedJobs = function getRecommendedJobs(userId, limit = 
                        WHERE j.status = 'Active' AND j.deleted_at IS NULL
                        ORDER BY j.id DESC 
                        LIMIT $1`;
-            return query(sql, [limit]).then(function(result) {
+            return query(sql, [limit]).then(function (result) {
                 return result.rows;
             });
         }
-        
+
         const categories = historyResult.rows.map(row => row.category);
         const types = historyResult.rows.map(row => row.type);
-        
+
         let sql = `SELECT j.*, c.name as company_name, c.city as company_city, c.logo_url,
                    (SELECT COUNT(*) FROM saved_job WHERE job_id = j.id) as saved_count
                    FROM job j 
@@ -551,8 +551,8 @@ module.exports.getRecommendedJobs = function getRecommendedJobs(userId, limit = 
                    AND (j.category = ANY($1) OR j.type = ANY($2))
                    ORDER BY j.id DESC 
                    LIMIT $3`;
-        
-        return query(sql, [categories, types, limit]).then(function(result) {
+
+        return query(sql, [categories, types, limit]).then(function (result) {
             return result.rows;
         });
     });
@@ -568,17 +568,17 @@ module.exports.getJobById = function getJobById(jobId, userId = null) {
                FROM job j 
                JOIN company c ON j.company_id = c.id 
                WHERE j.id = $1 AND j.deleted_at IS NULL`;
-    
+
     const params = [jobId];
-    
+
     if (userId) {
         sql += `, (SELECT COUNT(*) FROM saved_job WHERE job_id = j.id AND user_id = $2) as is_saved`;
         sql += `, (SELECT COUNT(*) FROM application WHERE job_id = j.id AND user_id = $2) as has_applied`;
         sql += `, (SELECT status FROM application WHERE job_id = j.id AND user_id = $2 LIMIT 1) as application_status`;
         params.push(userId);
     }
-    
-    return query(sql, params).then(function(result) {
+
+    return query(sql, params).then(function (result) {
         return result.rows;
     });
 }
@@ -591,16 +591,16 @@ module.exports.getJobsByCompany = function getJobsByCompany(companyId) {
                FROM job j 
                WHERE j.company_id = $1 AND j.deleted_at IS NULL
                ORDER BY j.id DESC;`;
-    
-    return query(sql, [companyId]).then(function(result) {
+
+    return query(sql, [companyId]).then(function (result) {
         return result.rows;
     });
 }
 
 // UPDATE - Edit a job
 module.exports.updateJob = function updateJob(jobId, jobData, companyId) {
-    const { 
-        title, description, category, type, 
+    const {
+        title, description, category, type,
         salary_range_from, salary_range_to, salary_type, salary_period,
         duration, deadline, experience, career_level, location, address,
         jobs_needed, reports 
@@ -637,7 +637,7 @@ module.exports.updateJob = function updateJob(jobId, jobData, companyId) {
                    reports = COALESCE($16, reports)
                WHERE id = $17 AND company_id = $18 AND deleted_at IS NULL
                RETURNING *;`;
-    
+
     return query(sql, [
         title, description, normalizedCategory, normalizedType,
         salary_range_from, salary_range_to, normalizedSalaryType,
@@ -656,8 +656,8 @@ module.exports.softDeleteJob = function softDeleteJob(jobId, companyId) {
                SET deleted_at = NOW() 
                WHERE id = $1 AND company_id = $2 AND deleted_at IS NULL
                RETURNING id, title, deleted_at;`;
-    
-    return query(sql, [jobId, companyId]).then(function(result) {
+
+    return query(sql, [jobId, companyId]).then(function (result) {
         return result.rows;
     });
 }
@@ -668,8 +668,8 @@ module.exports.restoreJob = function restoreJob(jobId, companyId) {
                SET deleted_at = NULL 
                WHERE id = $1 AND company_id = $2 AND deleted_at IS NOT NULL
                RETURNING id, title, deleted_at;`;
-    
-    return query(sql, [jobId, companyId]).then(function(result) {
+
+    return query(sql, [jobId, companyId]).then(function (result) {
         return result.rows;
     });
 }
@@ -682,8 +682,8 @@ module.exports.getDeletedJobsByCompany = function getDeletedJobsByCompany(compan
                FROM job j 
                WHERE j.company_id = $1 AND j.deleted_at IS NOT NULL
                ORDER BY j.deleted_at DESC;`;
-    
-    return query(sql, [companyId]).then(function(result) {
+
+    return query(sql, [companyId]).then(function (result) {
         return result.rows;
     });
 }
@@ -695,8 +695,8 @@ module.exports.getAllDeletedJobs = function getAllDeletedJobs() {
                LEFT JOIN company c ON j.company_id = c.id
                WHERE j.deleted_at IS NOT NULL
                ORDER BY j.deleted_at DESC;`;
-    
-    return query(sql, []).then(function(result) {
+
+    return query(sql, []).then(function (result) {
         return result.rows;
     });
 }
@@ -704,7 +704,7 @@ module.exports.getAllDeletedJobs = function getAllDeletedJobs() {
 // CHECK - Verify job belongs to company
 module.exports.checkJobBelongsToCompany = function checkJobBelongsToCompany(jobId, companyId) {
     let sql = "SELECT id FROM job WHERE id = $1 AND company_id = $2;";
-    return query(sql, [jobId, companyId]).then(function(result) {
+    return query(sql, [jobId, companyId]).then(function (result) {
         return result.rows;
     });
 }
@@ -712,7 +712,7 @@ module.exports.checkJobBelongsToCompany = function checkJobBelongsToCompany(jobI
 // UPDATE - Change job status
 module.exports.updateJobStatus = function updateJobStatus(jobId, status, companyId) {
     let sql = "UPDATE job SET status = $1 WHERE id = $2 AND company_id = $3 AND deleted_at IS NULL RETURNING *;";
-    return query(sql, [status, jobId, companyId]).then(function(result) {
+    return query(sql, [status, jobId, companyId]).then(function (result) {
         return result.rows;
     });
 }
@@ -720,21 +720,72 @@ module.exports.updateJobStatus = function updateJobStatus(jobId, status, company
 // ==================== APPLICATIONS ====================
 
 // CREATE - Apply for a job
-module.exports.applyForJob = function applyForJob(userId, jobId, resumeId) {
-    let checkSql = `SELECT id, status FROM application WHERE user_id = $1 AND job_id = $2;`;
-    return query(checkSql, [userId, jobId]).then(function(checkResult) {
-        if (checkResult.rows.length > 0) {
-            return { alreadyApplied: true, status: checkResult.rows[0].status };
-        }
-        
-        let sql = `INSERT INTO application (job_id, user_id, resume_id, status, time_applied) 
-                   VALUES ($1, $2, $3, 'Reviewing', CURRENT_TIMESTAMP) 
-                   RETURNING *;`;
-        return query(sql, [jobId, userId, resumeId]).then(function(result) {
-            return { alreadyApplied: false, application: result.rows[0] };
-        });
-    });
-}
+// module.exports.applyForJob = function applyForJob(userId, jobId, resumeId) {
+//     let checkSql = `SELECT id, status FROM application WHERE user_id = $1 AND job_id = $2;`;
+//     return query(checkSql, [userId, jobId]).then(function(checkResult) {
+//         if (checkResult.rows.length > 0) {
+//             return { alreadyApplied: true, status: checkResult.rows[0].status };
+//         }
+
+//         let sql = `INSERT INTO application (job_id, user_id, resume_id, status, time_applied) 
+//                    VALUES ($1, $2, $3, 'Reviewing', CURRENT_TIMESTAMP) 
+//                    RETURNING *;`;
+//         return query(sql, [jobId, userId, resumeId]).then(function(result) {
+//             return { alreadyApplied: false, application: result.rows[0] };
+//         });
+//     });
+// }
+module.exports.applyForJob = function applyForJob(
+    userId,
+    jobId,
+    fullname,
+    email,
+    phone,
+    proposal,
+    resumeFileName,
+    resumeFileData
+) {
+    const sql = `
+        INSERT INTO application
+        (
+            job_id,
+            user_id,
+            fullname,
+            email,
+            phone,
+            proposal,
+            resume_file_name,
+            resume_file_data,
+            status,
+            time_applied
+        )
+        VALUES
+        (
+            $1,
+            $2,
+            $3,
+            $4,
+            $5,
+            $6,
+            $7,
+            $8,
+            'Reviewing',
+            CURRENT_TIMESTAMP
+        )
+        RETURNING *;
+    `;
+
+    return query(sql, [
+        jobId,
+        userId,
+        fullname,
+        email,
+        phone,
+        proposal,
+        resumeFileName,
+        resumeFileData
+    ]).then(result => result.rows[0]);
+};
 
 // READ - Get applications by user with job details
 module.exports.getApplicationsByUser = function getApplicationsByUser(userId) {
@@ -747,7 +798,7 @@ module.exports.getApplicationsByUser = function getApplicationsByUser(userId) {
                JOIN company c ON j.company_id = c.id
                WHERE a.user_id = $1
                ORDER BY a.time_applied DESC;`;
-    return query(sql, [userId]).then(function(result) {
+    return query(sql, [userId]).then(function (result) {
         return result.rows;
     });
 }
@@ -761,7 +812,7 @@ module.exports.getApplicationsByJob = function getApplicationsByJob(jobId) {
                LEFT JOIN user_detail ud ON u.id = ud.user_id
                WHERE a.job_id = $1
                ORDER BY a.time_applied DESC;`;
-    return query(sql, [jobId]).then(function(result) {
+    return query(sql, [jobId]).then(function (result) {
         return result.rows;
     });
 }
@@ -772,7 +823,7 @@ module.exports.getApplicationStatusCount = function getApplicationStatusCount(us
                FROM application 
                WHERE user_id = $1 
                GROUP BY status;`;
-    return query(sql, [userId]).then(function(result) {
+    return query(sql, [userId]).then(function (result) {
         return result.rows;
     });
 }
@@ -783,7 +834,7 @@ module.exports.updateApplicationStatus = function updateApplicationStatus(applic
                SET status = $1, remarks = COALESCE($2, remarks)
                WHERE id = $3
                RETURNING *;`;
-    return query(sql, [status, remarks, applicationId]).then(function(result) {
+    return query(sql, [status, remarks, applicationId]).then(function (result) {
         return result.rows;
     });
 }
@@ -797,7 +848,7 @@ module.exports.saveJob = function saveJob(userId, jobId) {
                ON CONFLICT (user_id, job_id)
                DO NOTHING
                RETURNING *;`;
-    return query(sql, [userId, jobId]).then(function(result) {
+    return query(sql, [userId, jobId]).then(function (result) {
         return result.rows;
     });
 }
@@ -805,7 +856,7 @@ module.exports.saveJob = function saveJob(userId, jobId) {
 // DELETE - Unsave a job
 module.exports.unsaveJob = function unsaveJob(userId, jobId) {
     let sql = `DELETE FROM saved_job WHERE user_id = $1 AND job_id = $2 RETURNING id;`;
-    return query(sql, [userId, jobId]).then(function(result) {
+    return query(sql, [userId, jobId]).then(function (result) {
         return result.rows;
     });
 }
@@ -821,7 +872,7 @@ module.exports.getSavedJobsByUser = function getSavedJobsByUser(userId) {
                JOIN company c ON j.company_id = c.id
                WHERE sj.user_id = $1 AND j.deleted_at IS NULL
                ORDER BY sj.id DESC;`;
-    return query(sql, [userId]).then(function(result) {
+    return query(sql, [userId]).then(function (result) {
         return result.rows;
     });
 }
@@ -829,7 +880,7 @@ module.exports.getSavedJobsByUser = function getSavedJobsByUser(userId) {
 // CHECK - Check if a job is saved by user
 module.exports.isJobSaved = function isJobSaved(userId, jobId) {
     let sql = `SELECT id FROM saved_job WHERE user_id = $1 AND job_id = $2;`;
-    return query(sql, [userId, jobId]).then(function(result) {
+    return query(sql, [userId, jobId]).then(function (result) {
         return result.rows;
     });
 }
@@ -844,7 +895,7 @@ module.exports.hasUserCompletedJobWithCompany = function hasUserCompletedJobWith
                WHERE a.user_id = $1 
                AND j.company_id = $2 
                AND a.status IN ('Offered', 'Onboarded')`;
-    return query(sql, [userId, companyId]).then(function(result) {
+    return query(sql, [userId, companyId]).then(function (result) {
         return result.rows;
     });
 }
@@ -856,7 +907,7 @@ module.exports.hasUserCompletedJob = function hasUserCompletedJob(userId, jobId)
                WHERE user_id = $1 
                AND job_id = $2 
                AND status IN ('Offered', 'Onboarded')`;
-    return query(sql, [userId, jobId]).then(function(result) {
+    return query(sql, [userId, jobId]).then(function (result) {
         return result.rows;
     });
 }
@@ -872,7 +923,7 @@ module.exports.getCompletedJobsByUser = function getCompletedJobsByUser(userId) 
                WHERE a.user_id = $1 
                AND a.status IN ('Offered', 'Onboarded')
                ORDER BY a.time_applied DESC;`;
-    return query(sql, [userId]).then(function(result) {
+    return query(sql, [userId]).then(function (result) {
         return result.rows;
     });
 }
@@ -887,7 +938,7 @@ module.exports.getCompletedJobsByCompany = function getCompletedJobsByCompany(co
                WHERE j.company_id = $1 
                AND a.status IN ('Offered', 'Onboarded')
                ORDER BY a.time_applied DESC;`;
-    return query(sql, [companyId]).then(function(result) {
+    return query(sql, [companyId]).then(function (result) {
         return result.rows;
     });
 }
@@ -896,13 +947,13 @@ module.exports.getCompletedJobsByCompany = function getCompletedJobsByCompany(co
 
 // CHECK - Check if user can review a company
 module.exports.canUserReviewCompany = function canUserReviewCompany(userId, companyId) {
-    return module.exports.hasUserCompletedJobWithCompany(userId, companyId).then(function(completedJobs) {
+    return module.exports.hasUserCompletedJobWithCompany(userId, companyId).then(function (completedJobs) {
         if (completedJobs.length === 0) {
             return { canReview: false, message: "You must complete a job with this company before reviewing." };
         }
-        
+
         let reviewSql = `SELECT id FROM review WHERE user_id = $1 AND company_id = $2;`;
-        return query(reviewSql, [userId, companyId]).then(function(reviewResult) {
+        return query(reviewSql, [userId, companyId]).then(function (reviewResult) {
             if (reviewResult.rows.length > 0) {
                 return { canReview: false, message: "You have already reviewed this company." };
             }
@@ -917,15 +968,15 @@ module.exports.canUserReviewCompany = function canUserReviewCompany(userId, comp
 module.exports.getJobSeekerDashboard = function getJobSeekerDashboard(userId) {
     return Promise.all([
         module.exports.getApplicationStatusCount(userId),
-        module.exports.getApplicationsByUser(userId).then(function(apps) { return apps.slice(0, 5); }),
-        module.exports.getSavedJobsByUser(userId).then(function(saved) { return saved.slice(0, 3); }),
+        module.exports.getApplicationsByUser(userId).then(function (apps) { return apps.slice(0, 5); }),
+        module.exports.getSavedJobsByUser(userId).then(function (saved) { return saved.slice(0, 3); }),
         module.exports.getRecommendedJobs(userId, 6)
-    ]).then(function(results) {
+    ]).then(function (results) {
         let totalApplications = 0;
-        results[0].forEach(function(stat) {
+        results[0].forEach(function (stat) {
             totalApplications += parseInt(stat.count);
         });
-        
+
         return {
             application_stats: results[0],
             total_applications: totalApplications,
