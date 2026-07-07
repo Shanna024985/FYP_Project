@@ -27,12 +27,12 @@ module.exports.createJob = (req, res, next) => {
     let { 
         title, description, category, type, 
         salary_range_from, salary_range_to, salary_type, salary_period,
-        duration, deadline, experience, career_level, location, 
+        duration, deadline, experience, career_level, location, address,  // ← ADDED address
         jobs_needed, reports 
     } = req.body;
     
     let companyId = req.body.companyId;
-    const userId = getUserIdFromReq(req, res);  // ← Get from token
+    const userId = getUserIdFromReq(req, res);
     
     if (!companyId) {
         return res.status(400).json({ error: "Company ID is required" });
@@ -68,7 +68,7 @@ module.exports.createJob = (req, res, next) => {
                 title, description, category, type,
                 salary_range_from, salary_range_to, salary_type: salary_type || 'Negotiable',
                 salary_period: salary_period || 'Month',
-                duration, deadline, experience, career_level, location,
+                duration, deadline, experience, career_level, location, address,  // ← ADDED address
                 jobs_needed: jobs_needed || 1, reports: reports || 0
             }, companyId)
             .then(function(jobDetails) {
@@ -159,7 +159,7 @@ module.exports.getJobsByCompany = (req, res, next) => {
 
 // READ - Get employer dashboard
 module.exports.getEmployerDashboard = (req, res, next) => {
-    const userId = getUserIdFromReq(req, res);  // ← Get from token
+    const userId = getUserIdFromReq(req, res);
     
     if (!userId) {
         return res.status(401).json({ error: "Unauthorized: User not authenticated" });
@@ -224,7 +224,7 @@ module.exports.updateJob = (req, res, next) => {
     let jobId = req.params.id;
     let jobData = req.body;
     let companyId = req.body.companyId;
-    const userId = getUserIdFromReq(req, res);  // ← Get from token
+    const userId = getUserIdFromReq(req, res);
     
     if (!companyId) {
         return res.status(400).json({ error: "Company ID is required" });
@@ -266,7 +266,7 @@ module.exports.updateJob = (req, res, next) => {
 module.exports.softDeleteJob = (req, res, next) => {
     let jobId = req.params.id;
     let companyId = req.body.companyId;
-    const userId = getUserIdFromReq(req, res);  // ← Get from token
+    const userId = getUserIdFromReq(req, res);
     
     console.log('=== softDeleteJob ===');
     console.log('jobId:', jobId);
@@ -318,7 +318,7 @@ module.exports.softDeleteJob = (req, res, next) => {
 module.exports.restoreJob = (req, res, next) => {
     let jobId = req.params.id;
     let companyId = req.body.companyId;
-    const userId = getUserIdFromReq(req, res);  // ← Get from token
+    const userId = getUserIdFromReq(req, res);
     
     console.log('=== restoreJob ===');
     console.log('jobId:', jobId);
@@ -367,7 +367,7 @@ module.exports.restoreJob = (req, res, next) => {
 // GET DELETED JOBS - Get all deleted jobs for a company
 module.exports.getDeletedJobsByCompany = (req, res, next) => {
     let companyId = req.params.companyId;
-    const userId = getUserIdFromReq(req, res);  // ← Get from token
+    const userId = getUserIdFromReq(req, res);
     
     if (!userId) {
         return res.status(401).json({ error: "Unauthorized: User not authenticated" });
@@ -412,7 +412,7 @@ module.exports.getAllDeletedJobs = (req, res, next) => {
 module.exports.closeJob = (req, res, next) => {
     let jobId = req.params.id;
     let companyId = req.body.companyId;
-    const userId = getUserIdFromReq(req, res);  // ← Get from token
+    const userId = getUserIdFromReq(req, res);
     
     if (!companyId) {
         return res.status(400).json({ error: "Company ID is required" });
@@ -452,7 +452,7 @@ module.exports.closeJob = (req, res, next) => {
 module.exports.openJob = (req, res, next) => {
     let jobId = req.params.id;
     let companyId = req.body.companyId;
-    const userId = getUserIdFromReq(req, res);  // ← Get from token
+    const userId = getUserIdFromReq(req, res);
     
     if (!companyId) {
         return res.status(400).json({ error: "Company ID is required" });
@@ -491,18 +491,11 @@ module.exports.openJob = (req, res, next) => {
 // ==================== APPLICATIONS ====================
 
 // CREATE - Apply for a job
-module.exports.applyForJob = async (req, res) => {
+module.exports.applyForJob = (req, res, next) => {
     const userId = getUserIdFromReq(req, res);
-    const jobId = req.params.id;
-
-    const {
-        fullname,
-        email,
-        phone,
-        proposal,
-        resumeId
-    } = req.body;
-
+    let jobId = req.params.id;
+    let resumeId = req.body.resumeId;
+    
     if (!userId) {
         return res.status(401).json({
             error: "Unauthorized: User not authenticated"
@@ -575,7 +568,7 @@ module.exports.applyForJob = async (req, res) => {
 
 // READ - Get my applications
 module.exports.getMyApplications = (req, res, next) => {
-    const userId = getUserIdFromReq(req, res);  // ← Get from token
+    const userId = getUserIdFromReq(req, res);
     
     if (!userId) {
         return res.status(401).json({ error: "Unauthorized: User not authenticated" });
@@ -597,7 +590,7 @@ module.exports.getMyApplications = (req, res, next) => {
 
 // READ - Get application stats
 module.exports.getApplicationStats = (req, res, next) => {
-    const userId = getUserIdFromReq(req, res);  // ← Get from token
+    const userId = getUserIdFromReq(req, res);
     
     if (!userId) {
         return res.status(401).json({ error: "Unauthorized: User not authenticated" });
@@ -650,7 +643,7 @@ module.exports.updateApplicationStatus = (req, res, next) => {
 // DELETE - Delete an application
 module.exports.deleteApplication = (req, res, next) => {
     let applicationId = req.params.applicationId;
-    const userId = getUserIdFromReq(req, res);  // ← Get from token
+    const userId = getUserIdFromReq(req, res);
     
     if (!userId) {
         return res.status(401).json({ error: "Unauthorized: User not authenticated" });
@@ -781,7 +774,7 @@ module.exports.canReviewCompany = (req, res, next) => {
 
 // READ - Get job seeker dashboard
 module.exports.getJobSeekerDashboard = (req, res, next) => {
-    const userId = getUserIdFromReq(req, res);  // ← Get from token
+    const userId = getUserIdFromReq(req, res);
     
     if (!userId) {
         return res.status(401).json({ error: "Unauthorized: User not authenticated" });
