@@ -310,6 +310,7 @@ export default function ApplyJobPage({ currentUrl }: Props) {
           salaryType={job.salary_type}
           salaryPeriod={job.salary_period}
           location={job.location}
+          address={job.address}
           tags={[job.category, job.type]}
           date={new Date(job.created_at).toLocaleDateString("en-SG")}
           companyLogo={`data:image/png;base64,${company?.logo_base64 ?? ""}`}
