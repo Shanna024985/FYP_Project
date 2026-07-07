@@ -422,6 +422,11 @@ module.exports.getAllJobs = function getAllJobs(filters = {}) {
     if (conditions.length > 0) {
         sql += " AND" + conditions.join(" AND");
     }
+    if (filters.address) {
+      conditions.push(`j.address ILIKE $${paramIndex}`);
+      params.push(`%${filters.address}%`);
+      paramIndex++;
+    }
 
     const limit = filters.limit ? parseInt(filters.limit) : 10;
     const offset = filters.offset ? parseInt(filters.offset) : 0;
