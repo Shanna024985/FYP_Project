@@ -728,23 +728,6 @@ module.exports.updateJobStatus = function updateJobStatus(jobId, status, company
 }
 
 // ==================== APPLICATIONS ====================
-
-// CREATE - Apply for a job
-// module.exports.applyForJob = function applyForJob(userId, jobId, resumeId) {
-//     let checkSql = `SELECT id, status FROM application WHERE user_id = $1 AND job_id = $2;`;
-//     return query(checkSql, [userId, jobId]).then(function(checkResult) {
-//         if (checkResult.rows.length > 0) {
-//             return { alreadyApplied: true, status: checkResult.rows[0].status };
-//         }
-
-//         let sql = `INSERT INTO application (job_id, user_id, resume_id, status, time_applied) 
-//                    VALUES ($1, $2, $3, 'Reviewing', CURRENT_TIMESTAMP) 
-//                    RETURNING *;`;
-//         return query(sql, [jobId, userId, resumeId]).then(function(result) {
-//             return { alreadyApplied: false, application: result.rows[0] };
-//         });
-//     });
-// }
 module.exports.applyForJob = function applyForJob(
     userId,
     jobId,
