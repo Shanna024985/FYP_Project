@@ -398,9 +398,7 @@ module.exports.getAllJobs = function getAllJobs(filters = {}) {
     });
 }
 
-// READ - Get single job by ID
-module.exports.getJobById = function getJobById(jobId) {
-    let sql = `SELECT j.*, c.name as company_name, c.city, 
+
 // READ - Get total job count for pagination
 module.exports.getTotalJobCount = function getTotalJobCount(filters = {}) {
     let sql = `SELECT COUNT(*) as total FROM job j JOIN company c ON j.company_id = c.id WHERE j.deleted_at IS NULL`;
@@ -900,4 +898,18 @@ module.exports.getJobSeekerDashboard = function getJobSeekerDashboard(userId) {
             recommended_jobs: results[3]
         };
     });
+}
+module.exports.getJobById = (req, res, next) => {
+    let jobId = req.params.id;
+    let userId = req.query.userId;
+    
+    return jobModel.getJobById(jobId, userId)
+        .then(function(jobDetails) {
+            if (jobDetails.length == 0) {
+                return res.status(404).json({ error: "Job not found" });
+            }
+            res.json({ job: jobDetails[0] });
+        }).catch(function(error) {
+            return res.status(500).json({ error: error.message });
+        });
 }
