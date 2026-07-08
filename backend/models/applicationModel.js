@@ -2,7 +2,7 @@ const { query } = require("../services/dbConnection");
 
 module.exports.getJobCompanyOwnershipById = jobId => {
     let sql = `SELECT user_id FROM job j JOIN company c ON j.company_id = c.id
-    JOIN company_ownership o ON o.company_id = c.id`;
+    JOIN company_ownership o ON o.company_id = c.id WHERE j.id = $1`;
     return query(sql, [jobId]).then(function(result) {
         return result.rows;
     });
@@ -21,11 +21,10 @@ module.exports.getResponseDetailsByStage = jobId => {
 }
 
 const responsesColumns = `SELECT a.id, first_name || ' ' || last_name candidate,
-date_applied, file_name resume_name,
-file_url resume_url, status, phone_number, email
+time_applied, resume_file_name,
+resume_file_data, status, phone_number, d.email
 FROM application a JOIN user_ u ON u.id = a.user_id
 JOIN user_detail d ON u.id = d.user_id
-JOIN resume r ON r.id = a.resume_id
 `;
 
 module.exports.getActiveCandidatesByJobId = jobId => {

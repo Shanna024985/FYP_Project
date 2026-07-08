@@ -112,7 +112,7 @@ module.exports.getAllJobs = function getAllJobs(filters = {}) {
 
 // READ - Get single job by ID
 module.exports.getJobById = function getJobById(jobId) {
-    let sql = `SELECT j.*, c.name as company_name, c.city, c.logo_file_url, 
+    let sql = `SELECT j.*, c.name as company_name, c.city, 
                c.description as company_description, c.contact_email as company_email,
                (SELECT COUNT(*) FROM application WHERE job_id = j.id) as application_count 
                FROM job j 
