@@ -398,6 +398,9 @@ module.exports.getAllJobs = function getAllJobs(filters = {}) {
     });
 }
 
+// READ - Get single job by ID
+module.exports.getJobById = function getJobById(jobId) {
+    let sql = `SELECT j.*, c.name as company_name, c.city, 
 // READ - Get total job count for pagination
 module.exports.getTotalJobCount = function getTotalJobCount(filters = {}) {
     let sql = `SELECT COUNT(*) as total FROM job j JOIN company c ON j.company_id = c.id WHERE j.deleted_at IS NULL`;
