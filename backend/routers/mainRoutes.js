@@ -10,14 +10,11 @@ router.get("/",(req,res,next)=>{
 const loginRoutes = require('./loginRoutes');
 router.use("/auth", loginRoutes);
 
-const loginRoutes = require("./loginRoutes");
 const jobRoutes = require("./jobRoutes");
 const companyRoutes = require("./companyRoutes");
 const uploadRoutes = require("./uploadRoutes");
 const locationRoutes = require("./locationRoutes");
-const resumeRoutes = require("./resumeRoutes");
 const reviewRoutes = require("./reviewRoutes");
-const userRoutes = require("./userRoutes");
 
 router.get("/", (req, res, next) => {
     res.send("You are connected!");

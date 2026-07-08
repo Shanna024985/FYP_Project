@@ -6,9 +6,9 @@ const applicationController = require("../controllers/applicationController");
 const jwtMiddleware = require('../middlewares/jwtMiddleware');
 
 // Company routes (SPECIFIC routes first)
-router.post("/company", jwtMiddleware.verifyToken, jobController.createCompany);
-router.get("/my/companies", jwtMiddleware.verifyToken, jobController.getMyCompanies);
-router.get("/my/jobs", jwtMiddleware.verifyToken, jobController.getMyJobs);
+// router.post("/company", jwtMiddleware.verifyToken, jobController.createCompany);
+// router.get("/my/companies", jwtMiddleware.verifyToken, jobController.getMyCompanies);
+// router.get("/my/jobs", jwtMiddleware.verifyToken, jobController.getMyJobs);
 
 // update status of application
 router.put("/application/:id", jwtMiddleware.verifyToken, applicationController.verifyStatus, applicationController.getJobIdByApplicationId, applicationController.verifyJobOwnership, applicationController.updateStatusById);
@@ -71,7 +71,7 @@ router.get("/dashboard/job-seeker", jwtMiddleware.verifyToken, jobController.get
 router.get("/resumes/user", jwtMiddleware.verifyToken, jobController.getUserResumes);
 router.post("/", jwtMiddleware.verifyToken, jobController.createJob);
 router.put("/:id", jwtMiddleware.verifyToken, jobController.updateJob);
-router.delete("/:id", jwtMiddleware.verifyToken, jobController.deleteJob);
+router.delete("/:id", jwtMiddleware.verifyToken, jobController.softDeleteJob);
 router.patch("/:id/close", jwtMiddleware.verifyToken, jobController.closeJob);
 
 // Application routes

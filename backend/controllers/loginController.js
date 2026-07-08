@@ -299,7 +299,6 @@ module.exports.getSingpassToken = (req, res, next) => {
 // Login/Register section
 // Check if user's Singpass ID exists in user_ table
 // if it exists, perform login, else perform register
-const model = require('../models/userModel')
 
 module.exports.checkSingpassIdExists = (req, res, next) => {
     return model.getUserBySingpassId(res.locals.singpassId)
