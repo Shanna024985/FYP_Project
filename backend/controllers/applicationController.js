@@ -19,7 +19,7 @@ module.exports.verifyJobExists = (req, res, next) => {
         if (userIds.length == 0) {
             return res.status(404).json({ message: 'jobId is not found' });
         } else {
-            res.locals.responses = userIds.application_count;
+            res.locals.responses = parseInt(userIds[0].application_count);
             next();
         }
     }).catch(function (error) {
@@ -63,7 +63,17 @@ module.exports.getActiveCandidatesByJobId = (req, res, next) => {
     return model.getActiveCandidatesByJobId(res.locals.jobId)
     .then((applications) => {
         if (res.locals.responseDetails) {
-            return res.status(200).json({responses: res.locals.responses, responseDetails: res.locals.responseDetails, activeCandidates: applications});
+            // format is this for now
+            const responseDetails = [
+                {month: "Screening", desktop: res.locals.responseDetails.screening},
+                {month: "Test", desktop: res.locals.responseDetails.testing},
+                {month: "Interview", desktop: res.locals.responseDetails.interviewing},
+                {month: "Offer", desktop: res.locals.responseDetails.offered},
+                {month: "Onboard", desktop: res.locals.responseDetails.onboarded}
+            ]
+
+            // return res.status(200).json({responses: res.locals.responses, responseDetails: res.locals.responseDetails, activeCandidates: applications});
+            return res.status(200).json({responses: res.locals.responses, responseDetails, activeCandidates: applications});
         } else {
             return res.status(200).json(applications);
         }
