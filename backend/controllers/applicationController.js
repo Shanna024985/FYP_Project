@@ -66,10 +66,10 @@ module.exports.getActiveCandidatesByJobId = (req, res, next) => {
             // format is this for now
             const responseDetails = [
                 {month: "Screening", desktop: res.locals.responseDetails.screening},
-                {month: "Test", desktop: res.locals.responseDetails.testing},
-                {month: "Interview", desktop: res.locals.responseDetails.interviewing},
-                {month: "Offer", desktop: res.locals.responseDetails.offered},
-                {month: "Onboard", desktop: res.locals.responseDetails.onboarded}
+                {month: "Interview", desktop: res.locals.responseDetails.interview},
+                {month: "Reviewing", desktop: res.locals.responseDetails.reviewing},
+                {month: "Offer", desktop: res.locals.responseDetails.offer},
+                {month: "Onboard", desktop: res.locals.responseDetails.onboard}
             ]
 
             // return res.status(200).json({responses: res.locals.responses, responseDetails: res.locals.responseDetails, activeCandidates: applications});

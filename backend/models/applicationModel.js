@@ -14,7 +14,7 @@ module.exports.getResponseDetailsByStage = jobId => {
 	(SELECT COUNT(*) FROM responses r2 WHERE r2.status = 'Interview') interview,
 	(SELECT COUNT(*) FROM responses r3 WHERE r3.status = 'Reviewing') reviewing,
     (SELECT COUNT(*) FROM responses r4 WHERE r4.status = 'Offer') offer,
-    (SELECT COUNT(*) FROM responses r5 WHERE r5.status = 'Onboarded') onboarded;`;
+    (SELECT COUNT(*) FROM responses r5 WHERE r5.status = 'Onboard') onboard;`;
     return query(sql, [jobId]).then(function(result) {
         return result.rows;
     });
