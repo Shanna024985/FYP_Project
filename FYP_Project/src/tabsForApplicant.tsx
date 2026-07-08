@@ -22,17 +22,20 @@ const pdfBlob = doc.output("blob");
 
 interface dataOfApplicants {
   candidates: string;
-  dateApplied: Date;
+  time_applied: string;
   resume: File;
   status: string;
   phoneNumber: number;
   email: string;
 }
 type Props = {
+  currentUrl: String;
+};
+type Status = {
   status: String;
 };
 
-function NativeSelectFunction(status: Props) {
+function NativeSelectFunction(status: Status) {
   let [optionsForNativeSelect, setoptionsForNativeSelect] = useState([
     { option: "Offer", value: "offer", seleted: false },
     { option: "Interview", value: "interview", seleted: false },
@@ -50,6 +53,7 @@ function NativeSelectFunction(status: Props) {
         id="status"
         onChange={(e) => {
           let valueChanged = e.target.value;
+          
         }}
       >
         {optionsForNativeSelect.map((value, index) => {
@@ -64,13 +68,13 @@ function NativeSelectFunction(status: Props) {
   );
 }
 
-const TabsForApplicant = () => {
+const TabsForApplicant = (props: Props ) => {
   let [dataOfActiveCandidates, setDataOfActiveCandidates] = useState<
     dataOfApplicants[]
   >([
     {
       candidates: "rick",
-      dateApplied: new Date(),
+      time_applied: "new Date()",
       status: "Interview",
       phoneNumber: 24521232,
       email: "testing@example.com",
@@ -78,7 +82,7 @@ const TabsForApplicant = () => {
     },
     {
       candidates: "ricks",
-      dateApplied: new Date(),
+      time_applied: "new Date()",
       status: "Offer",
       phoneNumber: 24521232,
       email: "testing@example.com",
@@ -90,7 +94,7 @@ const TabsForApplicant = () => {
   >([
     {
       candidates: "Astergus",
-      dateApplied: new Date(),
+      time_applied: "new Date()",
       status: "Awaiting Replies",
       phoneNumber: 24521232,
       email: "testing@example.com",
@@ -98,13 +102,28 @@ const TabsForApplicant = () => {
     },
     {
       candidates: "Pearson",
-      dateApplied: new Date(),
+      time_applied: "new Date()",
       status: "Awaiting Replies",
       phoneNumber: 245221232,
       email: "testing@example.com",
  resume: new File([pdfBlob], "resume.pdf", { type: "application/pdf" }),
     },
   ]);
+  useEffect(()=>{
+       let address = new URL(window.location.href);
+    let queryParameters = address.searchParams;
+    let id = queryParameters.get("id");
+    fetch(props.currentUrl + "/jobs/" + id + "/application/overview",{
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          }
+    }).then((value)=>{
+      return value.json()
+    }).then((thingToWorkWith)=>{
+      setDataOfActiveCandidates(thingToWorkWith.activeCandidates)
+    })
+  },[])
   return (
     <div>
       <Tabs defaultValue="active">
@@ -130,7 +149,7 @@ const TabsForApplicant = () => {
                   <TableRow key={index}>
                     <TableCell>{value.candidates}</TableCell>
                     <TableCell>
-                      {value.dateApplied.toLocaleDateString()}
+                      {value.time_applied}
                     </TableCell>
                     <TableCell>
                       <a
@@ -184,7 +203,7 @@ const TabsForApplicant = () => {
                   <TableRow key={index}>
                     <TableCell>{value.candidates}</TableCell>
                     <TableCell>
-                      {value.dateApplied.toLocaleDateString()}
+                      {value.time_applied}
                     </TableCell>
                     <TableCell>
                       <a

@@ -236,8 +236,7 @@ let EmployerPage = (props: Props) => {
                               companyId: value.company_id,
                             });
                             if (
-                              value.status == "Active" &&
-                              value.status != valueOfInput
+                              value.status == "Active" 
                             ) {
                               fetch(
                                 props.currentUrl +
@@ -259,8 +258,7 @@ let EmployerPage = (props: Props) => {
                                 }
                               });
                             } else if (
-                              value.status == "Closed" &&
-                              value.status != valueOfInput
+                              value.status == "Closed" 
                             ) {
                               fetch(
                                 props.currentUrl +
