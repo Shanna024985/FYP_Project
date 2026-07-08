@@ -27,6 +27,6 @@ router.patch("/:id/close", jwtMiddleware.verifyToken, jobController.closeJob);
 router.post("/:id/apply", jwtMiddleware.verifyToken, applicationController.verifyJobId, applicationController.verifyJobExists, resumeController.verifyResumeExists, resumeController.verifyResumeOwnership);
 
 const applicationRoutes = require('./applicationRoutes');
-router.use("/:id/application", jwtMiddleware.verifyToken, applicationController.verifyJobId, applicationController.verifyJobExists, applicationController.verifyJobOwnership, applicationRoutes);
+router.use("/:jobId/application", jwtMiddleware.verifyToken, applicationController.verifyJobId, applicationController.verifyJobExists, applicationController.verifyJobOwnership, applicationRoutes);
 
 module.exports = router;
