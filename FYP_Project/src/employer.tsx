@@ -233,7 +233,7 @@ let EmployerPage = (props: Props) => {
                             let valueOfInput = e.currentTarget.value;
                             let body = JSON.stringify({
                               status: valueOfInput,
-                              companyId: localStorage.getItem("companyId"),
+                              companyId: value.company_id,
                             });
                             if (
                               value.status == "Active" &&

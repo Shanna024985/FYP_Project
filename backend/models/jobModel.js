@@ -899,17 +899,3 @@ module.exports.getJobSeekerDashboard = function getJobSeekerDashboard(userId) {
         };
     });
 }
-module.exports.getJobById = (req, res, next) => {
-    let jobId = req.params.id;
-    let userId = req.query.userId;
-    
-    return jobModel.getJobById(jobId, userId)
-        .then(function(jobDetails) {
-            if (jobDetails.length == 0) {
-                return res.status(404).json({ error: "Job not found" });
-            }
-            res.json({ job: jobDetails[0] });
-        }).catch(function(error) {
-            return res.status(500).json({ error: error.message });
-        });
-}

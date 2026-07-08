@@ -171,7 +171,6 @@ const EditJobs = (props: Props) => {
   const titleRef = useRef(null);
   const descriptionRef = useRef(null);
   let [idToUse, setId] = useState<string>("");
-  const jobTypeRef = useRef(null);
   useEffect(() => {
     let address = new URL(window.location.href);
     let queryParameters = address.searchParams;
@@ -364,7 +363,7 @@ const EditJobs = (props: Props) => {
         <div className="flex mt-9">
           <Button
             onClick={(e) => {
-              let companyId = localStorage.getItem("companyId");
+              let companyId = jobReturned?.company_id
               let body = JSON.stringify({
                 companyId: companyId,
                 ...jobReturned,
