@@ -65,6 +65,7 @@ type JobsObject = {
   updated_at: string;
   company_name: string;
   company_city: string;
+  deleted_at: string;
 };
 type Company = {
   id: number;
@@ -83,7 +84,7 @@ type Company = {
   active_jobs_list: JobsObject[];
 };
 const Employer = (props: Props) => {
-  if (localStorage.getItem("companyId") == null) {
+  if (localStorage.getItem("token") == null) {
     return (
       <Error
         status={403}
@@ -150,10 +151,14 @@ let EmployerPage = (props: Props) => {
         let jobs: Company[] = valueForJobs.companies;
         jobs.forEach((element, index) => {
           let jobList: JobsObject[] = element.active_jobs_list;
-          console.log(jobList)
+          let companyId = element.id;
           jobList.forEach((valuesOfJobsForShown, index) => {
-            console.log(valuesOfJobsForShown)
-            newDataOfJobs.push(valuesOfJobsForShown);
+            if (valuesOfJobsForShown.deleted_at === null) {
+              newDataOfJobs.push({
+                ...valuesOfJobsForShown,
+                company_id: companyId,
+              });
+            }
             if (index == jobs.length - 1) {
               setDataOfJobs(newDataOfJobs);
               setToSearchDataOfJobs(newDataOfJobs);
@@ -226,7 +231,6 @@ let EmployerPage = (props: Props) => {
                           key={value.id}
                           onChange={(e) => {
                             let valueOfInput = e.currentTarget.value;
-                            console.log(valueOfInput);
                             let body = JSON.stringify({
                               status: valueOfInput,
                               companyId: localStorage.getItem("companyId"),
@@ -311,8 +315,9 @@ let EmployerPage = (props: Props) => {
                           className="p-0 bg-white/0 text-left hover:bg-amber-50"
                           onClick={() => {
                             let body = JSON.stringify({
-                              companyId: localStorage.getItem("companyId"),
+                              companyId: value.company_id,
                             });
+                           
                             fetch(props.currentUrl + "/jobs/" + value.id, {
                               method: "DELETE",
                               headers: {
@@ -329,7 +334,36 @@ let EmployerPage = (props: Props) => {
                                 toast("Job has been deleted", {
                                   action: {
                                     label: "Undo",
-                                    onClick: () => console.log("Undo"),
+                                    onClick: () => {
+                                      fetch(
+                                        props.currentUrl +
+                                          "/jobs/" +
+                                          value.id +
+                                          "/restore",
+                                        {
+                                          method: "POST",
+                                          headers: {
+                                            "Content-Type": "application/json",
+                                            Authorization:
+                                              "Bearer " +
+                                              localStorage.getItem("token"),
+                                          },
+                                          body: body,
+                                        },
+                                      )
+                                        .then((value) => {
+                                          return value.json();
+                                        })
+                                        .then((valueToDo) => {
+                                          let newDataOfJobs: JobsObject[] = [];
+                                          dataOfJobs.forEach(
+                                            (valueOfExistingData) => {
+                                              newDataOfJobs.push(valueOfExistingData)
+                                            },
+                                          );
+                                          setDataOfJobs(newDataOfJobs)
+                                        });
+                                    },
                                   },
                                   position: "top-center",
                                 });

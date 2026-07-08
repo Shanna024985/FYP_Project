@@ -31,6 +31,7 @@ function formatDate(date: Date | undefined) {
 }
 type dateGiven = {
   date?: Date;
+  onChange?: (date: Date | undefined) => void;
 };
 
 export function DatePickerNaturalLanguage(props: dateGiven) {
@@ -43,6 +44,7 @@ export function DatePickerNaturalLanguage(props: dateGiven) {
     if (props.date) {
       setDate(props.date);
       setValue(formatDate(props.date));
+
     }
   }, [props.date]);
 
@@ -57,6 +59,8 @@ export function DatePickerNaturalLanguage(props: dateGiven) {
           const date = parseDate(e.target.value);
           if (date) {
             setDate(date);
+                props.onChange?.(date);
+
           }
         }}
         onKeyDown={(e) => {
@@ -93,6 +97,8 @@ export function DatePickerNaturalLanguage(props: dateGiven) {
                 setDate(date);
                 setValue(formatDate(date));
                 setOpen(false);
+                  props.onChange?.(date);
+
               }}
             />
           </PopoverContent>

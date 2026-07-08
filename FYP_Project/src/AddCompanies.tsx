@@ -419,7 +419,7 @@ const AddCompanies = (prop: Props) => {
                         );
                       })}
                     </SelectGroup>
-                  </SelectContent>
+                  </SelectContent>  
                 </Select>
               </Field>
               <Field>

@@ -103,7 +103,8 @@ module.exports.getCompaniesByUser = (req, res, next) => {
                         'updated_at', j.updated_at,
                         'deadline', j.deadline,
                         'type',j.type,
-                        'status', j.status
+                        'status', j.status,
+						'deleted_at', j.deleted_at
                    )) FROM job j WHERE j.company_id = c.id 
                ), '[]') as active_jobs_list
                FROM company c
@@ -113,7 +114,7 @@ module.exports.getCompaniesByUser = (req, res, next) => {
                ORDER BY c.id DESC;`;
     
     return query(sql, [userId])
-        .then(function(result) {
+        .then(function(result) {    
             res.json({ 
                 count: result.rows.length, 
                 companies: result.rows 

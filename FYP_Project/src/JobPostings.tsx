@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import NavigationMenus from "./NavigationMenu";
 import {
   Field,
@@ -23,6 +23,7 @@ import {
   SelectLabel,
 } from "./components/ui/select";
 import { Button } from "./components/ui/button";
+import { Navigate, useNavigate } from "react-router-dom";
 type Props = {
   currentUrl: String;
 };
@@ -30,6 +31,49 @@ type stages = {
   stage: Number;
   setStage: Function;
   currentUrl: String;
+  salaryType: string;
+  setSalaryType: Function;
+  salaryDuration: string;
+  setSalaryDuration: Function;
+  title: string;
+  jobType: string;
+  jobCategory: string;
+  company: string;
+  numberOfJobs: string;
+  setTitle: Function;
+  setJobType: Function;
+  setJobCategory: Function;
+  setCompany: Function;
+  setNumberOfJobs: Function;
+  minSalaryAmount: string;
+  maxSalaryAmount: string;
+  salaryAmount: string;
+  setSalaryAmount: Function;
+  setMinSalaryAmount: Function;
+  setMaxSalaryAmount: Function;
+  preferredDuration: string;
+  setPreferredDuration: Function;
+  setDeadline: Function;
+  deadline: string;
+  careerLevel: string;
+  setCareerLevel: Function;
+  location: string;
+  setLocation: Function;
+  address: string;
+  setAddress: Function;
+  jobDescription: string;
+  setJobDescription: Function;
+};
+type condition = {
+  salaryType: string;
+  setSalaryDuration: Function;
+  salaryDuration: string;
+  minSalaryAmount: string;
+  maxSalaryAmount: string;
+  salaryAmount: string;
+  setSalaryAmount: Function;
+  setMinSalaryAmount: Function;
+  setMaxSalaryAmount: Function;
 };
 type JobsObject = {
   id: number;
@@ -69,12 +113,12 @@ type Company = {
   profile_url: string | null;
   total_jobs: string;
   active_jobs: string;
-  active_job_list: JobsObject[]
+  active_job_list: JobsObject[];
 };
 const StepOneOfJobPostings = (props: stages) => {
-  let [itemsForCompanySelect, setItemsForCompanySelect] = useState<string[]>([
-    "Birds", "Apple","tea",
-  ]);
+  let [itemsForCompanySelect, setItemsForCompanySelect] = useState<Company[]>(
+    [],
+  );
   useEffect(() => {
     fetch(props.currentUrl + "/company/user/companies", {
       method: "GET",
@@ -82,18 +126,15 @@ const StepOneOfJobPostings = (props: stages) => {
         "Content-Type": "application/json",
         Authorization: "Bearer " + localStorage.getItem("token"),
       },
-    }).then((value)=>{
-      return value.json()
-    }).then((values)=>{
-      let companysarray: Company[] = values.companies 
-      let newArray: string[]= []
-      if (companysarray){
-        companysarray.forEach(element => {
-          newArray.push(element.name)
-        });
-      }
-      setItemsForCompanySelect(newArray)
     })
+      .then((value) => {
+        return value.json();
+      })
+      .then((values) => {
+        let companysarray: Company[] = values.companies;
+
+        setItemsForCompanySelect(companysarray);
+      });
   }, []);
   return (
     <>
@@ -101,19 +142,40 @@ const StepOneOfJobPostings = (props: stages) => {
         <FieldGroup className="mt-8">
           <Field>
             <FieldLabel htmlFor="titleName">Job Title</FieldLabel>
-            <Input required id="titleName" placeholder="Backend Engineer" />
+            <Input
+              required
+              id="titleName"
+              placeholder="Backend Engineer"
+              onChange={(e) => {
+                props.setTitle(e.currentTarget.value);
+              }}
+              value={props.title}
+            />
+          </Field>
+          <Field>
+            <FieldLabel htmlFor="jobDescription">Job Description</FieldLabel>
+            <Input placeholder="We need.." id="jobDescription" value={props.jobDescription} onChange={(e)=>{
+              props.setJobDescription(e.currentTarget.value)
+            }}/>
           </Field>
           <Field>
             <FieldLabel htmlFor="jobTypes">Job Type</FieldLabel>
-            <Select required>
+            <Select
+              required
+              onValueChange={(e) => {
+                props.setJobType(e);
+              }}
+              value={props.jobType}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select..." />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectItem value={"fullTime"}>Full-time</SelectItem>
-                  <SelectItem value={"partTime"}>Part-time</SelectItem>
-                  <SelectItem value={"contract"}>Contract</SelectItem>
+                  <SelectItem value={"Full-Time"}>Full-Time</SelectItem>
+                  <SelectItem value={"Part-Time"}>Part-Time</SelectItem>
+                  <SelectItem value={"Contract"}>Contract</SelectItem>
+                  <SelectItem value={"GIG"}>GIG</SelectItem>
                 </SelectGroup>
               </SelectContent>
             </Select>
@@ -121,7 +183,13 @@ const StepOneOfJobPostings = (props: stages) => {
 
           <Field>
             <FieldLabel htmlFor="jobTypes">Job Category</FieldLabel>
-            <Select required>
+            <Select
+              required
+              onValueChange={(e) => {
+                props.setJobCategory(e);
+              }}
+              value={props.jobCategory}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select..." />
               </SelectTrigger>
@@ -146,7 +214,7 @@ const StepOneOfJobPostings = (props: stages) => {
                   <SelectItem value="marketing">
                     Marketing & Advertising
                   </SelectItem>
-                  <SelectItem value="parttimer">
+                  <SelectItem value="part-timer">
                     Part-time & Freelance
                   </SelectItem>
                   <SelectItem value="sales">Sales & Retail</SelectItem>
@@ -158,23 +226,27 @@ const StepOneOfJobPostings = (props: stages) => {
           </Field>
           <Field>
             <FieldLabel htmlFor="">Company</FieldLabel>
-            <Select required>
+            <Select
+              required
+              value={props.company}
+              onValueChange={(e) => {
+                props.setCompany(e);
+              }}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select..." />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  {/* <SelectItem value={"birds"}>Birds</SelectItem>
-                  <SelectItem value={"apple"}>Apple</SelectItem>
-                  <SelectItem value={"tealive"}>Tealive</SelectItem> */}
-                  {
-                    itemsForCompanySelect.map((valuesOfCompany)=>{
-                      return (
+                  {itemsForCompanySelect.map((valuesOfCompany) => {
+                    return (
                       <>
-                      <SelectItem value={valuesOfCompany}>{valuesOfCompany}</SelectItem>
-                      </>)
-                    })
-                  }
+                        <SelectItem value={valuesOfCompany.id.toString()}>
+                          {valuesOfCompany.name}
+                        </SelectItem>
+                      </>
+                    );
+                  })}
                 </SelectGroup>
               </SelectContent>
             </Select>
@@ -188,7 +260,37 @@ const StepOneOfJobPostings = (props: stages) => {
           </Field>
           <Field>
             <FieldLabel htmlFor="noofjobs">Number of Jobs Positions</FieldLabel>
-            <Input required id="noofjobs" type="number" placeholder="4" />
+            <Input
+              required
+              id="noofjobs"
+              type="number"
+              placeholder="4"
+              onChange={(e) => {
+                props.setNumberOfJobs(e.currentTarget.value);
+              }}
+              value={props.numberOfJobs}
+            />
+          </Field>
+          <Field>
+            <FieldLabel htmlFor="jobTypes">Salary Type</FieldLabel>
+            <Select
+              required
+              onValueChange={(e) => {
+                props.setSalaryType(e);
+              }}
+              value={props.salaryType}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value={"Fixed"}>Fixed</SelectItem>
+                  <SelectItem value={"Range"}>Range</SelectItem>
+                  <SelectItem value={"Negotiable"}>Negotiable</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
           </Field>
         </FieldGroup>
       </div>
@@ -204,30 +306,176 @@ const StepOneOfJobPostings = (props: stages) => {
   );
 };
 
+const ConditionalRendererForSalary = (props: condition) => {
+  if (props.salaryType === "Range") {
+    return (
+      <>
+        <Field>
+          <FieldLabel>Salary Range (per month)</FieldLabel>
+          <div className="flex justify-between">
+            <Input
+              id="minsalary"
+              className="w-[45%]"
+              placeholder="100"
+              value={props.minSalaryAmount}
+              type="number"
+              onChange={(e) => {
+                props.setMinSalaryAmount(e.currentTarget.value);
+              }}
+              required
+            />
+            <p className="text-center p-1">to</p>
+            <Input
+              id="maxsalary"
+              className="w-[45%]"
+              placeholder="300"
+              type="number"
+              value={props.maxSalaryAmount}
+              onChange={(e) => {
+                props.setMaxSalaryAmount(e.currentTarget.value);
+              }}
+              required
+            />
+          </div>
+        </Field>
+        <Field>
+          <FieldLabel>Salary Duration</FieldLabel>
+          <Select
+            required
+            onValueChange={(e) => {
+              props.setSalaryDuration(e);
+            }}
+            value={props.salaryDuration}
+          >
+            <SelectTrigger>
+              {" "}
+              <SelectValue placeholder="Select.."></SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={"Week"}>Per Week</SelectItem>
+
+              <SelectItem value={"Month"}>Per Month</SelectItem>
+
+              <SelectItem value={"Year"}>Per Year</SelectItem>
+            </SelectContent>
+          </Select>
+        </Field>
+      </>
+    );
+  } else if (props.salaryType === "Fixed") {
+    return (
+      <>
+        <Field>
+          <FieldLabel htmlFor="salaryAmt">Salary Amount</FieldLabel>
+          <div className="flex justify-between">
+            <Input
+              id="salaryAmt"
+              placeholder="200"
+              required
+              value={props.salaryAmount}
+              type="number"
+              onChange={(e) => {
+                props.setSalaryAmount(e.currentTarget.value);
+              }}
+            />
+          </div>
+        </Field>
+        <Field>
+          <FieldLabel>Salary Duration</FieldLabel>
+          <Select
+            required
+            onValueChange={(e) => {
+              props.setSalaryDuration(e);
+            }}
+            value={props.salaryDuration}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select.."></SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Week">Per Week</SelectItem>
+
+              <SelectItem value="Month">Per Month</SelectItem>
+
+              <SelectItem value="Year">Per Year</SelectItem>
+            </SelectContent>
+          </Select>
+        </Field>
+      </>
+    );
+  } else {
+    return <></>;
+  }
+};
+
+type propsForDatePicker = {
+  date: string;
+  setDate: Function;
+};
+
+const RenderTheJobPostingsForDatePicker = (props: propsForDatePicker) => {
+  if (props.date == "") {
+    return (
+      <>
+        <DatePickerNaturalLanguage
+          onChange={(date) => {
+            props.setDate(date?.toLocaleDateString("en-CA"));
+          }}
+        />
+      </>
+    );
+  } else {
+    return (
+      <>
+        <DatePickerNaturalLanguage
+          date={new Date(props.date)}
+          onChange={(date) => {
+            props.setDate(date?.toLocaleDateString("en-CA"));
+          }}
+        />
+      </>
+    );
+  }
+};
+
 const StepTwoOfJobPostings = (props: stages) => {
   return (
     <>
       <div>
         <FieldGroup className="mt-8">
-          <Field>
-            <FieldLabel>Salary Range</FieldLabel>
-            <div className="flex justify-between">
-              <Input id="minsalary" className="w-[45%]" placeholder="100" />
-              <p className="text-center p-1">to</p>
-              <Input id="maxsalary" className="w-[45%]" placeholder="300" />
-            </div>
-          </Field>
+          <ConditionalRendererForSalary
+            setSalaryDuration={props.setSalaryDuration}
+            salaryType={props.salaryType}
+            salaryDuration={props.salaryDuration}
+            minSalaryAmount={props.minSalaryAmount}
+            setMinSalaryAmount={props.setMinSalaryAmount}
+            setMaxSalaryAmount={props.setMaxSalaryAmount}
+            maxSalaryAmount={props.maxSalaryAmount}
+            salaryAmount={props.salaryAmount}
+            setSalaryAmount={props.setSalaryAmount}
+          />
+
           <Field>
             <FieldLabel htmlFor="date-optional">
               Application Deadline
             </FieldLabel>
-            <DatePickerNaturalLanguage />
+
+            <RenderTheJobPostingsForDatePicker
+              date={props.deadline}
+              setDate={props.setDeadline}
+            />
           </Field>
           <Field>
             <FieldLabel htmlFor="preferredDuration">
               Preferred Duration
             </FieldLabel>
-            <Select required>
+            <Select
+              required
+              value={props.preferredDuration}
+              onValueChange={(e) => {
+                props.setPreferredDuration(e);
+              }}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select..." />
               </SelectTrigger>
@@ -246,13 +494,24 @@ const StepTwoOfJobPostings = (props: stages) => {
           </Field>
         </FieldGroup>
       </div>
-      <div
-        className="flex"
-        onClick={(e) => {
-          props.setStage(3);
-        }}
-      >
-        <Button className="mt-10">Next</Button>
+      <div className="flex gap-3">
+        <Button
+          className="mt-10 bg-gray-400"
+          onClick={(e) => {
+            props.setStage(1);
+          }}
+        >
+          Previous
+        </Button>
+
+        <Button
+          className="mt-10"
+          onClick={(e) => {
+            props.setStage(3);
+          }}
+        >
+          Next
+        </Button>
       </div>
     </>
   );
@@ -328,13 +587,21 @@ const StepThreeOfJobPostings = (props: stages) => {
 
     Mexico: ["Mexico City", "Guadalajara", "Monterrey"],
   });
+  let navigate = useNavigate();
+
   return (
     <>
       <div>
         <FieldGroup className="mt-8">
           <Field>
             <FieldLabel htmlFor="minimumexperience">Career level</FieldLabel>
-            <Select required>
+            <Select
+              value={props.careerLevel}
+              onValueChange={(e) => {
+                props.setCareerLevel(e);
+              }}
+              required
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select..." />
               </SelectTrigger>
@@ -358,7 +625,13 @@ const StepThreeOfJobPostings = (props: stages) => {
           </Field>
           <Field>
             <FieldLabel htmlFor="locationDropdown">Location</FieldLabel>
-            <Select required>
+            <Select
+              value={props.location}
+              onValueChange={(e) => {
+                props.setLocation(e);
+              }}
+              required
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select..." />
               </SelectTrigger>
@@ -368,15 +641,7 @@ const StepThreeOfJobPostings = (props: stages) => {
                     return (
                       <>
                         <React.Fragment key={country}>
-                          <SelectLabel>{country}</SelectLabel>
-                          {citiesLoop.map((city) => (
-                            <SelectItem
-                              key={city}
-                              value={city.toLowerCase().replace(/\s+/g, "-")}
-                            >
-                              {city}
-                            </SelectItem>
-                          ))}
+                          <SelectItem value={country}>{country}</SelectItem>
                         </React.Fragment>
                       </>
                     );
@@ -385,9 +650,64 @@ const StepThreeOfJobPostings = (props: stages) => {
               </SelectContent>
             </Select>
           </Field>
+          <Field>
+            <FieldLabel htmlFor="addressOfJob">Address</FieldLabel>
+            <Input
+              placeholder="12 john stt, 123456"
+              id="addressOfJob"
+              value={props.address}
+              onChange={(e) => {
+                props.setAddress(e.currentTarget.value);
+              }}
+            />
+          </Field>
         </FieldGroup>
-        <div className="flex" onClick={(e) => {}}>
-          <Button className="mt-10">Save</Button>
+        <div className="flex gap-3">
+          <Button
+            className="mt-10 bg-gray-400"
+            onClick={(e) => {
+              props.setStage(2);
+            }}
+          >
+            Previous
+          </Button>
+          <Button
+            className="mt-10"
+            onClick={(e) => {
+              e.preventDefault();
+              let bodyForPost = JSON.stringify({
+                companyId: props.company,
+                title: props.title,
+                category: props.jobCategory,
+                type: props.jobType,
+                salary_range_to: props.maxSalaryAmount,
+                salary_range_from: props.minSalaryAmount,
+                salary_type: props.salaryType,
+                salary_period: props.salaryDuration,
+                duration: props.preferredDuration,
+                deadline: props.deadline,
+                experience: props.careerLevel,
+                location: props.location,
+                jobs_needed: props.numberOfJobs,
+                description: props.jobDescription
+              });
+              fetch(props.currentUrl + "/jobs", {
+                method: "POST",
+                body: bodyForPost,
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: "Bearer " + localStorage.getItem("token"),
+                },
+              }).then((valueReturned) => {
+                if (valueReturned.status == 201) {
+                  alert("Job has been created successfully");
+                  navigate("/employer");
+                }
+              });
+            }}
+          >
+            Save
+          </Button>
         </div>
       </div>
     </>
@@ -423,6 +743,38 @@ const ConditionalRenderer = (props: stages) => {
         setStage={props.setStage}
         stage={props.stage}
         currentUrl={props.currentUrl}
+        salaryType={props.salaryType}
+        setSalaryType={props.setSalaryType}
+        salaryDuration={props.salaryDuration}
+        setSalaryDuration={props.setSalaryDuration}
+        title={props.title}
+        jobType={props.jobType}
+        jobCategory={props.jobCategory}
+        company={props.company}
+        numberOfJobs={props.numberOfJobs}
+        setTitle={props.setTitle}
+        setJobType={props.setJobType}
+        setJobCategory={props.setJobCategory}
+        setCompany={props.setCompany}
+        setNumberOfJobs={props.setNumberOfJobs}
+        minSalaryAmount={props.minSalaryAmount}
+        setMinSalaryAmount={props.setMinSalaryAmount}
+        maxSalaryAmount={props.maxSalaryAmount}
+        setMaxSalaryAmount={props.setMaxSalaryAmount}
+        preferredDuration={props.preferredDuration}
+        setPreferredDuration={props.setPreferredDuration}
+        setDeadline={props.setDeadline}
+        deadline={props.deadline}
+        setCareerLevel={props.setCareerLevel}
+        careerLevel={props.careerLevel}
+        location={props.location}
+        setLocation={props.setLocation}
+        address={props.address}
+        setAddress={props.setAddress}
+        salaryAmount={props.salaryAmount}
+        setSalaryAmount={props.setSalaryAmount}
+        setJobDescription={props.setJobDescription}
+        jobDescription={props.jobDescription}
       />
     );
   } else if (props.stage == 2) {
@@ -431,6 +783,38 @@ const ConditionalRenderer = (props: stages) => {
         setStage={props.setStage}
         stage={props.stage}
         currentUrl={props.currentUrl}
+        salaryType={props.salaryType}
+        setSalaryType={props.setSalaryType}
+        salaryDuration={props.salaryDuration}
+        setSalaryDuration={props.setSalaryDuration}
+        title={props.title}
+        jobType={props.jobType}
+        jobCategory={props.jobCategory}
+        company={props.company}
+        numberOfJobs={props.numberOfJobs}
+        setTitle={props.setTitle}
+        setJobType={props.setJobType}
+        setJobCategory={props.setJobCategory}
+        setCompany={props.setCompany}
+        setNumberOfJobs={props.setNumberOfJobs}
+        minSalaryAmount={props.minSalaryAmount}
+        setMinSalaryAmount={props.setMinSalaryAmount}
+        maxSalaryAmount={props.maxSalaryAmount}
+        setMaxSalaryAmount={props.setMaxSalaryAmount}
+        preferredDuration={props.preferredDuration}
+        setPreferredDuration={props.setPreferredDuration}
+        setDeadline={props.setDeadline}
+        deadline={props.deadline}
+        setCareerLevel={props.setCareerLevel}
+        careerLevel={props.careerLevel}
+        location={props.location}
+        setLocation={props.setLocation}
+        address={props.address}
+        setAddress={props.setAddress}
+        salaryAmount={props.salaryAmount}
+        setSalaryAmount={props.setSalaryAmount}
+                setJobDescription={props.setJobDescription}
+        jobDescription={props.jobDescription}
       />
     );
   } else if (props.stage == 3) {
@@ -439,6 +823,38 @@ const ConditionalRenderer = (props: stages) => {
         setStage={props.setStage}
         stage={props.stage}
         currentUrl={props.currentUrl}
+        salaryType={props.salaryType}
+        setSalaryType={props.setSalaryType}
+        salaryDuration={props.salaryDuration}
+        setSalaryDuration={props.setSalaryDuration}
+        title={props.title}
+        jobType={props.jobType}
+        jobCategory={props.jobCategory}
+        company={props.company}
+        numberOfJobs={props.numberOfJobs}
+        setTitle={props.setTitle}
+        setJobType={props.setJobType}
+        setJobCategory={props.setJobCategory}
+        setCompany={props.setCompany}
+        setNumberOfJobs={props.setNumberOfJobs}
+        minSalaryAmount={props.minSalaryAmount}
+        setMinSalaryAmount={props.setMinSalaryAmount}
+        maxSalaryAmount={props.maxSalaryAmount}
+        setMaxSalaryAmount={props.setMaxSalaryAmount}
+        preferredDuration={props.preferredDuration}
+        setPreferredDuration={props.setPreferredDuration}
+        setDeadline={props.setDeadline}
+        deadline={props.deadline}
+        setCareerLevel={props.setCareerLevel}
+        careerLevel={props.careerLevel}
+        location={props.location}
+        setLocation={props.setLocation}
+        address={props.address}
+        setAddress={props.setAddress}
+        salaryAmount={props.salaryAmount}
+        setSalaryAmount={props.setSalaryAmount}
+                setJobDescription={props.setJobDescription}
+        jobDescription={props.jobDescription}
       />
     );
   }
@@ -450,6 +866,8 @@ const JobPostings = (props: Props) => {
     if (stage == 2) {
       let step1SvgDiv = document.getElementById("step1SVG");
       let step2SvgDiv = document.getElementById("step2SVG");
+      let step3SvgDiv = document.getElementById("step3SVGDiv");
+
       if (step1SvgDiv) {
         let paragraph = document.getElementById("paragraphOfJobOverview");
         if (paragraph) {
@@ -459,10 +877,21 @@ const JobPostings = (props: Props) => {
       if (step2SvgDiv) {
         let p = document.getElementById("paragraphOfPayTerms");
         if (p) {
-          p.classList.replace("text-[#B0B0B0]", "text-[#2A88E0]");
+          p.className = "text-left font-bold text-[#2A88E0] self-center";
+
           let circleSVG = document.getElementById("circleOfStep2");
           if (circleSVG) {
             circleSVG.setAttribute("fill", "#2A88E0");
+          }
+        }
+      }
+      if (step3SvgDiv) {
+        let circle = document.getElementById("step3SVGCircle");
+        if (circle) {
+          circle.setAttribute("fill", "#B0B0B0");
+          let p = document.getElementById("paragraphOfJobRequirements");
+          if (p) {
+            p.classList.replace("text-[#2A88E0]", "text-[#B0B0B0]");
           }
         }
       }
@@ -485,8 +914,46 @@ const JobPostings = (props: Props) => {
           }
         }
       }
+    } else if (stage == 1) {
+      let step1SvgDiv = document.getElementById("step1SVG");
+      let step2SvgDiv = document.getElementById("step2SVG");
+
+      if (step1SvgDiv) {
+        let paragraph = document.getElementById("paragraphOfJobOverview");
+        if (paragraph) {
+          paragraph.className =
+            "text-left font-bold text-[#2A88E0] self-center";
+        }
+      }
+      if (step2SvgDiv) {
+        let p = document.getElementById("paragraphOfPayTerms");
+        if (p) {
+          p.className = "text-left font-bold text-[#B0B0B0] self-center";
+
+          let circleSVG = document.getElementById("circleOfStep2");
+          if (circleSVG) {
+            circleSVG.setAttribute("fill", "#B0B0B0");
+          }
+        }
+      }
     }
   }, [stage]);
+  let [salary_type, setSalaryType] = useState("");
+  let [salary_time, setSalaryTime] = useState("");
+  let [title, setTitle] = useState("");
+  let [jobtype, setJobType] = useState("");
+  let [jobCategory, setJobCategory] = useState("");
+  let [company, setCompany] = useState("");
+  let [numberOfJobs, setNumberOfJobs] = useState("");
+  let [minSalaryAmount, setMinSalaryAmount] = useState("");
+  let [maxSalaryAmount, setMaxSalaryAmount] = useState("");
+  let [salaryAmount, setSalaryAmount] = useState("");
+  let [preferredDuration, setPreferredDuration] = useState("");
+  let [deadline, setDeadline] = React.useState("");
+  let [careerLevel, setCareerLevel] = useState("");
+  let [location, setLocation] = useState("");
+  let [address, setAddress] = useState("");
+  let [jobDescription, setJobDescription] = useState("");
   return (
     <div>
       <NavigationMenus />
@@ -616,6 +1083,38 @@ const JobPostings = (props: Props) => {
           stage={stage}
           setStage={setStage}
           currentUrl={props.currentUrl}
+          salaryType={salary_type}
+          setSalaryType={setSalaryType}
+          salaryDuration={salary_time}
+          setSalaryDuration={setSalaryTime}
+          title={title}
+          setTitle={setTitle}
+          jobType={jobtype}
+          setJobType={setJobType}
+          jobCategory={jobCategory}
+          setJobCategory={setJobCategory}
+          company={company}
+          setCompany={setCompany}
+          numberOfJobs={numberOfJobs}
+          setNumberOfJobs={setNumberOfJobs}
+          minSalaryAmount={minSalaryAmount}
+          setMinSalaryAmount={setMinSalaryAmount}
+          maxSalaryAmount={maxSalaryAmount}
+          setMaxSalaryAmount={setMaxSalaryAmount}
+          preferredDuration={preferredDuration}
+          setPreferredDuration={setPreferredDuration}
+          setDeadline={setDeadline}
+          deadline={deadline}
+          setCareerLevel={setCareerLevel}
+          careerLevel={careerLevel}
+          location={location}
+          setLocation={setLocation}
+          address={address}
+          setAddress={setAddress}
+          salaryAmount={salaryAmount}
+          setSalaryAmount={setSalaryAmount}
+          jobDescription={jobDescription}
+          setJobDescription={setJobDescription}
         />
       </div>
     </div>
