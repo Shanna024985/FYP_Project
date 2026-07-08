@@ -24,7 +24,7 @@ router.delete("/:id", jwtMiddleware.verifyToken, jobController.deleteJob);
 router.patch("/:id/close", jwtMiddleware.verifyToken, jobController.closeJob);
 
 // Application routes
-router.post("/:id/apply", jwtMiddleware.verifyToken, applicationController.verifyJobId, applicationController.verifyJobExists, resumeController.verifyResumeExists, resumeController.verifyResumeOwnership);
+router.post("/:jobId/apply", jwtMiddleware.verifyToken, applicationController.verifyJobId, applicationController.verifyJobExists, resumeController.verifyResumeExists, resumeController.verifyResumeOwnership, applicationController.createApplication);
 
 const applicationRoutes = require('./applicationRoutes');
 router.use("/:jobId/application", jwtMiddleware.verifyToken, applicationController.verifyJobId, applicationController.verifyJobExists, applicationController.verifyJobOwnership, applicationRoutes);

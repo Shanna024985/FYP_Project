@@ -11,7 +11,7 @@ module.exports.verifyResumeExists = (req, res, next) => {
 
 // verify user owns the provided resume
 module.exports.verifyResumeOwnership = (req, res, next) => {
-    return resumeModel.getResumeById(req.body.resumeId)
+    return model.getResumeById(req.body.resumeId)
     .then((resume) => {
         if (resume.length == 0) {
             return res.status(404).json({ message: 'resumeId is not found' });
