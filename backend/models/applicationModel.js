@@ -10,11 +10,11 @@ module.exports.getJobCompanyOwnershipById = jobId => {
 
 module.exports.getResponseDetailsByStage = jobId => {
     let sql = `WITH responses AS (SELECT status FROM application WHERE job_id = $1)
-	SELECT (SELECT COUNT(*) from responses r1 WHERE r1.status = 'Screening') screening,
-	(SELECT COUNT(*) from responses r2 WHERE r2.status = 'Testing') testing,
-	(SELECT COUNT(*) from responses r3 WHERE r3.status = 'Interviewing') interviewing,
-    (SELECT COUNT(*) from responses r4 WHERE r4.status = 'Offered') offered,
-    (SELECT COUNT(*) from responses r5 WHERE r5.status = 'Onboarded') onboarded;`;
+	SELECT (SELECT COUNT(*) FROM responses r1 WHERE r1.status = 'Screening') screening,
+	(SELECT COUNT(*) FROM responses r2 WHERE r2.status = 'Interview') interview,
+	(SELECT COUNT(*) FROM responses r3 WHERE r3.status = 'Reviewing') reviewing,
+    (SELECT COUNT(*) FROM responses r4 WHERE r4.status = 'Offer') offer,
+    (SELECT COUNT(*) FROM responses r5 WHERE r5.status = 'Onboard') onboard;`;
     return query(sql, [jobId]).then(function(result) {
         return result.rows;
     });
@@ -28,14 +28,14 @@ JOIN user_detail d ON u.id = d.user_id
 `;
 
 module.exports.getActiveCandidatesByJobId = jobId => {
-    let sql = responsesColumns + `WHERE job_id = $1 AND status IN ('Interviewing', 'Offered', 'Rejected');`;
+    let sql = responsesColumns + `WHERE job_id = $1 AND status IN ('Interview', 'Offer', 'Rejected');`;
     return query(sql, [jobId]).then(function(result) {
         return result.rows;
     });
 }
 
 module.exports.getAwaitingResponsesByJobId = jobId => {
-    let sql = responsesColumns + `WHERE job_id = $1 AND status NOT IN ('Interviewing', 'Offered', 'Rejected');`;
+    let sql = responsesColumns + `WHERE job_id = $1 AND status NOT IN ('Interview', 'Offer', 'Rejected');`;
     return query(sql, [jobId]).then(function(result) {
         return result.rows;
     });
@@ -49,14 +49,14 @@ module.exports.getApplicationsByJobId = jobId => {
 }
 
 module.exports.getActiveCandidatesByJobIdAndName = (jobId, name) => {
-    let sql = responsesColumns + `WHERE job_id = $1 AND status IN ('Interviewing', 'Offered', 'Rejected') AND first_name || ' ' || last_name ILIKE $2;`;
+    let sql = responsesColumns + `WHERE job_id = $1 AND status IN ('Interview', 'Offer', 'Rejected') AND first_name || ' ' || last_name ILIKE $2;`;
     return query(sql, [jobId, name + '%']).then(function(result) {
         return result.rows;
     });
 }
 
 module.exports.getAwaitingResponsesByJobIdAndName = (jobId, name) => {
-    let sql = responsesColumns + `WHERE job_id = $1 AND status NOT IN ('Interviewing', 'Offered', 'Rejected') AND first_name || ' ' || last_name ILIKE $2;`;
+    let sql = responsesColumns + `WHERE job_id = $1 AND status NOT IN ('Interview', 'Offer', 'Rejected') AND first_name || ' ' || last_name ILIKE $2;`;
     return query(sql, [jobId, name + '%']).then(function(result) {
         return result.rows;
     });
@@ -76,9 +76,11 @@ module.exports.getJobIdByApplicationId = (id) => {
     });
 }
 
-module.exports.insertSingleApplication = (jobId, userId, resumeId) => {
-    let sql = `INSERT INTO application (job_id, user_id, resume_id) VALUES ($1, $2, $3) RETURNING id;`;
-    return query(sql, [jobId, userId, resumeId]).then(function(result) {
+module.exports.insertSingleApplication = (jobId, userId, resumeId, proposal) => {
+    let sql = `INSERT INTO application (job_id, user_id, resume_id, remarks, fullname, email, phone, proposal)
+    SELECT $1, $2, $3, '', first_name || ' ' || last_name, email, phone_number, $4 FROM user_ u JOIN user_detail d ON u.id = d.user_id WHERE u.id = $5
+    RETURNING id;`;
+    return query(sql, [jobId, userId, resumeId, proposal, userId]).then(function(result) {
         return result.rows;
     });
 }

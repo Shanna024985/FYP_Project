@@ -66,10 +66,10 @@ module.exports.getActiveCandidatesByJobId = (req, res, next) => {
             // format is this for now
             const responseDetails = [
                 {month: "Screening", desktop: res.locals.responseDetails.screening},
-                {month: "Test", desktop: res.locals.responseDetails.testing},
-                {month: "Interview", desktop: res.locals.responseDetails.interviewing},
-                {month: "Offer", desktop: res.locals.responseDetails.offered},
-                {month: "Onboard", desktop: res.locals.responseDetails.onboarded}
+                {month: "Interview", desktop: res.locals.responseDetails.interview},
+                {month: "Reviewing", desktop: res.locals.responseDetails.reviewing},
+                {month: "Offer", desktop: res.locals.responseDetails.offer},
+                {month: "Onboard", desktop: res.locals.responseDetails.onboard}
             ]
 
             // return res.status(200).json({responses: res.locals.responses, responseDetails: res.locals.responseDetails, activeCandidates: applications});
@@ -158,8 +158,8 @@ module.exports.updateStatusById = (req, res, next) => {
 module.exports.verifyStatus = (req, res, next) => {
     if (!req.body.status) {
         return res.status(400).json({ message: 'status is undefined' });
-    } else if (!['Reviewing', 'Screening', 'Testing', 'Interviewing', 'Offered', 'Onboarded', 'Rejected'].includes(req.body.status)) {
-        return res.status(400).json({ message: 'status is not one of the following: Reviewing, Screening, Testing, Interviewing, Offered, Onboarded, Rejected' });
+    } else if (!['Screening', 'Interview', 'Reviewing', 'Offer', 'Onboarded', 'Rejected'].includes(req.body.status)) {
+        return res.status(400).json({ message: 'status is not one of the following: Screening, Interview, Reviewing, Offer, Onboarded, Rejected' });
     } else {
         next();
     }
@@ -167,7 +167,7 @@ module.exports.verifyStatus = (req, res, next) => {
 
 // create an application
 module.exports.createApplication = (req, res, next) => {
-    return model.insertSingleApplication(req.params.id, res.locals.userId, req.body.resumeId)
+    return model.insertSingleApplication(req.params.jobId, res.locals.userId, req.body.resumeId, (req.body.proposal) ? req.body.proposal : '')
     .then((application) => {
         return res.status(201).json({ message: 'Successfully applied for job.', id: application[0].id});
     }).catch(function (error) {
