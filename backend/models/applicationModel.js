@@ -14,7 +14,8 @@ module.exports.getResponseDetailsByStage = jobId => {
 	(SELECT COUNT(*) FROM responses r2 WHERE r2.status = 'Interview') interview,
 	(SELECT COUNT(*) FROM responses r3 WHERE r3.status = 'Reviewing') reviewing,
     (SELECT COUNT(*) FROM responses r4 WHERE r4.status = 'Offer') offer,
-    (SELECT COUNT(*) FROM responses r5 WHERE r5.status = 'Onboard') onboard;`;
+    (SELECT COUNT(*) FROM responses r5 WHERE r5.status = 'Onboard') onboard,
+    (SELECT COUNT(*) FROM responses r6 WHERE r6.status = 'Rejected') rejected;`;
     return query(sql, [jobId]).then(function(result) {
         return result.rows;
     });
@@ -77,10 +78,10 @@ module.exports.getJobIdByApplicationId = (id) => {
 }
 
 module.exports.insertSingleApplication = (jobId, userId, resumeId, proposal) => {
-    let sql = `INSERT INTO application (job_id, user_id, resume_id, remarks, fullname, email, phone, proposal)
-    SELECT $1, $2, $3, '', first_name || ' ' || last_name, email, phone_number, $4 FROM user_ u JOIN user_detail d ON u.id = d.user_id WHERE u.id = $5
+    let sql = `INSERT INTO application (job_id, user_id, resume_id, remarks, fullname, email, phone, proposal, resume_file_name, resume_file_data)
+    SELECT $1, $2, $3, '', first_name || ' ' || last_name, email, phone_number, $4, r.file_name, r.file_data FROM user_ u JOIN user_detail d ON u.id = d.user_id JOIN resume r ON r.id = $5 WHERE u.id = $6
     RETURNING id;`;
-    return query(sql, [jobId, userId, resumeId, proposal, userId]).then(function(result) {
+    return query(sql, [jobId, userId, resumeId, proposal, resumeId, userId]).then(function(result) {
         return result.rows;
     });
 }

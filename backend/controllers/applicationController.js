@@ -69,7 +69,8 @@ module.exports.getActiveCandidatesByJobId = (req, res, next) => {
                 {month: "Interview", desktop: res.locals.responseDetails.interview},
                 {month: "Reviewing", desktop: res.locals.responseDetails.reviewing},
                 {month: "Offer", desktop: res.locals.responseDetails.offer},
-                {month: "Onboard", desktop: res.locals.responseDetails.onboard}
+                {month: "Onboard", desktop: res.locals.responseDetails.onboard},
+                {month: "Rejected", desktop: res.locals.responseDetails.rejected}
             ]
 
             // return res.status(200).json({responses: res.locals.responses, responseDetails: res.locals.responseDetails, activeCandidates: applications});
