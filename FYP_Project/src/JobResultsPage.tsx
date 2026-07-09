@@ -1,16 +1,22 @@
-import JobListItem from "./components/common sections/JobListItem"
+import JobListItem from "./components/common sections/JobListItem";
 
 export default function JobResultsPage() {
   const jobs = Array.from({ length: 5 }).map((_, i) => ({
+    currentUrl: "/jobs",
+    jobId: i + 1,
     title: `Frontend Developer ${i + 1}`,
     description:
       "We are looking for a talented developer to join our team and build modern web applications using React, TypeScript and Node.js...",
-    salary: "$3000 / month",
+    salaryRangeFrom: 3000,
+    salaryRangeTo: 5000,
+    salaryType: "Fixed",
+    salaryPeriod: "Month",
     location: "Singapore",
+    address: "Jurong East",
     tags: ["Urgent", "Freelance"],
     date: "22 May 2026",
     companyLogo: "https://via.placeholder.com/50",
-  }))
+  }));
 
   return (
     <div className="p-6 space-y-4">
@@ -23,5 +29,5 @@ export default function JobResultsPage() {
         </div>
       ))}
     </div>
-  )
+  );
 }

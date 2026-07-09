@@ -60,7 +60,8 @@ export default function BrowseJobs({ currentUrl }: Props) {
   // MAP API → UI FORMAT
   const mappedJobs = currentJobs.map((job) => ({
     currentUrl,
-    jobId: job.id, 
+    jobId: job.id,
+
     title: job.title,
     description: job.description,
 
@@ -69,7 +70,8 @@ export default function BrowseJobs({ currentUrl }: Props) {
     salaryType: job.salary_type,
     salaryPeriod: job.salary_period,
 
-    location: `${job.location}, ${job.company_city}`,
+    location: job.location,
+    address: job.address,
 
     tags: [job.type, job.category],
 

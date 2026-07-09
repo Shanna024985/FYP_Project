@@ -422,6 +422,11 @@ module.exports.getAllJobs = function getAllJobs(filters = {}) {
     if (conditions.length > 0) {
         sql += " AND" + conditions.join(" AND");
     }
+    if (filters.address) {
+      conditions.push(`j.address ILIKE $${paramIndex}`);
+      params.push(`%${filters.address}%`);
+      paramIndex++;
+    }
 
     const limit = filters.limit ? parseInt(filters.limit) : 10;
     const offset = filters.offset ? parseInt(filters.offset) : 0;
@@ -560,14 +565,19 @@ module.exports.getRecommendedJobs = function getRecommendedJobs(userId, limit = 
 
 // READ - Get single job by ID with full details
 module.exports.getJobById = function getJobById(jobId, userId = null) {
-    let sql = `SELECT j.*, c.name as company_name, c.city, 
-               c.description as company_description, c.contact_email as company_email,
-               c.logo_url, c.tagline as company_tagline, c.url as company_url,
-               (SELECT COUNT(*) FROM application WHERE job_id = j.id) as application_count,
-               (SELECT COUNT(*) FROM saved_job WHERE job_id = j.id) as saved_count
-               FROM job j 
-               JOIN company c ON j.company_id = c.id 
-               WHERE j.id = $1 AND j.deleted_at IS NULL`;
+    let sql = `SELECT j.*,
+       c.name AS company_name,
+       c.description AS company_description,
+       c.contact_email AS company_email,
+       c.logo_url,
+       c.tagline AS company_tagline,
+       c.url AS company_url,
+       (SELECT COUNT(*) FROM application WHERE job_id = j.id) AS application_count,
+       (SELECT COUNT(*) FROM saved_job WHERE job_id = j.id) AS saved_count
+FROM job j
+JOIN company c ON j.company_id = c.id
+WHERE j.id = $1
+  AND j.deleted_at IS NULL`;
 
     const params = [jobId];
 
@@ -718,23 +728,6 @@ module.exports.updateJobStatus = function updateJobStatus(jobId, status, company
 }
 
 // ==================== APPLICATIONS ====================
-
-// CREATE - Apply for a job
-// module.exports.applyForJob = function applyForJob(userId, jobId, resumeId) {
-//     let checkSql = `SELECT id, status FROM application WHERE user_id = $1 AND job_id = $2;`;
-//     return query(checkSql, [userId, jobId]).then(function(checkResult) {
-//         if (checkResult.rows.length > 0) {
-//             return { alreadyApplied: true, status: checkResult.rows[0].status };
-//         }
-
-//         let sql = `INSERT INTO application (job_id, user_id, resume_id, status, time_applied) 
-//                    VALUES ($1, $2, $3, 'Reviewing', CURRENT_TIMESTAMP) 
-//                    RETURNING *;`;
-//         return query(sql, [jobId, userId, resumeId]).then(function(result) {
-//             return { alreadyApplied: false, application: result.rows[0] };
-//         });
-//     });
-// }
 module.exports.applyForJob = function applyForJob(
     userId,
     jobId,
