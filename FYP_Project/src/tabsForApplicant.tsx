@@ -33,6 +33,7 @@ type Props = {
 };
 type Status = {
   status: String;
+  currentUrl: String;
 };
 
 function NativeSelectFunction(status: Status) {
@@ -55,6 +56,24 @@ function NativeSelectFunction(status: Status) {
         id="status"
         onChange={(e) => {
           let valueChanged = e.currentTarget.value;
+          let address = new URL(window.location.href);
+          let queryParameters = address.searchParams;
+          let id = queryParameters.get("id");
+          let body = JSON.stringify({
+            status: valueChanged,
+          });
+          fetch(status.currentUrl + "/jobs/application/" + id, {
+            method: "PUT",
+            body: body,
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + localStorage.getItem("token"),
+            },
+          }).then((value)=>{
+            return value.json()
+          }).then((value)=>{
+            alert("Successfully updated status")
+          })
         }}
       >
         {optionsForNativeSelect.map((value, index) => {
@@ -164,10 +183,10 @@ const TabsForApplicant = (props: Props) => {
 
         let awaitingCandidates: activeCandidates[] =
           thingToWorkWith.awaitingCandidates;
-        let thingToSetForActive = setUpArray(activeCandidates)
+        let thingToSetForActive = setUpArray(activeCandidates);
         setDataOfActiveCandidates(thingToSetForActive);
-        let thingToSetForAwait = setUpArray(awaitingCandidates)
-        setDataOfAwaitingCandidates(thingToSetForAwait)
+        let thingToSetForAwait = setUpArray(awaitingCandidates);
+        setDataOfAwaitingCandidates(thingToSetForAwait);
       });
   }, []);
   return (
@@ -207,8 +226,10 @@ const TabsForApplicant = (props: Props) => {
                       </a>
                     </TableCell>
                     <TableCell>
-                      <NativeSelectFunction status={value.status} />
-
+                      <NativeSelectFunction
+                        status={value.status}
+                        currentUrl={props.currentUrl}
+                      />
                     </TableCell>
                     <TableCell>
                       <a
@@ -246,8 +267,8 @@ const TabsForApplicant = (props: Props) => {
             </TableHeader>
             <TableBody>
               {dataOfAwaitingCandidates.map((value, index) => {
-                console.log(value)
-                debugger
+                console.log(value);
+                debugger;
                 return (
                   <TableRow key={index}>
                     <TableCell>{value.candidates}</TableCell>
@@ -264,7 +285,10 @@ const TabsForApplicant = (props: Props) => {
                       </a>
                     </TableCell>
                     <TableCell>
-                      <NativeSelectFunction status={value.status} />
+                      <NativeSelectFunction
+                        status={value.status}
+                        currentUrl={props.currentUrl}
+                      />
                     </TableCell>
                     <TableCell>
                       <a

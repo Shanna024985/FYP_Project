@@ -20,6 +20,7 @@ const ViewApplicants = (props: Props) => {
     { month: "Reviewing", desktop: 237 },
     { month: "Offer", desktop: 73 },
     { month: "Onboard", desktop: 209 },
+    { month: "Rejected", desktop: 100 },
   ]);
 
   useEffect(() => {
@@ -38,13 +39,14 @@ const ViewApplicants = (props: Props) => {
             "Content-Type": "application/json",
             Authorization: "Bearer " + localStorage.getItem("token"),
           },
-        }).then((value)=>{
-          return value.json()
-        }).then((valueToDoCode)=>{
-          setResponses(valueToDoCode.responses)
-          setData(valueToDoCode.responseDetails)
         })
-
+          .then((value) => {
+            return value.json();
+          })
+          .then((valueToDoCode) => {
+            setResponses(valueToDoCode.responses);
+            setData(valueToDoCode.responseDetails);
+          });
       });
   }, []);
   return (
