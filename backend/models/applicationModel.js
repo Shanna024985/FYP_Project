@@ -71,7 +71,7 @@ module.exports.updateStatusById = (status, id) => {
 }
 
 module.exports.getJobIdByApplicationId = (id) => {
-    let sql = `GET job_id FROM application WHERE id = $1;`;
+    let sql = `SELECT job_id FROM application WHERE id = $1;`;
     return query(sql, [id]).then(function(result) {
         return result.rows;
     });
