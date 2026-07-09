@@ -25,7 +25,7 @@ interface dataOfApplicants {
   time_applied: string;
   resume: File;
   status: string;
-  phoneNumber: number;
+  phoneNumber: string;
   email: string;
 }
 type Props = {
@@ -37,13 +37,15 @@ type Status = {
 
 function NativeSelectFunction(status: Status) {
   let [optionsForNativeSelect, setoptionsForNativeSelect] = useState([
-    { option: "Offer", value: "offer", seleted: false },
-    { option: "Interview", value: "interview", seleted: false },
-    { option: "Rejected", value: "rejected", seleted: false },
-    { option: "Awaiting Replies", value: "waitinglist", seleted: false },
+    { option: "Offer", value: "Offer", seleted: false },
+    { option: "Interview", value: "Interview", seleted: false },
+    { option: "Rejected", value: "Rejected", seleted: false },
+    { option: "Awaiting Replies", value: "Screening", seleted: false },
+    { option: "Review", value: "Reviewing", seleted: false },
+    { option: "Onboard", value: "Onboard", seleted: false },
   ]);
   optionsForNativeSelect.forEach((value) => {
-    if (value.option == status.status) {
+    if (value.value == status.status) {
       value.seleted = true;
     }
   });
@@ -52,8 +54,7 @@ function NativeSelectFunction(status: Status) {
       <NativeSelect
         id="status"
         onChange={(e) => {
-          let valueChanged = e.target.value;
-          
+          let valueChanged = e.currentTarget.value;
         }}
       >
         {optionsForNativeSelect.map((value, index) => {
@@ -67,26 +68,61 @@ function NativeSelectFunction(status: Status) {
     </>
   );
 }
+type resume = {
+  type: string;
+  data: string;
+};
+type activeCandidates = {
+  id: string;
+  candidate: string;
+  time_applied: string;
+  resume_file_name: string;
+  resume_file_data: resume;
+  status: string;
+  phone_number: string;
+  email: string;
+};
 
-const TabsForApplicant = (props: Props ) => {
+function setUpArray(activeCandidates: activeCandidates[]) {
+  let thingToSet: dataOfApplicants[] = [];
+  activeCandidates.forEach((value) => {
+    let resumeBlob = value.resume_file_data;
+    let resumeName = value.resume_file_name;
+    let resume = new File([resumeBlob.data], resumeName, {
+      type: resumeBlob.type,
+    });
+    let newObj: dataOfApplicants = {
+      candidates: value.candidate,
+      time_applied: value.time_applied,
+      status: value.status,
+      phoneNumber: value.phone_number,
+      email: value.email,
+      resume: resume,
+    };
+    thingToSet.push(newObj);
+  });
+  return thingToSet;
+}
+
+const TabsForApplicant = (props: Props) => {
   let [dataOfActiveCandidates, setDataOfActiveCandidates] = useState<
     dataOfApplicants[]
   >([
     {
       candidates: "rick",
-      time_applied: "new Date()",
+      time_applied: "2026-06-30 01:34:22.791036",
       status: "Interview",
-      phoneNumber: 24521232,
+      phoneNumber: "24521232",
       email: "testing@example.com",
       resume: new File([pdfBlob], "resume.pdf", { type: "application/pdf" }),
     },
     {
       candidates: "ricks",
-      time_applied: "new Date()",
+      time_applied: "2026-06-30 01:34:22.791036",
       status: "Offer",
-      phoneNumber: 24521232,
+      phoneNumber: "24521232",
       email: "testing@example.com",
- resume: new File([pdfBlob], "resume.pdf", { type: "application/pdf" }),
+      resume: new File([pdfBlob], "resume.pdf", { type: "application/pdf" }),
     },
   ]);
   let [dataOfAwaitingCandidates, setDataOfAwaitingCandidates] = useState<
@@ -94,36 +130,46 @@ const TabsForApplicant = (props: Props ) => {
   >([
     {
       candidates: "Astergus",
-      time_applied: "new Date()",
+      time_applied: "2026-06-30 01:34:22.791036",
       status: "Awaiting Replies",
-      phoneNumber: 24521232,
+      phoneNumber: "24521232",
       email: "testing@example.com",
-    resume: new File([pdfBlob], "resume.pdf", { type: "application/pdf" }),
+      resume: new File([pdfBlob], "resume.pdf", { type: "application/pdf" }),
     },
     {
       candidates: "Pearson",
-      time_applied: "new Date()",
+      time_applied: "2026-06-30 01:34:22.791036",
       status: "Awaiting Replies",
-      phoneNumber: 245221232,
+      phoneNumber: "245221232",
       email: "testing@example.com",
- resume: new File([pdfBlob], "resume.pdf", { type: "application/pdf" }),
+      resume: new File([pdfBlob], "resume.pdf", { type: "application/pdf" }),
     },
   ]);
-  useEffect(()=>{
-       let address = new URL(window.location.href);
+  useEffect(() => {
+    let address = new URL(window.location.href);
     let queryParameters = address.searchParams;
     let id = queryParameters.get("id");
-    fetch(props.currentUrl + "/jobs/" + id + "/application/overview",{
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + localStorage.getItem("token"),
-          }
-    }).then((value)=>{
-      return value.json()
-    }).then((thingToWorkWith)=>{
-      setDataOfActiveCandidates(thingToWorkWith.activeCandidates)
+    fetch(props.currentUrl + "/jobs/" + id + "/application/overview", {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
     })
-  },[])
+      .then((value) => {
+        return value.json();
+      })
+      .then((thingToWorkWith) => {
+        let activeCandidates: activeCandidates[] =
+          thingToWorkWith.activeCandidates;
+
+        let awaitingCandidates: activeCandidates[] =
+          thingToWorkWith.awaitingCandidates;
+        let thingToSetForActive = setUpArray(activeCandidates)
+        setDataOfActiveCandidates(thingToSetForActive);
+        let thingToSetForAwait = setUpArray(awaitingCandidates)
+        setDataOfAwaitingCandidates(thingToSetForAwait)
+      });
+  }, []);
   return (
     <div>
       <Tabs defaultValue="active">
@@ -149,7 +195,7 @@ const TabsForApplicant = (props: Props ) => {
                   <TableRow key={index}>
                     <TableCell>{value.candidates}</TableCell>
                     <TableCell>
-                      {value.time_applied}
+                      {new Date(value.time_applied).toLocaleDateString()}
                     </TableCell>
                     <TableCell>
                       <a
@@ -162,6 +208,7 @@ const TabsForApplicant = (props: Props ) => {
                     </TableCell>
                     <TableCell>
                       <NativeSelectFunction status={value.status} />
+
                     </TableCell>
                     <TableCell>
                       <a
@@ -199,11 +246,13 @@ const TabsForApplicant = (props: Props ) => {
             </TableHeader>
             <TableBody>
               {dataOfAwaitingCandidates.map((value, index) => {
+                console.log(value)
+                debugger
                 return (
                   <TableRow key={index}>
                     <TableCell>{value.candidates}</TableCell>
                     <TableCell>
-                      {value.time_applied}
+                      {new Date(value.time_applied).toLocaleDateString()}
                     </TableCell>
                     <TableCell>
                       <a

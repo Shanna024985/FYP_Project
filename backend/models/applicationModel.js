@@ -35,7 +35,7 @@ module.exports.getActiveCandidatesByJobId = jobId => {
 }
 
 module.exports.getAwaitingResponsesByJobId = jobId => {
-    let sql = responsesColumns + `WHERE job_id = $1 AND status NOT IN ('Interview', 'Offer', 'Rejected');`;
+    let sql = responsesColumns + `WHERE job_id = $1 AND status NOT IN ('Interview', 'Offer', 'Rejected', 'Onboard');`;
     return query(sql, [jobId]).then(function(result) {
         return result.rows;
     });
@@ -49,14 +49,14 @@ module.exports.getApplicationsByJobId = jobId => {
 }
 
 module.exports.getActiveCandidatesByJobIdAndName = (jobId, name) => {
-    let sql = responsesColumns + `WHERE job_id = $1 AND status IN ('Interview', 'Offer', 'Rejected') AND first_name || ' ' || last_name ILIKE $2;`;
+    let sql = responsesColumns + `WHERE job_id = $1 AND status IN ('Interview', 'Offer', 'Rejected', 'Onboard') AND first_name || ' ' || last_name ILIKE $2;`;
     return query(sql, [jobId, name + '%']).then(function(result) {
         return result.rows;
     });
 }
 
 module.exports.getAwaitingResponsesByJobIdAndName = (jobId, name) => {
-    let sql = responsesColumns + `WHERE job_id = $1 AND status NOT IN ('Interview', 'Offer', 'Rejected') AND first_name || ' ' || last_name ILIKE $2;`;
+    let sql = responsesColumns + `WHERE job_id = $1 AND status IN ('Screening') AND first_name || ' ' || last_name ILIKE $2;`;
     return query(sql, [jobId, name + '%']).then(function(result) {
         return result.rows;
     });
