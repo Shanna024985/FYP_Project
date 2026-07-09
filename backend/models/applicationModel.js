@@ -29,14 +29,14 @@ JOIN user_detail d ON u.id = d.user_id
 `;
 
 module.exports.getActiveCandidatesByJobId = jobId => {
-    let sql = responsesColumns + `WHERE job_id = $1 AND status IN ('Interview', 'Offer', 'Rejected');`;
+    let sql = responsesColumns + `WHERE job_id = $1 AND status IN ('Interview', 'Offer', 'Rejected','Reviewing','Onboard');`;
     return query(sql, [jobId]).then(function(result) {
         return result.rows;
     });
 }
 
 module.exports.getAwaitingResponsesByJobId = jobId => {
-    let sql = responsesColumns + `WHERE job_id = $1 AND status NOT IN ('Interview', 'Offer', 'Rejected', 'Onboard');`;
+    let sql = responsesColumns + `WHERE job_id = $1 AND status NOT IN ('Interview', 'Offer', 'Rejected', 'Onboard','Reviewing');`;
     return query(sql, [jobId]).then(function(result) {
         return result.rows;
     });
@@ -50,7 +50,7 @@ module.exports.getApplicationsByJobId = jobId => {
 }
 
 module.exports.getActiveCandidatesByJobIdAndName = (jobId, name) => {
-    let sql = responsesColumns + `WHERE job_id = $1 AND status IN ('Interview', 'Offer', 'Rejected', 'Onboard') AND first_name || ' ' || last_name ILIKE $2;`;
+    let sql = responsesColumns + `WHERE job_id = $1 AND status IN ('Interview', 'Offer', 'Rejected', 'Onboard','Reviewing') AND first_name || ' ' || last_name ILIKE $2;`;
     return query(sql, [jobId, name + '%']).then(function(result) {
         return result.rows;
     });
