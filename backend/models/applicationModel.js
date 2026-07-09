@@ -77,10 +77,10 @@ module.exports.getJobIdByApplicationId = (id) => {
 }
 
 module.exports.insertSingleApplication = (jobId, userId, resumeId, proposal) => {
-    let sql = `INSERT INTO application (job_id, user_id, resume_id, remarks, fullname, email, phone, proposal)
-    SELECT $1, $2, $3, '', first_name || ' ' || last_name, email, phone_number, $4 FROM user_ u JOIN user_detail d ON u.id = d.user_id WHERE u.id = $5
+    let sql = `INSERT INTO application (job_id, user_id, resume_id, remarks, fullname, email, phone, proposal, resume_file_name, resume_file_data)
+    SELECT $1, $2, $3, '', first_name || ' ' || last_name, email, phone_number, $4, r.file_name, r.file_data FROM user_ u JOIN user_detail d ON u.id = d.user_id JOIN resume r ON r.id = $5 WHERE u.id = $6
     RETURNING id;`;
-    return query(sql, [jobId, userId, resumeId, proposal, userId]).then(function(result) {
+    return query(sql, [jobId, userId, resumeId, proposal, resumeId, userId]).then(function(result) {
         return result.rows;
     });
 }
