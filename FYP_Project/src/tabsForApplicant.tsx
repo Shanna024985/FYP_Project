@@ -27,13 +27,23 @@ interface dataOfApplicants {
   status: string;
   phoneNumber: string;
   email: string;
+  id: string;
+}
+interface dataType {
+  month: String;
+  desktop: number;
 }
 type Props = {
   currentUrl: String;
+  setDataOfCandidates: Function;
+  dataOfCandidates: dataType[];
 };
 type Status = {
   status: String;
   currentUrl: String;
+  idOfApplication: string;
+  setDataOfCandidates: Function;
+  dataOfCandidates: dataType[];
 };
 
 function NativeSelectFunction(status: Status) {
@@ -41,11 +51,12 @@ function NativeSelectFunction(status: Status) {
     { option: "Offer", value: "Offer", seleted: false },
     { option: "Interview", value: "Interview", seleted: false },
     { option: "Rejected", value: "Rejected", seleted: false },
-    { option: "Awaiting Replies", value: "Screening", seleted: false },
-    { option: "Review", value: "Reviewing", seleted: false },
-    { option: "Onboard", value: "Onboard", seleted: false },
+    { option: "Screening", value: "Screening", seleted: false },
+    { option: "Reviewing", value: "Reviewing", seleted: false },
   ]);
+  let [previousValue, setPreviousValue] = useState(status.status)
   optionsForNativeSelect.forEach((value) => {
+    debugger
     if (value.value == status.status) {
       value.seleted = true;
     }
@@ -56,24 +67,56 @@ function NativeSelectFunction(status: Status) {
         id="status"
         onChange={(e) => {
           let valueChanged = e.currentTarget.value;
-          let address = new URL(window.location.href);
-          let queryParameters = address.searchParams;
-          let id = queryParameters.get("id");
+         
           let body = JSON.stringify({
             status: valueChanged,
           });
-          fetch(status.currentUrl + "/jobs/application/" + id, {
-            method: "PUT",
-            body: body,
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: "Bearer " + localStorage.getItem("token"),
+          fetch(
+            status.currentUrl + "/jobs/application/" + status.idOfApplication,
+            {
+              method: "PUT",
+              body: body,
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + localStorage.getItem("token"),
+              },
             },
-          }).then((value)=>{
-            return value.json()
-          }).then((value)=>{
-            alert("Successfully updated status")
-          })
+          )
+            .then((value) => {
+              return value.json();
+            })
+            .then((value) => {
+              alert("Successfully updated status");
+
+              let dataOfCandidates = status.dataOfCandidates.map(
+                (valuesOfNewArray) => {
+                  debugger;
+                  console.log(valuesOfNewArray);
+                  if (valuesOfNewArray.month == valueChanged) {
+                    console.log("done this");
+                    return {
+                      ...valuesOfNewArray,
+                      desktop: valuesOfNewArray.desktop + 1,
+                    };
+                  } else if (
+                    valuesOfNewArray.month == status.status
+                  ) {
+                    console.log("done that");
+                    return {
+                      ...valuesOfNewArray,
+                      desktop: valuesOfNewArray.desktop - 1,
+                    };
+                  } else {
+                    return valuesOfNewArray;
+                  }
+                },
+              );
+                           
+
+              console.log(dataOfCandidates);
+              status.setDataOfCandidates(dataOfCandidates);
+              setPreviousValue(valueChanged)
+            });
         }}
       >
         {optionsForNativeSelect.map((value, index) => {
@@ -117,6 +160,7 @@ function setUpArray(activeCandidates: activeCandidates[]) {
       phoneNumber: value.phone_number,
       email: value.email,
       resume: resume,
+      id: value.id,
     };
     thingToSet.push(newObj);
   });
@@ -134,6 +178,7 @@ const TabsForApplicant = (props: Props) => {
       phoneNumber: "24521232",
       email: "testing@example.com",
       resume: new File([pdfBlob], "resume.pdf", { type: "application/pdf" }),
+      id: "32",
     },
     {
       candidates: "ricks",
@@ -142,6 +187,7 @@ const TabsForApplicant = (props: Props) => {
       phoneNumber: "24521232",
       email: "testing@example.com",
       resume: new File([pdfBlob], "resume.pdf", { type: "application/pdf" }),
+      id: "32",
     },
   ]);
   let [dataOfAwaitingCandidates, setDataOfAwaitingCandidates] = useState<
@@ -154,6 +200,7 @@ const TabsForApplicant = (props: Props) => {
       phoneNumber: "24521232",
       email: "testing@example.com",
       resume: new File([pdfBlob], "resume.pdf", { type: "application/pdf" }),
+      id: "32",
     },
     {
       candidates: "Pearson",
@@ -162,6 +209,7 @@ const TabsForApplicant = (props: Props) => {
       phoneNumber: "245221232",
       email: "testing@example.com",
       resume: new File([pdfBlob], "resume.pdf", { type: "application/pdf" }),
+      id: "32",
     },
   ]);
   useEffect(() => {
@@ -229,6 +277,9 @@ const TabsForApplicant = (props: Props) => {
                       <NativeSelectFunction
                         status={value.status}
                         currentUrl={props.currentUrl}
+                        idOfApplication={value.id}
+                        dataOfCandidates={props.dataOfCandidates}
+                        setDataOfCandidates={props.setDataOfCandidates}
                       />
                     </TableCell>
                     <TableCell>
@@ -268,7 +319,6 @@ const TabsForApplicant = (props: Props) => {
             <TableBody>
               {dataOfAwaitingCandidates.map((value, index) => {
                 console.log(value);
-                debugger;
                 return (
                   <TableRow key={index}>
                     <TableCell>{value.candidates}</TableCell>
@@ -288,6 +338,9 @@ const TabsForApplicant = (props: Props) => {
                       <NativeSelectFunction
                         status={value.status}
                         currentUrl={props.currentUrl}
+                        idOfApplication={value.id}
+                        dataOfCandidates={props.dataOfCandidates}
+                        setDataOfCandidates={props.setDataOfCandidates}
                       />
                     </TableCell>
                     <TableCell>

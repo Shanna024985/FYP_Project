@@ -11,7 +11,7 @@ const jwtMiddleware = require('../middlewares/jwtMiddleware');
 // router.get("/my/jobs", jwtMiddleware.verifyToken, jobController.getMyJobs);
 
 // update status of application
-router.put("/application/:jobId", jwtMiddleware.verifyToken, applicationController.verifyStatus, applicationController.getJobIdByApplicationId, applicationController.verifyJobOwnership, applicationController.updateStatusById);
+router.put("/application/:id", jwtMiddleware.verifyToken, applicationController.verifyStatus, applicationController.getJobIdByApplicationId, applicationController.verifyJobOwnership, applicationController.updateStatusById);
 
 // ==================== PUBLIC JOB ROUTES ====================
 router.get("/", jobController.getAllJobs);

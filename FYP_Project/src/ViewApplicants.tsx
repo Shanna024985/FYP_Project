@@ -9,7 +9,11 @@ type Props = {
 };
 interface dataType {
   month: String;
-  desktop: Number;
+  desktop: number;
+}
+interface dataTypes {
+  month: String;
+  desktop: string;
 }
 const ViewApplicants = (props: Props) => {
   let [job, setJobs] = useState("Cashier");
@@ -45,7 +49,13 @@ const ViewApplicants = (props: Props) => {
           })
           .then((valueToDoCode) => {
             setResponses(valueToDoCode.responses);
-            setData(valueToDoCode.responseDetails);
+            let newDataToSet = valueToDoCode.responseDetails.map((value: dataTypes)=>{
+              return {
+                ...value,
+                desktop: parseInt(value.desktop)
+              }
+            })
+            setData(newDataToSet);
           });
       });
   }, []);
@@ -73,7 +83,7 @@ const ViewApplicants = (props: Props) => {
         </div>
         <div className="text-left mt-6 p-4 rounded-2xl bg-[#F2E9D9]">
           <p className="text-2xl font-bold text-left">Candidate List</p>
-          <TabsForApplicant currentUrl={props.currentUrl} />
+          <TabsForApplicant currentUrl={props.currentUrl} setDataOfCandidates={setData} dataOfCandidates={data}/>
         </div>
       </div>
     </div>
