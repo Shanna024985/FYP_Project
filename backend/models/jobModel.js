@@ -438,6 +438,7 @@ module.exports.getAllJobs = function getAllJobs(filters = {}) {
     });
 }
 
+
 // READ - Get total job count for pagination
 module.exports.getTotalJobCount = function getTotalJobCount(filters = {}) {
     let sql = `SELECT COUNT(*) as total FROM job j JOIN company c ON j.company_id = c.id WHERE j.deleted_at IS NULL`;
@@ -612,8 +613,8 @@ module.exports.updateJob = function updateJob(jobId, jobData, companyId) {
     const {
         title, description, category, type,
         salary_range_from, salary_range_to, salary_type, salary_period,
-        duration, deadline, experience, career_level, location, address,
-        jobs_needed, reports 
+        duration, deadline, experience, career_level, location, 
+        jobs_needed, reports, status 
     } = jobData;
     
     console.log('=== updateJob ===');
@@ -642,17 +643,17 @@ module.exports.updateJob = function updateJob(jobId, jobData, companyId) {
                    experience = COALESCE($11, experience),
                    career_level = COALESCE($12, career_level),
                    location = COALESCE($13, location),
-                   address = COALESCE($14, address),
-                   jobs_needed = COALESCE($15, jobs_needed),
-                   reports = COALESCE($16, reports)
-               WHERE id = $17 AND company_id = $18 AND deleted_at IS NULL
+                   jobs_needed = COALESCE($14, jobs_needed),
+                   reports = COALESCE($15, reports),
+                   status = COALESCE($16, status)
+               WHERE id = $17 AND company_id = $18
                RETURNING *;`;
 
     return query(sql, [
         title, description, normalizedCategory, normalizedType,
         salary_range_from, salary_range_to, normalizedSalaryType,
         normalizedSalaryPeriod, normalizedDuration, deadline, normalizedExperience, 
-        normalizedCareerLevel, normalizedLocation, address, jobs_needed, reports, jobId, companyId
+        normalizedCareerLevel, mappedLocation, jobs_needed, reports,status ,jobId, companyId
     ]).then(function(result) {
         return result.rows;
     });

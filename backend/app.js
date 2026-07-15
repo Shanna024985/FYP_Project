@@ -40,10 +40,7 @@ app.use("/", express.static(pathForServingHtmlFile));
 let mainRoutes = require("./routers/mainRoutes");
 app.use("/api", mainRoutes);
 
-// Catch-all for React Router
-app.use((req, res) => {
-    res.sendFile(path.join(pathForServingHtmlFile, "index.html"));
-});
+
 
 // START THE SERVER
 const PORT = process.env.PORT || 3000;

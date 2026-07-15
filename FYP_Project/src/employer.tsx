@@ -34,108 +34,362 @@ import {
   NativeSelect,
   NativeSelectOption,
 } from "./components/ui/native-select";
-import { useNavigate } from "react-router-dom";
+import { data, useNavigate } from "react-router-dom";
 import { toast, Toaster } from "sonner";
+import { useEffect, useState } from "react";
+import Error from "./Error";
+import { el } from "date-fns/locale";
 type Props = {
-    currentUrl: String
+  currentUrl: String;
+};
+type JobsObject = {
+  id: number;
+  company_id: number;
+  title: string;
+  description: string;
+  category: string;
+  type: string;
+  status: string;
+  salary_range_from: number;
+  salary_range_to: number;
+  salary_type: string;
+  salary_period: string;
+  duration: string;
+  deadline: string;
+  experience: string;
+  career_level: string;
+  location: string;
+  jobs_needed: number;
+  reports: string;
+  created_at: string;
+  updated_at: string;
+  company_name: string;
+  company_city: string;
+  deleted_at: string;
+};
+type Company = {
+  id: number;
+  name: string;
+  url: string;
+  contact_email: string;
+  tagline: string;
+  description: string;
+  city: string;
+  address: string | null;
+  logo_url: string;
+  banner_url: string | null;
+  profile_url: string | null;
+  total_jobs: string;
+  active_jobs: string;
+  active_jobs_list: JobsObject[];
+};
+const Employer = (props: Props) => {
+  if (localStorage.getItem("token") == null) {
+    return (
+      <Error
+        status={403}
+        description="You do not have permission to access this page"
+        pageLinkForRedirect="/jobSeeker/Dashboard"
+        pageForRedirect="home"
+      />
+    );
+  } else {
+    return <EmployerPage currentUrl={props.currentUrl} />;
+  }
+};
+function getOrdinal(n: number) {
+  const s = ["th", "st", "nd", "rd"];
+  const v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
 }
 
-const Employer = (props: Props) => {
-  const navigate = useNavigate();
+let dateChangedToProperReading = (date: string) => {
+  let newDate = new Date(date);
+  const day = newDate.getDate();
+  const month = newDate.toLocaleString("en-GB", { month: "long" });
+  const year = newDate.getFullYear();
+  return `${getOrdinal(day)} ${month} ${year}`;
+};
+type Statuses = {
+  status: string;
+};
+let StatusOfJob = (props: Statuses) => {
+  let [options, setOptions] = useState(["Active", "Closed"]);
   return (
-    <div>
-      <NavigationMenus />
-      <div className="mt-5 ml-2">
-        <p className="text-2xl font-bold text-left">Employer Dashboard</p>
-        <hr className="mt-3" />
-        <div className="mt-7 flex justify-between">
-          <InputGroup className="w-1/3">
-            <InputGroupAddon align={"inline-end"}>
-              <SearchIcon />
-            </InputGroupAddon>
-            <InputGroupInput placeholder="Search" />
-          </InputGroup>
-          <Button
-            className="bg-[#2A88E0]"
-            onClick={() => {
-              navigate("/jobposting")
-            }}
-          >
-            <PlusIcon /> Add job postings
-          </Button>
-        </div>
-        <div className="mt-6">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[100px]">Job Title</TableHead>
-                <TableHead>Application Deadline</TableHead>
-                <TableHead>Job Type</TableHead>
-                <TableHead className="text-left">Status</TableHead>
-                <TableHead className="text-left">Location</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <TableRow>
-                <TableCell className="font-medium text-left">
-                  Backend Engineer
-                </TableCell>
-                <TableCell className="text-left">20th June 2026</TableCell>
-                <TableCell className="text-left">Full-time</TableCell>
-                <TableCell className="text-left">
-                  <NativeSelect>
-                    <NativeSelectOption value={"Active"}>
-                      Active
-                    </NativeSelectOption>
-                    <NativeSelectOption value={"Closed"}>
-                      Closed
-                    </NativeSelectOption>
-                  </NativeSelect>
-                </TableCell>
-                <TableCell className="text-left">Central</TableCell>
-                <TableCell>
-                  <Button
-                    className="p-0 bg-white/0 text-left"
-                    onClick={() => {
-                      navigate("/jobApplicants");
-                    }}
-                  >
-                    <FileUserIcon color="black" />
-                  </Button>
-                </TableCell>
-                <TableCell>
-                  <Button
-                    className="p-0 bg-white/0 text-left"
-                    onClick={() => {
-                      navigate("/editjobs");
-                    }}
-                  >
-                    <SquarePenIcon color="black" />
-                  </Button>
-                </TableCell>
-                <TableCell>
-                  <Button
-                    className="p-0 bg-white/0 text-left"
-                    onClick={() =>
-                      toast("Job has been deleted", {
-                        action: {
-                          label: "Undo",
-                          onClick: () => console.log("Undo"),
-                        },
-                        position: "top-center"
-                      })
+    <>
+      {options.map((value) => {
+        if (value == props.status) {
+          return (
+            <NativeSelectOption selected value={value}>
+              {value}
+            </NativeSelectOption>
+          );
+        } else {
+          return <NativeSelectOption value={value}>{value}</NativeSelectOption>;
+        }
+      })}
+    </>
+  );
+};
+let EmployerPage = (props: Props) => {
+  let [dataOfJobs, setDataOfJobs] = useState<JobsObject[]>([]);
+  let [toSearchDataOfJobs, setToSearchDataOfJobs] = useState<JobsObject[]>([]);
+  const navigate = useNavigate();
+  useEffect(() => {
+    fetch(props.currentUrl + "/company/user/companies", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+    })
+      .then((value) => {
+        return value.json();
+      })
+      .then((valueForJobs) => {
+        let newDataOfJobs: JobsObject[] = [];
+        let jobs: Company[] = valueForJobs.companies;
+        jobs.forEach((element, index) => {
+          let jobList: JobsObject[] = element.active_jobs_list;
+          let companyId = element.id;
+          jobList.forEach((valuesOfJobsForShown, index) => {
+            if (valuesOfJobsForShown.deleted_at === null) {
+              newDataOfJobs.push({
+                ...valuesOfJobsForShown,
+                company_id: companyId,
+              });
+            }
+            if (index == jobs.length - 1) {
+              setDataOfJobs(newDataOfJobs);
+              setToSearchDataOfJobs(newDataOfJobs);
+            }
+          });
+        });
+      });
+  }, []);
+  return (
+    <>
+      <div>
+        <NavigationMenus />
+        <div className="mt-5 ml-2">
+          <p className="text-2xl font-bold text-left">Employer Dashboard</p>
+          <hr className="mt-3" />
+          <div className="mt-7 flex justify-between">
+            <InputGroup className="w-1/3">
+              <InputGroupAddon align={"inline-end"}>
+                <SearchIcon />
+              </InputGroupAddon>
+              <InputGroupInput
+                placeholder="Search"
+                onChange={(e) => {
+                  let newDataOfJobs: JobsObject[] = [];
+
+                  toSearchDataOfJobs.forEach((value) => {
+                    if (
+                      value.title.toLowerCase().includes(e.currentTarget.value)
+                    ) {
+                      newDataOfJobs.push(value);
                     }
-                  >
-                    <Trash color="red" className="w-100 h-100" />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
+                  });
+                  setDataOfJobs(newDataOfJobs);
+                }}
+              />
+            </InputGroup>
+            <Button
+              className="bg-[#2A88E0]"
+              onClick={() => {
+                navigate("/jobposting");
+              }}
+            >
+              <PlusIcon /> Add job postings
+            </Button>
+          </div>
+          <div className="mt-6">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[100px]">Job Title</TableHead>
+                  <TableHead>Application Deadline</TableHead>
+                  <TableHead>Job Type</TableHead>
+                  <TableHead className="text-left">Status</TableHead>
+                  <TableHead className="text-left">Location</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {dataOfJobs.map((value) => {
+                  return (
+                    <TableRow>
+                      <TableCell className="font-medium text-left">
+                        {value.title}
+                      </TableCell>
+                      <TableCell className="text-left">
+                        {dateChangedToProperReading(value.deadline)}
+                      </TableCell>
+                      <TableCell className="text-left">{value.type}</TableCell>
+                      <TableCell className="text-left">
+                        <NativeSelect
+                          key={value.id}
+                          onChange={(e) => {
+                            let valueOfInput = e.currentTarget.value;
+                            let body = JSON.stringify({
+                              status: valueOfInput,
+                              companyId: value.company_id,
+                            });
+                            if (
+                              value.status == "Active" 
+                            ) {
+                              fetch(
+                                props.currentUrl +
+                                  "/jobs/" +
+                                  value.id +
+                                  "/close",
+                                {
+                                  method: "PATCH",
+                                  headers: {
+                                    "Content-Type": "application/json",
+                                    Authorization:
+                                      "Bearer " + localStorage.getItem("token"),
+                                  },
+                                  body: body,
+                                },
+                              ).then((value) => {
+                                if (value.status == 200) {
+                                  alert("Job status have been saved");
+                                }
+                              });
+                            } else if (
+                              value.status == "Closed" 
+                            ) {
+                              fetch(
+                                props.currentUrl +
+                                  "/jobs/" +
+                                  value.id +
+                                  "/open",
+                                {
+                                  method: "PATCH",
+                                  headers: {
+                                    "Content-Type": "application/json",
+                                    Authorization:
+                                      "Bearer " + localStorage.getItem("token"),
+                                  },
+                                  body: body,
+                                },
+                              ).then((value) => {
+                                if (value.status == 200) {
+                                  alert("Job status have been saved");
+                                }
+                              });
+                            }
+                          }}
+                        >
+                          <StatusOfJob status={value.status} />
+                        </NativeSelect>
+                      </TableCell>
+                      <TableCell className="text-left">
+                        {value.location}
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          className="p-0 bg-white/0 text-left hover:bg-amber-50"
+                          onClick={() => {
+                            navigate("/jobApplicants?id=" + value.id);
+                          }}
+                        >
+                          <FileUserIcon color="black" />
+                        </Button>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          className="p-0 bg-white/0 text-left hover:bg-amber-50"
+                          onClick={() => {
+                            navigate("/editjobs?id=" + value.id);
+                          }}
+                        >
+                          <SquarePenIcon color="black" />
+                        </Button>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          className="p-0 bg-white/0 text-left hover:bg-amber-50"
+                          onClick={() => {
+                            let body = JSON.stringify({
+                              companyId: value.company_id,
+                            });
+                           
+                            fetch(props.currentUrl + "/jobs/" + value.id, {
+                              method: "DELETE",
+                              headers: {
+                                "Content-Type": "application/json",
+                                Authorization:
+                                  "Bearer " + localStorage.getItem("token"),
+                              },
+                              body: body,
+                            })
+                              .then((valueNotCompatible) => {
+                                return valueNotCompatible.json();
+                              })
+                              .then((values) => {
+                                toast("Job has been deleted", {
+                                  action: {
+                                    label: "Undo",
+                                    onClick: () => {
+                                      fetch(
+                                        props.currentUrl +
+                                          "/jobs/" +
+                                          value.id +
+                                          "/restore",
+                                        {
+                                          method: "POST",
+                                          headers: {
+                                            "Content-Type": "application/json",
+                                            Authorization:
+                                              "Bearer " +
+                                              localStorage.getItem("token"),
+                                          },
+                                          body: body,
+                                        },
+                                      )
+                                        .then((value) => {
+                                          return value.json();
+                                        })
+                                        .then((valueToDo) => {
+                                          let newDataOfJobs: JobsObject[] = [];
+                                          dataOfJobs.forEach(
+                                            (valueOfExistingData) => {
+                                              newDataOfJobs.push(valueOfExistingData)
+                                            },
+                                          );
+                                          setDataOfJobs(newDataOfJobs)
+                                        });
+                                    },
+                                  },
+                                  position: "top-center",
+                                });
+                                let newDataOfJobs: JobsObject[] = [];
+                                dataOfJobs.forEach((valueOfExistingData) => {
+                                  if (value.id == valueOfExistingData.id) {
+                                    return;
+                                  } else {
+                                    newDataOfJobs.push(valueOfExistingData);
+                                  }
+                                });
+                                setDataOfJobs(newDataOfJobs);
+                              });
+                          }}
+                        >
+                          <Trash color="red" className="w-100 h-100" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
         </div>
+        <Toaster />
       </div>
-      <Toaster/>
-    </div>
+    </>
   );
 };
 

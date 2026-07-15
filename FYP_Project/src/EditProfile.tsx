@@ -11,6 +11,7 @@ import {
   InputGroupInput,
   InputGroupText,
 } from "@/components/ui/input-group";
+import { useNavigate } from "react-router-dom";
 type Props = {
   currentUrl: string;
 };
@@ -37,7 +38,7 @@ export default function EditProfilePage({ currentUrl }: Props) {
   const emailRef = useRef<HTMLInputElement>(null);
   const phoneRef = useRef<HTMLInputElement>(null);
   const [profileImage, setProfileImage] = useState<string | null>(null);
-  const resumeInputRef = useRef<HTMLInputElement>(null);
+  const resumeInputRef = useRef<HTMLInputElement>(null);  const navigate = useNavigate();
   const profileInputRef = useRef<HTMLInputElement>(null);
 
   const [profile, setProfile] = useState({
