@@ -91,8 +91,8 @@ server.on('connection', (ws, req) => {
         }
     }
 
-    ws.on('close', (ws, req) => {
-        delete clients[clients.findIndex(ws)];
+    ws.on('close', () => {
+        delete clients[Object.entries(clients).find(wsPair => wsPair[1] == ws)[0]];
     })
 })
 
