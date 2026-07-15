@@ -35,7 +35,13 @@ type AppliedJob = {
   time_applied: string;
   status: string;
 };
-
+type UserProfile = {
+  first_name: string;
+  last_name: string;
+  email: string;
+  profile_picture_file_data: string | null;
+  profile_picture_file_name: string | null;
+};
 import type { SavedJob } from "../src/types/saved-job";
 import SavedJobCard from "@/components/common sections/SavedJobCard";
 
@@ -51,17 +57,15 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
       try {
         setLoadingRecommended(true);
 
-        const res = await axios.get(`${currentUrl}/jobs`);
+        const token = localStorage.getItem("token");
 
-        const sorted = res.data.jobs
-          .sort(
-            (a: any, b: any) =>
-              new Date(b.created_at).getTime() -
-              new Date(a.created_at).getTime(),
-          )
-          .slice(0, 3);
+        const res = await axios.get(`${currentUrl}/jobs/recommended?limit=3`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-        setRecommendedJobs(sorted);
+        setRecommendedJobs(res.data.jobs);
       } catch (err) {
         console.error(err);
       } finally {
@@ -74,7 +78,8 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
 
   const [appliedJobs, setAppliedJobs] = useState<AppliedJob[]>([]);
   const [loadingApplied, setLoadingApplied] = useState(true);
-
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [loadingProfile, setLoadingProfile] = useState(true);
   const [savedJobs, setSavedJobs] = useState<SavedJob[]>([]);
   const [loadingSaved, setLoadingSaved] = useState(true);
   useEffect(() => {
@@ -99,6 +104,29 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
     };
 
     fetchAppliedJobs();
+  }, [currentUrl]);
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        setLoadingProfile(true);
+
+        const token = localStorage.getItem("token");
+
+        const res = await axios.get(`${currentUrl}/user/profile`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        setProfile(res.data.profile);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoadingProfile(false);
+      }
+    };
+
+    fetchProfile();
   }, [currentUrl]);
   useEffect(() => {
     const fetchSavedJobs = async () => {
@@ -191,7 +219,11 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
           {/* COLUMN 1 - PROFILE PIC */}
           <Card className="flex items-center justify-center p-6">
             <img
-              src="https://via.placeholder.com/150"
+              src={
+                profile?.profile_picture_file_data
+                  ? `data:image/jpeg;base64,${profile.profile_picture_file_data}`
+                  : "https://via.placeholder.com/150"
+              }
               alt="Profile"
               className="h-40 w-40 rounded-full object-cover"
             />
@@ -202,7 +234,11 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
             <CardContent className="space-y-4 p-0">
               <div>
                 {/* Name */}
-                <h2 className="text-2xl font-semibold title-black">John Doe</h2>
+                <h2 className="text-2xl font-semibold title-black">
+                  {loadingProfile
+                    ? "Loading..."
+                    : `${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`}
+                </h2>
 
                 {/* Rating */}
                 <Button
@@ -216,7 +252,9 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
                   </Badge>
                 </Button>
                 {/* Email */}
-                <p className="text-muted-foreground">johndoe@gmail.com</p>
+                <p className="text-muted-foreground">
+                  {loadingProfile ? "Loading..." : profile?.email}
+                </p>
               </div>
               <Button className="w-fit" onClick={() => navigate("/profile")}>
                 <Pencil />
@@ -305,6 +343,7 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
               {recommendedJobs.map((job) => (
                 <JobCard
                   key={job.id}
+                  currentUrl={currentUrl}
                   id={job.id}
                   title={job.title}
                   companyName={job.company_name}

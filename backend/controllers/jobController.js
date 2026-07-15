@@ -118,7 +118,7 @@ module.exports.getAllJobs = (req, res, next) => {
 
 // READ - Get recommended jobs
 module.exports.getRecommendedJobs = (req, res, next) => {
-    let userId = req.query.userId || 1;
+    const userId = getUserIdFromReq(req, res);
     let limit = req.query.limit || 6;
     
     return jobModel.getRecommendedJobs(userId, limit)
