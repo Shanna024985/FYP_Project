@@ -193,7 +193,7 @@ module.exports.uploadProfilePhoto = (req, res, next) => {
             const fileData = req.file.buffer.toString("base64");
 
             return userModel
-              .updateProfilePhoto(userId, fileName, fileData)
+              .updateProfilePhoto(userId, fileName, fileData, result.secure_url)
               .then(function (updated) {
                 if (updated.length === 0) {
                   return res.status(404).json({
