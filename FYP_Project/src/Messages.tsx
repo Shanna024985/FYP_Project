@@ -23,7 +23,7 @@ const Messages = (props: Props) => {
     socket.current.onopen = (event) => {
       console.log("Connected");
     };
-
+    
     fetch(props.currentUrl + "/message/list", {
       headers: {
         "Content-Type": "application/json",
