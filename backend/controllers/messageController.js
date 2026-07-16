@@ -6,7 +6,7 @@ module.exports.getMessageWithUserByUserId = (req, res, next) => {
         return res.status(400).json({ message: 'userId is undefined' });
     } else if (req.body.page == undefined) {
         req.body.page = 1;
-    } else if (typeof req.body.page != 'number' || Number.isInteger(req.body.page)) {
+    } else if (typeof req.body.page != 'number' || !Number.isInteger(req.body.page)) {
         return res.status(400).json({ message: 'page is not an integer' });
     } else if (req.body.page <= 0) {
         return res.status(400).json({ message: 'page cannot be 0 or less' });
