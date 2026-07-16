@@ -33,6 +33,7 @@ type JobsObject = {
   reports: string;
   created_at: string;
   updated_at: string;
+  address: string;
   company_name: string;
   company_city: string;
 };
@@ -274,6 +275,17 @@ const EditJobs = (props: Props) => {
             >
               <LocationOptions status={jobReturned?.location} />
             </NativeSelect>
+          </Field>
+          <Field>
+            <FieldLabel htmlFor="address">Address</FieldLabel>
+            <Input id="address" placeholder="12 st abc, 123456" value={jobReturned?.address}     onChange={(e) => {
+                if (jobReturned) {
+                  setJobReturned({
+                    ...jobReturned,
+                    address: e.target.value,
+                  });
+                }
+              }}/>
           </Field>
           <Field>
             <FieldLabel htmlFor="date-optional">

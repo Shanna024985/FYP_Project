@@ -238,6 +238,7 @@ let EmployerPage = (props: Props) => {
                             if (
                               value.status == "Active" 
                             ) {
+                              console.log("no")
                               fetch(
                                 props.currentUrl +
                                   "/jobs/" +
@@ -260,6 +261,7 @@ let EmployerPage = (props: Props) => {
                             } else if (
                               value.status == "Closed" 
                             ) {
+                              console.log("yes")
                               fetch(
                                 props.currentUrl +
                                   "/jobs/" +

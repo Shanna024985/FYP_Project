@@ -4,6 +4,7 @@ const jobController = require("../controllers/jobController");
 const resumeController = require("../controllers/resumeController");
 const applicationController = require("../controllers/applicationController");
 const jwtMiddleware = require('../middlewares/jwtMiddleware');
+const upload = require("../middlewares/upload");
 
 // Company routes (SPECIFIC routes first)
 // router.post("/company", jwtMiddleware.verifyToken, jobController.createCompany);

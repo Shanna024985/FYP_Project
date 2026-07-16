@@ -301,7 +301,6 @@ module.exports.createJob = function createJob(jobData, companyId) {
     
     console.log('=== createJob ===');
     console.log('address received:', address);
-    
     const normalizedCategory = normalizeCategory(category);
     const normalizedType = normalizeType(type);
     const normalizedSalaryType = normalizeSalaryType(salary_type);
@@ -614,7 +613,7 @@ module.exports.updateJob = function updateJob(jobId, jobData, companyId) {
         title, description, category, type,
         salary_range_from, salary_range_to, salary_type, salary_period,
         duration, deadline, experience, career_level, location, 
-        jobs_needed, reports, status 
+        jobs_needed, reports, status, address 
     } = jobData;
     
     console.log('=== updateJob ===');
@@ -645,7 +644,8 @@ module.exports.updateJob = function updateJob(jobId, jobData, companyId) {
                    location = COALESCE($13, location),
                    jobs_needed = COALESCE($14, jobs_needed),
                    reports = COALESCE($15, reports),
-                   status = COALESCE($16, status)
+                   status = COALESCE($16, status), 
+                   address = COALESCE($19, address)
                WHERE id = $17 AND company_id = $18
                RETURNING *;`;
 
@@ -653,7 +653,7 @@ module.exports.updateJob = function updateJob(jobId, jobData, companyId) {
         title, description, normalizedCategory, normalizedType,
         salary_range_from, salary_range_to, normalizedSalaryType,
         normalizedSalaryPeriod, normalizedDuration, deadline, normalizedExperience, 
-        normalizedCareerLevel, mappedLocation, jobs_needed, reports,status ,jobId, companyId
+        normalizedCareerLevel, normalizedLocation, jobs_needed, reports,status, jobId, companyId, address
     ]).then(function(result) {
         return result.rows;
     });
