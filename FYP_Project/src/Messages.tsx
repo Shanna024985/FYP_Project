@@ -13,9 +13,18 @@ type Props = {
   currentUrl: String;
 };
 
+type listOfMessages = {
+  user_id: string;
+  most_recent_message: string;
+  profile_picture_file_name: string;
+  time_sent: string;
+  user_name: string;
+  profile_picture_file_data: File;
+};
 const Messages = (props: Props) => {
   const socket = useRef<WebSocket | null>(null);
-  let [listOfPeople, setListOfpeople] = useState()
+  let [listOfPeople, setListOfpeople] = useState<listOfMessages[]>();
+  let [profileOfUserSelected, setProfileOfUserSelected] = useState<listOfMessages>();
   useEffect(() => {
     socket.current = new WebSocket(
       "ws://localhost:3001?token=" + localStorage.getItem("token"),
@@ -23,7 +32,7 @@ const Messages = (props: Props) => {
     socket.current.onopen = (event) => {
       console.log("Connected");
     };
-    
+
     fetch(props.currentUrl + "/message/list", {
       headers: {
         "Content-Type": "application/json",
@@ -34,7 +43,8 @@ const Messages = (props: Props) => {
         return value.json();
       })
       .then((values) => {
-        console.log(values);
+        setProfileOfUserSelected(values[0])
+        setListOfpeople(values);
       });
   }, []);
   return (
@@ -66,278 +76,106 @@ const Messages = (props: Props) => {
             <SquarePen className="self-center" />
           </div>
           <div className="flex justify-between">
-            <Input placeholder="Search" className="mt-2 w-4/5" />
+            <Input placeholder="Search" className="mt-2 w-9/10" />
             <Search className="self-center" />
           </div>
           <div className="overflow-y-scroll mt-4 h-[80vh] flex flex-col gap-3">
-            <div className="flex gap-3 bg-blue-100 p-2">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="7"
-                height="fit"
-                viewBox="0 0 7 92"
-                fill="none"
-                className="self-center"
-              >
-                <line
-                  x1="3.5"
-                  y1="3.5"
-                  x2="3.5"
-                  y2="88.5"
-                  stroke="#2A88E0"
-                  stroke-width="7"
-                  stroke-linecap="round"
-                />
-              </svg>
-              <div className="flex">
-                <Avatar className="size-15 self-center">
-                  <AvatarImage src="../public/IMG_0230 copy.jpeg" />
-                  <AvatarFallback>Profile Picture</AvatarFallback>
-                </Avatar>
-              </div>
-              <div className="flex flex-col self-center">
-                <p className="font-bold text-lg text-left">John William</p>
-                <p className="text-left text-sm">
-                  I am looking foward to working with you
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-3  p-2">
-              <div className="flex">
-                <Avatar className="size-15 self-center">
-                  <AvatarImage src="../public/IMG_0230 copy.jpeg" />
-                  <AvatarFallback>Profile Picture</AvatarFallback>
-                </Avatar>
-              </div>
-              <div className="flex flex-col self-center">
-                <p className="font-bold text-lg text-left">John William</p>
-                <p className="text-left text-sm">
-                  I am looking foward to working with you
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-3  p-2">
-              <div className="flex">
-                <Avatar className="size-15 self-center">
-                  <AvatarImage src="../public/IMG_0230 copy.jpeg" />
-                  <AvatarFallback>Profile Picture</AvatarFallback>
-                </Avatar>
-              </div>
-              <div className="flex flex-col self-center">
-                <p className="font-bold text-lg text-left">John William</p>
-                <p className="text-left text-sm">
-                  I am looking foward to working with you
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-3  p-2">
-              <div className="flex">
-                <Avatar className="size-15 self-center">
-                  <AvatarImage src="../public/IMG_0230 copy.jpeg" />
-                  <AvatarFallback>Profile Picture</AvatarFallback>
-                </Avatar>
-              </div>
-              <div className="flex flex-col self-center">
-                <p className="font-bold text-lg text-left">John William</p>
-                <p className="text-left text-sm">
-                  I am looking foward to working with you
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-3  p-2">
-              <div className="flex">
-                <Avatar className="size-15 self-center">
-                  <AvatarImage src="../public/IMG_0230 copy.jpeg" />
-                  <AvatarFallback>Profile Picture</AvatarFallback>
-                </Avatar>
-              </div>
-              <div className="flex flex-col self-center">
-                <p className="font-bold text-lg text-left">John William</p>
-                <p className="text-left text-sm">
-                  I am looking foward to working with you
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-3  p-2">
-              <div className="flex">
-                <Avatar className="size-15 self-center">
-                  <AvatarImage src="../public/IMG_0230 copy.jpeg" />
-                  <AvatarFallback>Profile Picture</AvatarFallback>
-                </Avatar>
-              </div>
-              <div className="flex flex-col self-center">
-                <p className="font-bold text-lg text-left">John William</p>
-                <p className="text-left text-sm">
-                  I am looking foward to working with you
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-3  p-2">
-              <div className="flex">
-                <Avatar className="size-15 self-center">
-                  <AvatarImage src="../public/IMG_0230 copy.jpeg" />
-                  <AvatarFallback>Profile Picture</AvatarFallback>
-                </Avatar>
-              </div>
-              <div className="flex flex-col self-center">
-                <p className="font-bold text-lg text-left">John William</p>
-                <p className="text-left text-sm">
-                  I am looking foward to working with you
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-3  p-2">
-              <div className="flex">
-                <Avatar className="size-15 self-center">
-                  <AvatarImage src="../public/IMG_0230 copy.jpeg" />
-                  <AvatarFallback>Profile Picture</AvatarFallback>
-                </Avatar>
-              </div>
-              <div className="flex flex-col self-center">
-                <p className="font-bold text-lg text-left">John William</p>
-                <p className="text-left text-sm">
-                  I am looking foward to working with you
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-3  p-2">
-              <div className="flex">
-                <Avatar className="size-15 self-center">
-                  <AvatarImage src="../public/IMG_0230 copy.jpeg" />
-                  <AvatarFallback>Profile Picture</AvatarFallback>
-                </Avatar>
-              </div>
-              <div className="flex flex-col self-center">
-                <p className="font-bold text-lg text-left">John William</p>
-                <p className="text-left text-sm">
-                  I am looking foward to working with you
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-3  p-2">
-              <div className="flex">
-                <Avatar className="size-15 self-center">
-                  <AvatarImage src="../public/IMG_0230 copy.jpeg" />
-                  <AvatarFallback>Profile Picture</AvatarFallback>
-                </Avatar>
-              </div>
-              <div className="flex flex-col self-center">
-                <p className="font-bold text-lg text-left">John William</p>
-                <p className="text-left text-sm">
-                  I am looking foward to working with you
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-3  p-2">
-              <div className="flex">
-                <Avatar className="size-15 self-center">
-                  <AvatarImage src="../public/IMG_0230 copy.jpeg" />
-                  <AvatarFallback>Profile Picture</AvatarFallback>
-                </Avatar>
-              </div>
-              <div className="flex flex-col self-center">
-                <p className="font-bold text-lg text-left">John William</p>
-                <p className="text-left text-sm">
-                  I am looking foward to working with you
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-3  p-2">
-              <div className="flex">
-                <Avatar className="size-15 self-center">
-                  <AvatarImage src="../public/IMG_0230 copy.jpeg" />
-                  <AvatarFallback>Profile Picture</AvatarFallback>
-                </Avatar>
-              </div>
-              <div className="flex flex-col self-center">
-                <p className="font-bold text-lg text-left">John William</p>
-                <p className="text-left text-sm">
-                  I am looking foward to working with you
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-3  p-2">
-              <div className="flex">
-                <Avatar className="size-15 self-center">
-                  <AvatarImage src="../public/IMG_0230 copy.jpeg" />
-                  <AvatarFallback>Profile Picture</AvatarFallback>
-                </Avatar>
-              </div>
-              <div className="flex flex-col self-center">
-                <p className="font-bold text-lg text-left">John William</p>
-                <p className="text-left text-sm">
-                  I am looking foward to working with you
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-3  p-2">
-              <div className="flex">
-                <Avatar className="size-15 self-center">
-                  <AvatarImage src="../public/IMG_0230 copy.jpeg" />
-                  <AvatarFallback>Profile Picture</AvatarFallback>
-                </Avatar>
-              </div>
-              <div className="flex flex-col self-center">
-                <p className="font-bold text-lg text-left">John William</p>
-                <p className="text-left text-sm">
-                  I am looking foward to working with you
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-3  p-2">
-              <div className="flex">
-                <Avatar className="size-15 self-center">
-                  <AvatarImage src="../public/IMG_0230 copy.jpeg" />
-                  <AvatarFallback>Profile Picture</AvatarFallback>
-                </Avatar>
-              </div>
-              <div className="flex flex-col self-center">
-                <p className="font-bold text-lg text-left">John William</p>
-                <p className="text-left text-sm">
-                  I am looking foward to working with you
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-3  p-2">
-              <div className="flex">
-                <Avatar className="size-15 self-center">
-                  <AvatarImage src="../public/IMG_0230 copy.jpeg" />
-                  <AvatarFallback>Profile Picture</AvatarFallback>
-                </Avatar>
-              </div>
-              <div className="flex flex-col self-center">
-                <p className="font-bold text-lg text-left">John William</p>
-                <p className="text-left text-sm">
-                  I am looking foward to working with you
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-3  p-2">
-              <div className="flex">
-                <Avatar className="size-15 self-center">
-                  <AvatarImage src="../public/IMG_0230 copy.jpeg" />
-                  <AvatarFallback>Profile Picture</AvatarFallback>
-                </Avatar>
-              </div>
-              <div className="flex flex-col self-center">
-                <p className="font-bold text-lg text-left">John William</p>
-                <p className="text-left text-sm">
-                  I am looking foward to working with you
-                </p>
-              </div>
-            </div>
+           
+            {listOfPeople?.map((values, index) => {
+              if (index == 0) {
+                return (
+                  <>
+                    <div className="flex gap-3 bg-blue-100 p-2">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="7"
+                        height="fit"
+                        viewBox="0 0 7 92"
+                        fill="none"
+                        className="self-center"
+                      >
+                        <line
+                          x1="3.5"
+                          y1="3.5"
+                          x2="3.5"
+                          y2="88.5"
+                          stroke="#2A88E0"
+                          stroke-width="7"
+                          stroke-linecap="round"
+                        />
+                      </svg>
+                      <div className="flex">
+                        <Avatar className="size-15 self-center">
+                          <AvatarImage
+                            src={`data:image/jpeg;base64,${values.profile_picture_file_data}`}
+                          />
+                          <AvatarFallback>Profile Picture</AvatarFallback>
+                        </Avatar>
+                      </div>
+                      <div className="flex flex-col self-center">
+                        <p className="font-bold text-lg text-left">
+                          {values.user_name}
+                        </p>
+                        <p className="text-left text-sm">
+                          {values.most_recent_message}
+                        </p>
+                      </div>
+                    </div>
+                  </>
+                );
+              } else {
+                return (
+                <>
+                  <div className="flex gap-3  p-2">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="7"
+                      height="fit"
+                      viewBox="0 0 7 92"
+                      fill="none"
+                      className="self-center"
+                    >
+                      <line
+                        x1="3.5"
+                        y1="3.5"
+                        x2="3.5"
+                        y2="88.5"
+                        stroke="#FFFFF"
+                        stroke-width="7"
+                        stroke-linecap="round"
+                      />
+                    </svg>
+                    <div className="flex">
+                      <Avatar className="size-15 self-center">
+                        <AvatarImage src={`data:image/jpeg;base64,${values.profile_picture_file_data}`} />
+                        <AvatarFallback>Profile Picture</AvatarFallback>
+                      </Avatar>
+                    </div>
+                    <div className="flex flex-col self-center">
+                      <p className="font-bold text-lg text-left">
+                        {values.user_name}
+                      </p>
+                      <p className="text-left text-sm">
+                        {values.most_recent_message}
+                      </p>
+                    </div>
+                  </div>
+                </>
+              );
+              }
+            })}
           </div>
         </div>
         <div className="flex-3 ml-5  overflow-y-hidden">
           <div className="flex justify-between">
             <div className="flex gap-3">
               <Avatar className="size-15 self-center">
-                <AvatarImage src="../public/IMG_0230 copy.jpeg" />
+                <AvatarImage src={`data:image/jpeg;base64,${profileOfUserSelected?.profile_picture_file_data}`}  />
                 <AvatarFallback>Profile Picture</AvatarFallback>
               </Avatar>
-              <p className="font-bold self-center text-lg">John William</p>
+              <p className="font-bold self-center text-lg">{profileOfUserSelected?.user_name}</p>
             </div>
-            <Button className="bg-blue-500 self-center">View profile</Button>
+            {/* <Button className="bg-blue-500 self-center">View profile</Button> */}
           </div>
           <div className="bg-gray-200 mt-4 h-[82vh] flex flex-col justify-end gap-4">
             <div className="p-4 flex flex-col gap-5">

@@ -76,7 +76,6 @@ export default function EditProfilePage({ currentUrl }: Props) {
         github_profile: res.data.profile.github_profile || "",
       });
       const profileData = res.data.profile;
-
       if (profileData.profile_picture_file_data) {
         setProfileImage(
           `data:image/jpeg;base64,${profileData.profile_picture_file_data}`,

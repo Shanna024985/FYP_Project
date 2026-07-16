@@ -37,7 +37,7 @@ module.exports.getMessageBetweenUsers = (userId1, userId2, page) => {
 }
 
 module.exports.getUserList = (userId) => {
-    let sql = `SELECT * FROM get_user_message_list($1);`;
+    let sql = `SELECT * FROM get_conversations($1);`;
     return query(sql, [userId]).then(function (result) {
         return result.rows;
     });
