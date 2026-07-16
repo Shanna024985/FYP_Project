@@ -1,5 +1,5 @@
 import { PlusCircle, Search, SmileIcon, SquarePen } from "lucide-react";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Input } from "./components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "./components/ui/avatar";
 import { Button } from "./components/ui/button";
@@ -15,14 +15,27 @@ type Props = {
 
 const Messages = (props: Props) => {
   const socket = useRef<WebSocket | null>(null);
+  let [listOfPeople, setListOfpeople] = useState()
   useEffect(() => {
     socket.current = new WebSocket(
       "ws://localhost:3001?token=" + localStorage.getItem("token"),
     );
-    socket.current.onopen = () => {
+    socket.current.onopen = (event) => {
       console.log("Connected");
     };
-
+    
+    fetch(props.currentUrl + "/message/list", {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+    })
+      .then((value) => {
+        return value.json();
+      })
+      .then((values) => {
+        console.log(values);
+      });
   }, []);
   return (
     <div>

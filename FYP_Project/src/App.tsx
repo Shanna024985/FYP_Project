@@ -69,6 +69,7 @@ function App() {
           <Route path="/companyreviews" element={<CompanyReviews currentUrl={linkForBackend}/>}/>
           <Route path="/addcompanies" element={<AddCompanies currentUrl={linkForBackend}/>}/>
           <Route path="/messages" element={<Messages currentUrl={linkForBackend}/>}/>
+          <Route path="/applyjob" element={<ApplyJobPage currentUrl={linkForBackend}/>} />
           <Route
             path="/jobSeeker/savedJobs"
             element={<SavedJobs currentUrl={linkForBackend} />}

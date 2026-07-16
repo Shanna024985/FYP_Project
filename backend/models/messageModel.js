@@ -1,5 +1,5 @@
 const { query } = require("../services/dbConnection");
-const {Server} = require('ws');
+const { Server } = require('ws');
 
 // module.exports.getMessageByUserId = (userId, page) => {
 //     let sql = `GET m.message,
@@ -31,14 +31,14 @@ module.exports.getMessageBetweenUsers = (userId1, userId2, page) => {
     WHERE (sender_user_id = $1 AND receiver_user_id = $2)
     OR (receiver_user_id = $3 AND sender_user_id = $4)
     ORDER BY 6 DESC LIMIT 25 OFFSET $5;`;
-    return query(sql, [userId1, userId2, userId1, userId2, (page - 1) * 25]).then(function(result) {
+    return query(sql, [userId1, userId2, userId1, userId2, (page - 1) * 25]).then(function (result) {
         return result.rows;
     });
 }
 
 module.exports.getUserList = (userId) => {
     let sql = `SELECT * FROM get_user_message_list($1);`;
-    return query(sql, [userId]).then(function(result) {
+    return query(sql, [userId]).then(function (result) {
         return result.rows;
     });
 }
@@ -46,34 +46,34 @@ module.exports.getUserList = (userId) => {
 module.exports.insertSingleMessage = (senderUserId, receiverUserId, message) => {
     let sql = `INSERT INTO message (sender_user_id, receiver_user_id, message)
     VALUES ($1, $2, $3) RETURNING id;`;
-    return query(sql, [senderUserId, receiverUserId, message]).then(function(result) {
+    return query(sql, [senderUserId, receiverUserId, message]).then(function (result) {
         return result.rows;
     });
 }
 
 module.exports.updateMessageById = (message, id) => {
     let sql = `UPDATE message SET message = $1 WHERE id = $2 RETURNING id, sender_user_id, receiver_user_id;`;
-    return query(sql, [message, id]).then(function(result) {
+    return query(sql, [message, id]).then(function (result) {
         return result.rows;
     });
 }
 
 module.exports.deleteMessageById = (id) => {
     let sql = `DELETE message WHERE id = $1 RETURNING id, sender_user_id, receiver_user_id;`;
-    return query(sql, [id]).then(function(result) {
+    return query(sql, [id]).then(function (result) {
         return result.rows;
     });
 }
 
 module.exports.getMessageById = (id) => {
     let sql = `SELECT * FROM message WHERE id = $1;`;
-    return query(sql, [id]).then(function(result) {
+    return query(sql, [id]).then(function (result) {
         return result.rows;
     });
 }
 
 const PORT = 3001;
-const server = new Server({port: PORT}, () => {
+const server = new Server({ port: PORT }, () => {
     console.log(`Websocket running on ws://localhost:${PORT}`);
 });
 let clients = {};
@@ -92,10 +92,22 @@ server.on('connection', (ws, req) => {
     }
 
     ws.on('close', () => {
-        delete clients[Object.entries(clients).find(wsPair => wsPair[1] == ws)[0]];
+        const key = Object.keys(clients).find(
+            id => clients[id] === ws
+        );
+
+
+        if (key) {
+            delete clients[key];
+        }
     })
 })
 
 module.exports.sendUpdateMessage = (userId, senderUserId) => {
-    clients[userId].send(senderUserId);
+    let wsUser = clients[userId];
+    if (wsUser) {
+        wsUser.send(senderUserId);
+    } else {
+        // senderUser is not online, maybe send email to user?
+    }
 }

@@ -76,6 +76,8 @@ module.exports.checkReceiverUserIdExists = (req, res, next) => {
     .then((user) => {
         if (user.length == 0) {
             return res.status(404).json({message: 'receiverUserId not found'});
+        } else if (user[0].id == res.locals.userId) {
+            return res.status(403).json({message: 'You cannot message yourself'});
         } else {
             next();
         }

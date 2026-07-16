@@ -12,7 +12,7 @@ const jwtMiddleware = require('../middlewares/jwtMiddleware');
 
 // update status of application
 router.put("/application/:id", jwtMiddleware.verifyToken, applicationController.verifyStatus, applicationController.getJobIdByApplicationId, applicationController.verifyJobOwnership, applicationController.updateStatusById);
-const upload = require("../middlewares/upload");
+
 // ==================== PUBLIC JOB ROUTES ====================
 router.get("/", jobController.getAllJobs);
 router.get("/recommended", jobController.getRecommendedJobs);
