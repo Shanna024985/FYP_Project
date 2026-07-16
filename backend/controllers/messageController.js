@@ -2,17 +2,18 @@ let model = require("../models/messageModel");
 let userModel = require("../models/userModel");
 
 module.exports.getMessageWithUserByUserId = (req, res, next) => {
-    if (req.body.userId == undefined) {
+    let pageIfNoQuery
+    if (req.params.userId == undefined) {
         return res.status(400).json({ message: 'userId is undefined' });
-    } else if (req.body.page == undefined) {
-        req.body.page = 1;
-    } else if (typeof req.body.page != 'number' || !Number.isInteger(req.body.page)) {
+    } else if (req.query.page == undefined) {
+        pageIfNoQuery = 1;
+    } else if (typeof req.query.page != 'number' || !Number.isInteger(req.query.page)) {
         return res.status(400).json({ message: 'page is not an integer' });
-    } else if (req.body.page <= 0) {
+    } else if (req.query.page <= 0) {
         return res.status(400).json({ message: 'page cannot be 0 or less' });
     }
 
-    return model.getMessageBetweenUsers(res.locals.userId, req.body.userId, req.body.page)
+    return model.getMessageBetweenUsers(res.locals.userId, req.params.userId, pageIfNoQuery)
     .then((messages) => {
         return res.status(200).json(messages);
     }).catch(function (error) {

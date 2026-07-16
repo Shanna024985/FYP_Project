@@ -21,10 +21,25 @@ type listOfMessages = {
   user_name: string;
   profile_picture_file_data: File;
 };
+type messageJson = {
+  message: string;
+  sender_user_id: string;
+  sender_user_name: string;
+  sender_profile_picture_file_name: string;
+  sender_profile_picture_file_url: string;
+  receiver_user_id: string;
+  receiver_user_name: string;
+  receiver_profile_picture_file_name: string;
+  receiver_profile_picture_file_url: string;
+  time_sent: string;
+};
 const Messages = (props: Props) => {
   const socket = useRef<WebSocket | null>(null);
   let [listOfPeople, setListOfpeople] = useState<listOfMessages[]>();
-  let [profileOfUserSelected, setProfileOfUserSelected] = useState<listOfMessages>();
+  let [profileOfUserSelected, setProfileOfUserSelected] =
+    useState<listOfMessages>();
+  let [messagesJson, setMessagesJson] = useState<messageJson[]>();
+  let [inputMessage, setInputMessage] = useState("")
   useEffect(() => {
     socket.current = new WebSocket(
       "ws://localhost:3001?token=" + localStorage.getItem("token"),
@@ -32,7 +47,22 @@ const Messages = (props: Props) => {
     socket.current.onopen = (event) => {
       console.log("Connected");
     };
-
+    socket.current.onmessage = (event) => {
+      debugger;
+      fetch(props.currentUrl + "/message/" + event.data, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + localStorage.getItem("token"),
+        },
+      })
+        .then((value) => {
+          return value.json();
+        })
+        .then((messagesJson) => {
+          setMessagesJson(messagesJson);
+          console.log(messagesJson);
+        });
+    };
     fetch(props.currentUrl + "/message/list", {
       headers: {
         "Content-Type": "application/json",
@@ -43,8 +73,22 @@ const Messages = (props: Props) => {
         return value.json();
       })
       .then((values) => {
-        setProfileOfUserSelected(values[0])
+        setProfileOfUserSelected(values[0]);
         setListOfpeople(values);
+
+        fetch(props.currentUrl + "/message/" + values[0].user_id, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
+        })
+          .then((value) => {
+            return value.json();
+          })
+          .then((messagesJson) => {
+            setMessagesJson(messagesJson);
+            console.log(messagesJson);
+          });
       });
   }, []);
   return (
@@ -80,7 +124,6 @@ const Messages = (props: Props) => {
             <Search className="self-center" />
           </div>
           <div className="overflow-y-scroll mt-4 h-[80vh] flex flex-col gap-3">
-           
             {listOfPeople?.map((values, index) => {
               if (index == 0) {
                 return (
@@ -125,43 +168,45 @@ const Messages = (props: Props) => {
                 );
               } else {
                 return (
-                <>
-                  <div className="flex gap-3  p-2">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="7"
-                      height="fit"
-                      viewBox="0 0 7 92"
-                      fill="none"
-                      className="self-center"
-                    >
-                      <line
-                        x1="3.5"
-                        y1="3.5"
-                        x2="3.5"
-                        y2="88.5"
-                        stroke="#FFFFF"
-                        stroke-width="7"
-                        stroke-linecap="round"
-                      />
-                    </svg>
-                    <div className="flex">
-                      <Avatar className="size-15 self-center">
-                        <AvatarImage src={`data:image/jpeg;base64,${values.profile_picture_file_data}`} />
-                        <AvatarFallback>Profile Picture</AvatarFallback>
-                      </Avatar>
+                  <>
+                    <div className="flex gap-3  p-2">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="7"
+                        height="fit"
+                        viewBox="0 0 7 92"
+                        fill="none"
+                        className="self-center"
+                      >
+                        <line
+                          x1="3.5"
+                          y1="3.5"
+                          x2="3.5"
+                          y2="88.5"
+                          stroke="#FFFFF"
+                          stroke-width="7"
+                          stroke-linecap="round"
+                        />
+                      </svg>
+                      <div className="flex">
+                        <Avatar className="size-15 self-center">
+                          <AvatarImage
+                            src={`data:image/jpeg;base64,${values.profile_picture_file_data}`}
+                          />
+                          <AvatarFallback>Profile Picture</AvatarFallback>
+                        </Avatar>
+                      </div>
+                      <div className="flex flex-col self-center">
+                        <p className="font-bold text-lg text-left">
+                          {values.user_name}
+                        </p>
+                        <p className="text-left text-sm">
+                          {values.most_recent_message}
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex flex-col self-center">
-                      <p className="font-bold text-lg text-left">
-                        {values.user_name}
-                      </p>
-                      <p className="text-left text-sm">
-                        {values.most_recent_message}
-                      </p>
-                    </div>
-                  </div>
-                </>
-              );
+                  </>
+                );
               }
             })}
           </div>
@@ -170,59 +215,108 @@ const Messages = (props: Props) => {
           <div className="flex justify-between">
             <div className="flex gap-3">
               <Avatar className="size-15 self-center">
-                <AvatarImage src={`data:image/jpeg;base64,${profileOfUserSelected?.profile_picture_file_data}`}  />
+                <AvatarImage
+                  src={`data:image/jpeg;base64,${profileOfUserSelected?.profile_picture_file_data}`}
+                />
                 <AvatarFallback>Profile Picture</AvatarFallback>
               </Avatar>
-              <p className="font-bold self-center text-lg">{profileOfUserSelected?.user_name}</p>
+              <p className="font-bold self-center text-lg">
+                {profileOfUserSelected?.user_name}
+              </p>
             </div>
             {/* <Button className="bg-blue-500 self-center">View profile</Button> */}
           </div>
           <div className="bg-gray-200 mt-4 h-[82vh] flex flex-col justify-end gap-4">
-            <div className="p-4 flex flex-col gap-5">
+            <div className="p-4 flex flex-col gap-5 overflow-y-scroll">
               {/* <p className="text-gray-500">
               All of your chat history will be shown here
             </p> */}
-              <Message>
-                <MessageAvatar>
-                  <Avatar>
-                    <AvatarImage
-                      src="https://github.com/shadcn.png"
-                      alt="@shadcn"
-                    />
-                    <AvatarFallback>CN</AvatarFallback>
-                  </Avatar>
-                </MessageAvatar>
-                <MessageContent>
-                  <Bubble variant={"muted"}>
-                    <BubbleContent>How can I help you today?</BubbleContent>
-                  </Bubble>
-                </MessageContent>
-              </Message>
-              <Message align="end">
-                <MessageAvatar>
-                  <Avatar>
-                    <AvatarImage
-                      src="https://github.com/shadcn.png"
-                      alt="@shadcn"
-                    />
-                    <AvatarFallback>CN</AvatarFallback>
-                  </Avatar>
-                </MessageAvatar>
-                <MessageContent>
-                  <Bubble>
-                    <BubbleContent>How can I help you today?</BubbleContent>
-                  </Bubble>
-                </MessageContent>
-              </Message>
+
+              {messagesJson?.map((valueOfMessage) => {
+                console.log(messagesJson);
+                if (
+                  valueOfMessage.sender_user_id ==
+                  profileOfUserSelected?.user_id
+                ) {
+                  return (
+                    <>
+                      <Message>
+                        <MessageAvatar>
+                          <Avatar>
+                            <AvatarImage
+                              src={
+                                valueOfMessage.sender_profile_picture_file_url
+                              }
+                              alt={
+                                valueOfMessage.sender_profile_picture_file_name
+                              }
+                            />
+                            <AvatarFallback>
+                              {valueOfMessage.sender_user_name}
+                            </AvatarFallback>
+                          </Avatar>
+                        </MessageAvatar>
+                        <MessageContent>
+                          <Bubble variant={"muted"}>
+                            <BubbleContent>
+                              {valueOfMessage.message}
+                            </BubbleContent>
+                          </Bubble>
+                        </MessageContent>
+                      </Message>
+                    </>
+                  );
+                } else if (
+                  valueOfMessage.receiver_user_id ==
+                  profileOfUserSelected?.user_id
+                ) {
+                  return (
+                    <>
+                      <Message align="end">
+                        <MessageAvatar>
+                          <Avatar>
+                            <AvatarImage
+                              src={
+                                valueOfMessage.sender_profile_picture_file_url
+                              }
+                              alt={
+                                valueOfMessage.sender_profile_picture_file_name
+                              }
+                            />
+                            <AvatarFallback>
+                              {" "}
+                              {valueOfMessage.sender_user_name}
+                            </AvatarFallback>
+                          </Avatar>
+                        </MessageAvatar>
+                        <MessageContent>
+                          <Bubble>
+                            <BubbleContent>
+                              {valueOfMessage.message}
+                            </BubbleContent>
+                          </Bubble>
+                        </MessageContent>
+                      </Message>
+                    </>
+                  );
+                }
+              })}
             </div>
             <div className="flex mb-3 gap-3 p-2">
               <PlusCircle className="self-center" />
               <Input
                 placeholder=""
                 className="bg-white  border-black self-center"
+                id="thingsToMessage"
+                onChange={(e)=>{
+                  setInputMessage(e.currentTarget.value)
+                }}
+                value={inputMessage}
               />
               <SmileIcon className="self-center" />
-              <Button>Send</Button>
+              <Button onClick={(e)=>{
+                setInputMessage("")
+              }}>Send</Button>
             </div>
           </div>
         </div>
