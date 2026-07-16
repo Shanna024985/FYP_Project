@@ -17,17 +17,17 @@ const { Server } = require('ws');
 
 module.exports.getMessageBetweenUsers = (userId1, userId2, page) => {
     let sql = `SELECT m.message,
-    u1.id sender_user_id,
-    u1.first_name || ' ' || u1.last_name sender_user_name,
-    u1.profile_picture_file_name sender_profile_picture_file_name,
-    u1.profile_picture_file_data sender_profile_picture_file_data,
-    u2.id receiver_user_id,
-    u2.first_name || ' ' || u2.last_name receiver_user_name,
-    u2.profile_picture_file_name receiver_profile_picture_file_name,
-    u2.profile_picture_file_data receiver_profile_picture_file_data,
+    d1.user_id sender_user_id,
+    d1.first_name || ' ' || d1.last_name sender_user_name,
+    d1.profile_picture_file_name sender_profile_picture_file_name,
+    d1.profile_picture_file_url sender_profile_picture_file_url,
+    d2.user_id receiver_user_id,
+    d2.first_name || ' ' || d2.last_name receiver_user_name,
+    d2.profile_picture_file_name receiver_profile_picture_file_name,
+    d2.profile_picture_file_url receiver_profile_picture_file_url,
     m.time_sent FROM message m
-    JOIN user_ u1 ON u1.id = m.sender_user_id
-    JOIN user_ u2 ON u2.id = m.receiver_user_id
+    JOIN user_detail d1 ON d1.user_id = m.sender_user_id
+    JOIN user_detail d2 ON d2.user_id = m.receiver_user_id
     WHERE (sender_user_id = $1 AND receiver_user_id = $2)
     OR (receiver_user_id = $3 AND sender_user_id = $4)
     ORDER BY 6 DESC LIMIT 25 OFFSET $5;`;
