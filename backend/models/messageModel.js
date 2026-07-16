@@ -20,9 +20,11 @@ module.exports.getMessageBetweenUsers = (userId1, userId2, page) => {
     d1.user_id sender_user_id,
     d1.first_name || ' ' || d1.last_name sender_user_name,
     d1.profile_picture_file_name sender_profile_picture_file_name,
+    d1.profile_picture_file_url sender_profile_picture_file_url,
     d2.user_id receiver_user_id,
     d2.first_name || ' ' || d2.last_name receiver_user_name,
     d2.profile_picture_file_name receiver_profile_picture_file_name,
+    d2.profile_picture_file_url receiver_profile_picture_file_url,
     m.time_sent FROM message m
     JOIN user_detail d1 ON d1.user_id = m.sender_user_id
     JOIN user_detail d2 ON d2.user_id = m.receiver_user_id
