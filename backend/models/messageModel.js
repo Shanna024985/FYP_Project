@@ -97,5 +97,10 @@ server.on('connection', (ws, req) => {
 })
 
 module.exports.sendUpdateMessage = (userId, senderUserId) => {
-    clients[userId].send(senderUserId);
+    let wsUser = clients[userId];
+    if (wsUser) {
+        wsUser.send(senderUserId);
+    } else {
+        // senderUser is not online, maybe send email to user?
+    }
 }
