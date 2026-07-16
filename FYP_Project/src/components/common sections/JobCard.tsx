@@ -3,7 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "../ui/button";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "../ui/badge";
+import BookmarkButton from "./BookmarkButton";
 type JobCardProps = {
+  currentUrl: string;
   id: number;
   title: string;
   companyName: string;
@@ -19,6 +21,7 @@ type JobCardProps = {
 };
 
 export default function JobCard({
+  currentUrl,
   id,
   title,
   companyName,
@@ -54,14 +57,18 @@ export default function JobCard({
   return (
     <Card className="h-full hover:shadow-md transition">
       {/* ROW 1 */}
-      <CardHeader className="flex flex-row items-center gap-3 space-y-0">
-        <img
-          src={companyLogo}
-          alt={companyName}
-          className="h-10 w-10 rounded-md object-cover"
-        />
+      <CardHeader className="flex flex-row items-start justify-between">
+        <div className="flex items-center gap-3">
+          <img
+            src={companyLogo}
+            alt={companyName}
+            className="h-10 w-10 rounded-md object-cover"
+          />
 
-        <CardTitle className="text-base leading-tight">{title}</CardTitle>
+          <CardTitle className="text-base leading-tight">{title}</CardTitle>
+        </div>
+
+        <BookmarkButton currentUrl={currentUrl} jobId={id} />
       </CardHeader>
 
       {/* ROW 2 - 3 - 4 - 5 - 6 */}

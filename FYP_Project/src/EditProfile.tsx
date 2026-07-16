@@ -29,12 +29,14 @@ export default function EditProfilePage({ currentUrl }: Props) {
     first_name: "",
     last_name: "",
     email: "",
+    phone_number: "",
     linkedin_profile: "",
     github_profile: "",
   });
   const firstNameRef = useRef<HTMLInputElement>(null);
   const lastNameRef = useRef<HTMLInputElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
+  const phoneRef = useRef<HTMLInputElement>(null);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const resumeInputRef = useRef<HTMLInputElement>(null);  const navigate = useNavigate();
   const profileInputRef = useRef<HTMLInputElement>(null);
@@ -121,6 +123,7 @@ export default function EditProfilePage({ currentUrl }: Props) {
       name === "first_name" ||
       name === "last_name" ||
       name === "email" ||
+      name === "phone_number" ||
       name === "linkedin_profile" ||
       name === "github_profile"
     ) {
@@ -163,7 +166,9 @@ export default function EditProfilePage({ currentUrl }: Props) {
 
       toast.success("Profile photo uploaded successfully.");
     } catch (err: any) {
-      toast.error(err.response?.data?.error || "Failed to upload profile photo.");
+      toast.error(
+        err.response?.data?.error || "Failed to upload profile photo.",
+      );
     }
   };
   const isValidEmail = (email: string) => {
@@ -189,6 +194,9 @@ export default function EditProfilePage({ currentUrl }: Props) {
         : !isValidEmail(profile.email)
           ? "Please enter a valid email address."
           : "",
+      phone_number: profile.phone_number.trim()
+        ? ""
+        : "Phone number is required.",
 
       linkedin_profile:
         profile.linkedin_profile && !isValidUrl(profile.linkedin_profile)
@@ -215,6 +223,10 @@ export default function EditProfilePage({ currentUrl }: Props) {
 
     if (newErrors.email) {
       emailRef.current?.focus();
+      return;
+    }
+    if (newErrors.phone_number) {
+      phoneRef.current?.focus();
       return;
     }
 
@@ -399,7 +411,9 @@ export default function EditProfilePage({ currentUrl }: Props) {
 
       toast.success("Profile photo deleted successfully.");
     } catch (err: any) {
-      toast.error(err.response?.data?.error || "Failed to delete profile photo.");
+      toast.error(
+        err.response?.data?.error || "Failed to delete profile photo.",
+      );
     }
   };
   if (loading) {
@@ -536,6 +550,7 @@ export default function EditProfilePage({ currentUrl }: Props) {
               </InputGroupAddon>
 
               <InputGroupInput
+                ref={phoneRef}
                 name="phone_number"
                 type="tel"
                 value={profile.phone_number}
@@ -543,6 +558,9 @@ export default function EditProfilePage({ currentUrl }: Props) {
                 placeholder="Enter phone number"
               />
             </InputGroup>
+            {errors.phone_number && (
+              <p className="text-sm text-red-500">{errors.phone_number}</p>
+            )}
           </div>
 
           {/* Link Profiles */}
