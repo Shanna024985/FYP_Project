@@ -44,8 +44,41 @@ module.exports.getUserList = (userId) => {
 }
 
 module.exports.insertSingleMessage = (senderUserId, receiverUserId, message) => {
-    let sql = `INSERT INTO message (sender_user_id, receiver_user_id, message)
-    VALUES ($1, $2, $3) RETURNING id;`;
+    let sql = `WITH new_message AS (
+    INSERT INTO message (
+        sender_user_id,
+        receiver_user_id,
+        message
+    )
+    VALUES ($1, $2, $3)
+    RETURNING id,
+              sender_user_id,
+              receiver_user_id,
+              message,
+              time_sent
+)
+SELECT
+    nm.id,
+    nm.message,
+    nm.time_sent,
+
+    -- Sender information
+    sender.user_id AS sender_id,
+    sender.first_name|| ' ' || sender.last_name AS sender_user_name,
+    sender.profile_picture_file_name AS sender_profile_picture_file_name,
+    sender.profile_picture_file_url AS sender_profile_picture_file_url,
+
+    -- Receiver information
+    receiver.user_id AS receiver_id,
+    receiver.first_name || ' ' || receiver.last_name  AS receiver_user_name,
+    receiver.profile_picture_file_name AS receiver_profile_picture_file_name,
+    receiver.profile_picture_file_url AS receiver_profile_picture_file_url
+
+FROM new_message nm
+INNER JOIN user_detail sender
+    ON nm.sender_user_id = sender.user_id
+INNER JOIN user_detail receiver
+    ON nm.receiver_user_id = receiver.user_id;`;
     return query(sql, [senderUserId, receiverUserId, message]).then(function (result) {
         return result.rows;
     });

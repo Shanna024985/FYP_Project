@@ -21,6 +21,21 @@ type listOfMessages = {
   user_name: string;
   profile_picture_file_data: File;
 };
+type Message = {
+  id: string;
+  message: string;
+  time_sent: string; // ISO 8601 timestamp
+
+  sender_id: string;
+  sender_user_name: string;
+  sender_profile_picture_file_name: string;
+  sender_profile_picture_file_url: string;
+
+  receiver_id: string;
+  receiver_user_name: string;
+  receiver_profile_picture_file_name: string;
+  receiver_profile_picture_file_url: string;
+};
 type messageJson = {
   message: string;
   sender_user_id: string;
@@ -39,7 +54,8 @@ const Messages = (props: Props) => {
   let [profileOfUserSelected, setProfileOfUserSelected] =
     useState<listOfMessages>();
   let [messagesJson, setMessagesJson] = useState<messageJson[]>();
-  let [inputMessage, setInputMessage] = useState("")
+  let [inputMessage, setInputMessage] = useState("");
+
   useEffect(() => {
     socket.current = new WebSocket(
       "ws://localhost:3001?token=" + localStorage.getItem("token"),
@@ -234,6 +250,7 @@ const Messages = (props: Props) => {
 
               {messagesJson?.map((valueOfMessage) => {
                 console.log(messagesJson);
+
                 if (
                   valueOfMessage.sender_user_id ==
                   profileOfUserSelected?.user_id
@@ -308,15 +325,59 @@ const Messages = (props: Props) => {
                 placeholder=""
                 className="bg-white  border-black self-center"
                 id="thingsToMessage"
-                onChange={(e)=>{
-                  setInputMessage(e.currentTarget.value)
+                onChange={(e) => {
+                  setInputMessage(e.currentTarget.value);
                 }}
                 value={inputMessage}
               />
               <SmileIcon className="self-center" />
-              <Button onClick={(e)=>{
-                setInputMessage("")
-              }}>Send</Button>
+              <Button
+                onClick={(e) => {
+                  let body = JSON.stringify({
+                    receiverUserId: profileOfUserSelected?.user_id,
+                    message: inputMessage,
+                  });
+                  fetch(props.currentUrl + "/message", {
+                    method: "POST",
+                    body: body,
+                    headers: {
+                      "Content-Type": "application/json",
+                      Authorization: "Bearer " + localStorage.getItem("token"),
+                    },
+                  })
+                    .then((valuesReturned) => {
+                      return valuesReturned.json();
+                    })
+                    .then((valuesToDeal) => {
+                      let messageJsonReceived: Message =
+                        valuesToDeal.messageJson;
+                      let newMessageJsonToDeal: messageJson = {
+                        message: messageJsonReceived.message,
+                        time_sent: messageJsonReceived.time_sent,
+                        sender_user_id: messageJsonReceived.sender_id,
+                        sender_user_name: messageJsonReceived.sender_user_name,
+                        sender_profile_picture_file_name:
+                          messageJsonReceived.sender_profile_picture_file_name,
+                        sender_profile_picture_file_url:
+                          messageJsonReceived.sender_profile_picture_file_url,
+                        receiver_user_id: messageJsonReceived.receiver_id,
+                        receiver_user_name:
+                          messageJsonReceived.receiver_user_name,
+                        receiver_profile_picture_file_name:
+                          messageJsonReceived.receiver_profile_picture_file_name,
+                        receiver_profile_picture_file_url:
+                          messageJsonReceived.receiver_profile_picture_file_url,
+                      };
+                      setMessagesJson([
+                        ...(messagesJson ?? []),
+                        newMessageJsonToDeal,
+                      ]);
+                      setInputMessage("");
+                    });
+                }}
+              >
+                Send
+              </Button>
             </div>
           </div>
         </div>
