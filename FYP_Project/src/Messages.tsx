@@ -173,7 +173,7 @@ const Messages = (props: Props) => {
             <div className="flex gap-3">
               <p className="font-bold text-xl self-center">Messages</p>
             </div>
-            <SquarePen className="self-center" />
+            {/* <SquarePen className="self-center" /> */}
           </div>
           <div className="flex justify-between">
             <Input placeholder="Search" className="mt-2 w-9/10" />
@@ -408,7 +408,7 @@ const Messages = (props: Props) => {
               })}
             </div>
             <div className="flex mb-3 gap-3 p-2">
-              <PlusCircle className="self-center" />
+              {/* <PlusCircle className="self-center" /> */}
               <Input
                 placeholder=""
                 className="bg-white  border-black self-center"
@@ -420,7 +420,7 @@ const Messages = (props: Props) => {
                 value={inputMessage}
                 ref={inputRef}
               />
-              <SmileIcon className="self-center" />
+              {/* <SmileIcon className="self-center" /> */}
               <Button
                 className={classNameForButtons}
                 onClick={(e) => {
