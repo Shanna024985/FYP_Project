@@ -16,7 +16,7 @@ const { Server } = require('ws');
 // }
 
 module.exports.getMessageBetweenUsers = (userId1, userId2, page) => {
-    let sql = `SELECT m.message,
+    let sql = `SELECT m.id,m.message,
     d1.user_id sender_user_id,
     d1.first_name || ' ' || d1.last_name sender_user_name,
     d1.profile_picture_file_name sender_profile_picture_file_name,

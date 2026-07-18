@@ -1,4 +1,4 @@
-import { PlusCircle, Search, SmileIcon, SquarePen } from "lucide-react";
+import { PlusCircle, Search, SmileIcon, SquarePen, Trash } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { Input } from "./components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "./components/ui/avatar";
@@ -9,6 +9,12 @@ import {
   MessageAvatar,
   MessageContent,
 } from "./components/ui/message";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "./components/ui/context-menu";
 type Props = {
   currentUrl: String;
 };
@@ -47,6 +53,7 @@ type messageJson = {
   receiver_profile_picture_file_name: string;
   receiver_profile_picture_file_url: string;
   time_sent: string;
+  id: string;
 };
 const Messages = (props: Props) => {
   const socket = useRef<WebSocket | null>(null);
@@ -55,7 +62,11 @@ const Messages = (props: Props) => {
     useState<listOfMessages>();
   let [messagesJson, setMessagesJson] = useState<messageJson[]>();
   let [inputMessage, setInputMessage] = useState("");
-
+  let messageDiv = useRef<HTMLDivElement>(null);
+  let [classNameForButtons, setClassNameForButtons] = useState("");
+  let [classNameForEditButton, setClassNameForEditButton] = useState("hidden");
+  let inputRef = useRef<HTMLInputElement>(null);
+  let [currentIdToEdit, setCurrentIdToEdit] = useState("");
   useEffect(() => {
     socket.current = new WebSocket(
       "ws://localhost:3001?token=" + localStorage.getItem("token"),
@@ -64,19 +75,59 @@ const Messages = (props: Props) => {
       console.log("Connected");
     };
     socket.current.onmessage = (event) => {
-      debugger;
+      // fetch(props.currentUrl + "/message/" + event.data, {
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //     Authorization: "Bearer " + localStorage.getItem("token"),
+      //   },
+      // })
+      //   .then((value) => {
+      //     return value.json();
+      //   })
+      //   .then((messagesJsonNew) => {
+      //     setMessagesJson(messagesJsonNew);
+
+      //     let newListOfPeople = listOfPeople?.map((ValuesOfPeople) => {
+      //       if (
+      //         ValuesOfPeople.user_id ===
+      //         messagesJsonNew[messagesJsonNew.length - 1].sender_user_id
+      //       ) {
+      //         return {
+      //           ...ValuesOfPeople,
+      //           most_recent_message:
+      //             messagesJsonNew[messagesJsonNew.length - 1].message,
+      //         };
+      //       } else {
+      //         return ValuesOfPeople;
+      //       }
+      //     });
+      //     setListOfpeople(newListOfPeople);
+      //     console.log(messagesJson);
+      //   });
       fetch(props.currentUrl + "/message/" + event.data, {
         headers: {
           "Content-Type": "application/json",
           Authorization: "Bearer " + localStorage.getItem("token"),
         },
       })
-        .then((value) => {
-          return value.json();
-        })
-        .then((messagesJson) => {
-          setMessagesJson(messagesJson);
-          console.log(messagesJson);
+        .then((res) => res.json())
+        .then((messagesJsonNew) => {
+          setMessagesJson(messagesJsonNew);
+
+          if (messagesJsonNew.length === 0) return;
+
+          const latestMessage = messagesJsonNew[messagesJsonNew.length - 1];
+
+          setListOfpeople((prevPeople) =>
+            prevPeople?.map((person) =>
+              person.user_id === latestMessage.sender_user_id
+                ? {
+                    ...person,
+                    most_recent_message: latestMessage.message,
+                  }
+                : person,
+            ),
+          );
         });
     };
     fetch(props.currentUrl + "/message/list", {
@@ -107,6 +158,11 @@ const Messages = (props: Props) => {
           });
       });
   }, []);
+  useEffect(() => {
+    if (messageDiv.current) {
+      messageDiv.current.scrollTop = messageDiv.current.scrollHeight;
+    }
+  }, [messagesJson]);
   return (
     <div>
       <p className="text-2xl font-bold text-left">All messages</p>
@@ -116,22 +172,6 @@ const Messages = (props: Props) => {
           <div className="flex justify-between">
             <div className="flex gap-3">
               <p className="font-bold text-xl self-center">Messages</p>
-              <div className="relative w-10 h-10">
-                <p className="absolute inset-0 flex items-center self-center justify-center text-white font-semibold">
-                  40
-                </p>
-
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="40"
-                  height="40"
-                  viewBox="0 0 40 40"
-                  fill="none"
-                  className="w-full h-full block"
-                >
-                  <circle cx="20" cy="20" r="20" fill="#F93868" />
-                </svg>
-              </div>
             </div>
             <SquarePen className="self-center" />
           </div>
@@ -243,10 +283,13 @@ const Messages = (props: Props) => {
             {/* <Button className="bg-blue-500 self-center">View profile</Button> */}
           </div>
           <div className="bg-gray-200 mt-4 h-[82vh] flex flex-col justify-end gap-4">
-            <div className="p-4 flex flex-col gap-5 overflow-y-scroll">
+            <div
+              className="p-4 flex flex-col gap-5 overflow-y-scroll"
+              ref={messageDiv}
+            >
               {/* <p className="text-gray-500">
-              All of your chat history will be shown here
-            </p> */}
+                All of your chat history will be shown here
+              </p> */}
 
               {messagesJson?.map((valueOfMessage) => {
                 console.log(messagesJson);
@@ -289,31 +332,76 @@ const Messages = (props: Props) => {
                 ) {
                   return (
                     <>
-                      <Message align="end">
-                        <MessageAvatar>
-                          <Avatar>
-                            <AvatarImage
-                              src={
-                                valueOfMessage.sender_profile_picture_file_url
-                              }
-                              alt={
-                                valueOfMessage.sender_profile_picture_file_name
-                              }
-                            />
-                            <AvatarFallback>
-                              {" "}
-                              {valueOfMessage.sender_user_name}
-                            </AvatarFallback>
-                          </Avatar>
-                        </MessageAvatar>
-                        <MessageContent>
-                          <Bubble>
-                            <BubbleContent>
-                              {valueOfMessage.message}
-                            </BubbleContent>
-                          </Bubble>
-                        </MessageContent>
-                      </Message>
+                      <ContextMenu>
+                        <ContextMenuTrigger>
+                          <Message align="end">
+                            <MessageAvatar>
+                              <Avatar>
+                                <AvatarImage
+                                  src={
+                                    valueOfMessage.sender_profile_picture_file_url
+                                  }
+                                  alt={
+                                    valueOfMessage.sender_profile_picture_file_name
+                                  }
+                                />
+                                <AvatarFallback>
+                                  {" "}
+                                  {valueOfMessage.sender_user_name}
+                                </AvatarFallback>
+                              </Avatar>
+                            </MessageAvatar>
+                            <MessageContent>
+                              <Bubble>
+                                <BubbleContent>
+                                  {valueOfMessage.message}
+                                </BubbleContent>
+                              </Bubble>
+                            </MessageContent>
+                          </Message>
+                        </ContextMenuTrigger>
+                        <ContextMenuContent>
+                          <ContextMenuItem
+                            onClick={(e) => {
+                              setInputMessage(valueOfMessage.message);
+                              setClassNameForButtons("hidden");
+                              setClassNameForEditButton("");
+                              setCurrentIdToEdit(valueOfMessage.id);
+                              inputRef.current?.focus();
+                            }}
+                          >
+                            <SquarePen /> Edit
+                          </ContextMenuItem>
+                          <ContextMenuItem
+                            onClick={(e) => {
+                              fetch(
+                                props.currentUrl +
+                                  "/message/" +
+                                  valueOfMessage.id,
+                                {
+                                  method: "DELETE",
+                                  headers: {
+                                    "Content-Type": "application/json",
+                                    Authorization:
+                                      "Bearer " + localStorage.getItem("token"),
+                                  },
+                                },
+                              )
+                                .then((values) => {
+                                  return values.json();
+                                })
+                                .then((newThing) => {
+                                  let newMessageJson = messagesJson.filter(
+                                    (value) => value.id !== valueOfMessage.id,
+                                  );
+                                  setMessagesJson(newMessageJson);
+                                });
+                            }}
+                          >
+                            <Trash color="red" /> Delete
+                          </ContextMenuItem>
+                        </ContextMenuContent>
+                      </ContextMenu>
                     </>
                   );
                 }
@@ -328,10 +416,13 @@ const Messages = (props: Props) => {
                 onChange={(e) => {
                   setInputMessage(e.currentTarget.value);
                 }}
+                autoFocus
                 value={inputMessage}
+                ref={inputRef}
               />
               <SmileIcon className="self-center" />
               <Button
+                className={classNameForButtons}
                 onClick={(e) => {
                   let body = JSON.stringify({
                     receiverUserId: profileOfUserSelected?.user_id,
@@ -367,16 +458,78 @@ const Messages = (props: Props) => {
                           messageJsonReceived.receiver_profile_picture_file_name,
                         receiver_profile_picture_file_url:
                           messageJsonReceived.receiver_profile_picture_file_url,
+                        id: messageJsonReceived.id,
                       };
                       setMessagesJson([
                         ...(messagesJson ?? []),
                         newMessageJsonToDeal,
                       ]);
+                      let newListOfPeople = listOfPeople?.map((values) => {
+                        if (values.user_id == profileOfUserSelected?.user_id) {
+                          return {
+                            ...values,
+                            most_recent_message: messageJsonReceived.message,
+                          };
+                        } else {
+                          return values;
+                        }
+                      });
+                      setListOfpeople(newListOfPeople);
                       setInputMessage("");
                     });
                 }}
               >
                 Send
+              </Button>
+              <Button
+                className={classNameForEditButton}
+                onClick={(value) => {
+                  let body = JSON.stringify({
+                    message: inputMessage,
+                  });
+                  fetch(props.currentUrl + "/message/" + currentIdToEdit, {
+                    method: "PUT",
+                    body: body,
+                    headers: {
+                      "Content-Type": "application/json",
+                      Authorization: "Bearer " + localStorage.getItem("token"),
+                    },
+                  })
+                    .then((Value) => {
+                      return Value.json();
+                    })
+                    .then((valuesOfStuff) => {
+                      let newMessageJsonComplete = messagesJson?.map(
+                        (values) => {
+                          if (values.id == currentIdToEdit) {
+                            return {
+                              ...values,
+                              message: inputMessage,
+                            };
+                          } else {
+                            return values;
+                          }
+                        },
+                      );
+                      let newListOfPeople = listOfPeople?.map((values) => {
+                        if (values.user_id == profileOfUserSelected?.user_id) {
+                          return {
+                            ...values,
+                            most_recent_message: inputMessage,
+                          };
+                        } else {
+                          return values;
+                        }
+                      });
+                      setListOfpeople(newListOfPeople);
+                      setMessagesJson(newMessageJsonComplete);
+                      setInputMessage("");
+                      setClassNameForEditButton("hidden");
+                      setClassNameForButtons("");
+                    });
+                }}
+              >
+                Save
               </Button>
             </div>
           </div>

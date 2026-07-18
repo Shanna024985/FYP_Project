@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Plus, StarHalfIcon, StarIcon } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./components/ui/avatar";
 import { Button } from "./components/ui/button";
@@ -18,9 +18,49 @@ import { Label } from "./components/ui/label";
 type Props = {
   currentUrl: String;
 };
+type Reviews = {
+  id: string;
+  company_id: string;
+  user_id: string;
+  rating: number;
+  message: string;
+  created_at: string;
+  username: string;
+};
+type Stars = {
+  averageRating: number;
+};
+let StarsPage = (prop: Stars) => {
+  const stars = [];
+  let previousNumber = 0;
+  for (let i = 1; i <= 5; i++) {
+    if (prop.averageRating >= i) {
+      stars.push(<StarIcon className="self-center" fill="yellow" key={i} />);
+      previousNumber = i;
+    } else if (prop.averageRating < i && prop.averageRating > previousNumber) {
+      stars.push(
+        <StarHalfIcon className="self-center" fill="yellow" key={i} />,
+      );
+      previousNumber = i;
+    }
+  }
+  return stars;
+};
 const CompanyReviews = (prop: Props) => {
   const [rating, setRating] = useState(0);
-
+  let [dataOfReviews, setDataOfReviews] = useState<Reviews[]>([]);
+  useEffect(() => {
+    let address = new URL(window.location.href);
+    let queryParameters = address.searchParams;
+    let id = queryParameters.get("id");
+    fetch(prop.currentUrl + "/reviews/company/" + id)
+      .then((valueCannnotUse) => {
+        return valueCannnotUse.json();
+      })
+      .then((values) => {
+        setDataOfReviews(values.reviews);
+      });
+  }, []);
   return (
     <div>
       <div className="flex justify-between">
@@ -80,13 +120,7 @@ const CompanyReviews = (prop: Props) => {
           <p className="text-lg">Average Rating</p>
           <div className="flex gap-3">
             <p className="font-semibold text-2xl">4.5</p>
-            <StarIcon className="self-center" fill="yellow" />
-            <StarIcon className="self-center" fill="yellow" />
-
-            <StarIcon className="self-center" fill="yellow" />
-
-            <StarIcon className="self-center" fill="yellow" />
-            <StarHalfIcon className="self-center" fill="yellow" />
+            <StarsPage averageRating={4.5} />
           </div>
         </div>
         <div className="flex flex-col gap-1">
@@ -139,13 +173,7 @@ const CompanyReviews = (prop: Props) => {
           </div>
           <div className="mt-1 flex flex-col gap-4">
             <div className="flex gap-3">
-              <StarIcon className="self-center" fill="yellow" />
-              <StarIcon className="self-center" fill="yellow" />
-
-              <StarIcon className="self-center" fill="yellow" />
-
-              <StarIcon className="self-center" fill="yellow" />
-              <StarHalfIcon className="self-center" fill="yellow" />
+              <StarsPage averageRating={4.5} />
             </div>
             <p className="text-left">
               My first job in this company went well it was very fruitful and
@@ -169,13 +197,7 @@ const CompanyReviews = (prop: Props) => {
           </div>
           <div className="mt-1 flex flex-col gap-4">
             <div className="flex gap-3">
-              <StarIcon className="self-center" fill="yellow" />
-              <StarIcon className="self-center" fill="yellow" />
-
-              <StarIcon className="self-center" fill="yellow" />
-
-              <StarIcon className="self-center" fill="yellow" />
-              <StarHalfIcon className="self-center" fill="yellow" />
+              <StarsPage averageRating={4.5} />
             </div>
             <p className="text-left">
               My first job in this company went well it was very fruitful and
@@ -184,6 +206,35 @@ const CompanyReviews = (prop: Props) => {
           </div>
         </div>
         <hr className="mx-4" />
+        {dataOfReviews.map((value) => {
+          return (
+            <>
+              <div className="flex p-5 gap-7 align-middle">
+                <div className="flex items-center justify-center">
+                  <Avatar className="size-20">
+                    <AvatarImage src="../public/IMG_0230 copy.jpeg" />
+                    <AvatarFallback>ProfilePic</AvatarFallback>
+                  </Avatar>
+                </div>
+                <div className="text-left flex flex-col align-middle h-full">
+                  <p className="font-bold text-2xl">{value.username}</p>
+                  <div className="flex flex-col gap-2 mt-2.5">
+                    <p>{new Date(value.created_at).toDateString()}</p>
+                  </div>
+                </div>
+                <div className="mt-1 flex flex-col gap-4">
+                  <div className="flex gap-3">
+                    <StarsPage averageRating={value.rating} />
+                  </div>
+                  <p className="text-left">
+                    {value.message}
+                  </p>
+                </div>
+              </div>
+              <hr className="mx-4" />
+            </>
+          );
+        })}
       </div>
     </div>
   );
