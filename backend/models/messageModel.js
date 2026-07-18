@@ -92,8 +92,8 @@ module.exports.updateMessageById = (message, id) => {
 }
 
 module.exports.deleteMessageById = (id) => {
-    let sql = `DELETE message WHERE id = $1 RETURNING id, sender_user_id, receiver_user_id;`;
-    return query(sql, [id]).then(function (result) {
+    let sql = `DELETE FROM message WHERE id = $1 RETURNING id, sender_user_id, receiver_user_id;`;
+    return query(sql, [id]).then(function(result) {
         return result.rows;
     });
 }
