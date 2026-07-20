@@ -6,6 +6,7 @@ import {
   GraduationCap,
   Users,
   CalendarDays,
+  MapPin,
 } from "lucide-react";
 import BookmarkButton from "@/components/common sections/BookmarkButton";
 import "./title.css";
@@ -238,6 +239,15 @@ export default function JobDetailsPage({ currentUrl }: Props) {
                           <span className="font-medium">Apply Before:</span>{" "}
                           <span className="text-muted-foreground">
                             {new Date(job.deadline).toLocaleDateString("en-SG")}
+                          </span>
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <MapPin className="size-4 text-muted-foreground" />
+                        <p>
+                          <span className="font-medium">Location:</span>{" "}
+                          <span className="text-muted-foreground">
+                            {job.address}, {job.location}
                           </span>
                         </p>
                       </div>

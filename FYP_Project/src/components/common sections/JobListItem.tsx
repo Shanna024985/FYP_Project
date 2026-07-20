@@ -13,6 +13,7 @@ type JobListItemProps = {
   salaryRangeTo: number;
   salaryType: string;
   location: string;
+  address: string;
   tags: string[];
   date: string;
   companyLogo: string;
@@ -28,6 +29,7 @@ export default function JobListItem({
   salaryRangeTo,
   salaryType,
   location,
+  address,
   tags,
   date,
   companyLogo,
@@ -63,7 +65,7 @@ export default function JobListItem({
 
           <span className="flex items-center gap-1">
             <MapPin size={14} />
-            {location}
+            {address}, {location}
           </span>
         </div>
 

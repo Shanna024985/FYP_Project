@@ -118,7 +118,7 @@ module.exports.getAllJobs = (req, res, next) => {
 
 // READ - Get recommended jobs
 module.exports.getRecommendedJobs = (req, res, next) => {
-    let userId = req.query.userId || 1;
+    const userId = getUserIdFromReq(req, res);
     let limit = req.query.limit || 6;
     
     return jobModel.getRecommendedJobs(userId, limit)
@@ -491,10 +491,11 @@ module.exports.openJob = (req, res, next) => {
 // ==================== APPLICATIONS ====================
 
 // CREATE - Apply for a job
-module.exports.applyForJob = (req, res, next) => {
+module.exports.applyForJob = async(req, res, next) => {
     const userId = getUserIdFromReq(req, res);
     let jobId = req.params.id;
     let resumeId = req.body.resumeId;
+    const { fullname, email, phone, proposal } = req.body;
     
     if (!userId) {
         return res.status(401).json({
