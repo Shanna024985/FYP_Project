@@ -728,6 +728,8 @@ module.exports.updateJobStatus = function updateJobStatus(jobId, status, company
 }
 
 // ==================== APPLICATIONS ====================
+
+// CREATE - Apply for a job
 module.exports.applyForJob = function applyForJob(
     userId,
     jobId,
@@ -880,32 +882,32 @@ module.exports.isJobSaved = function isJobSaved(userId, jobId) {
 
 // ==================== JOB COMPLETION ====================
 
-// CHECK - Check if user has completed a job with a company
+// CHECK - Check if user has completed a job with a company - FIXED
 module.exports.hasUserCompletedJobWithCompany = function hasUserCompletedJobWithCompany(userId, companyId) {
     let sql = `SELECT a.id, a.job_id, a.status 
                FROM application a 
                JOIN job j ON a.job_id = j.id 
                WHERE a.user_id = $1 
                AND j.company_id = $2 
-               AND a.status IN ('Offered', 'Onboarded')`;
+               AND a.status IN ('Offer', 'Onboard')`;
     return query(sql, [userId, companyId]).then(function (result) {
         return result.rows;
     });
 }
 
-// CHECK - Check if user has completed a specific job
+// CHECK - Check if user has completed a specific job - FIXED
 module.exports.hasUserCompletedJob = function hasUserCompletedJob(userId, jobId) {
     let sql = `SELECT id, status 
                FROM application 
                WHERE user_id = $1 
                AND job_id = $2 
-               AND status IN ('Offered', 'Onboarded')`;
+               AND status IN ('Offer', 'Onboard')`;
     return query(sql, [userId, jobId]).then(function (result) {
         return result.rows;
     });
 }
 
-// READ - Get all completed jobs for a user
+// READ - Get all completed jobs for a user - FIXED
 module.exports.getCompletedJobsByUser = function getCompletedJobsByUser(userId) {
     let sql = `SELECT a.*, j.title as job_title, j.description, 
                c.name as company_name, c.id as company_id,
@@ -914,14 +916,14 @@ module.exports.getCompletedJobsByUser = function getCompletedJobsByUser(userId) 
                JOIN job j ON a.job_id = j.id
                JOIN company c ON j.company_id = c.id
                WHERE a.user_id = $1 
-               AND a.status IN ('Offered', 'Onboarded')
+               AND a.status IN ('Offer', 'Onboard')
                ORDER BY a.time_applied DESC;`;
     return query(sql, [userId]).then(function (result) {
         return result.rows;
     });
 }
 
-// READ - Get all completed jobs for a company
+// READ - Get all completed jobs for a company - FIXED
 module.exports.getCompletedJobsByCompany = function getCompletedJobsByCompany(companyId) {
     let sql = `SELECT a.*, j.title as job_title, 
                u.singpass_id as user_identifier
@@ -929,7 +931,7 @@ module.exports.getCompletedJobsByCompany = function getCompletedJobsByCompany(co
                JOIN job j ON a.job_id = j.id
                JOIN user_ u ON a.user_id = u.id
                WHERE j.company_id = $1 
-               AND a.status IN ('Offered', 'Onboarded')
+               AND a.status IN ('Offer', 'Onboard')
                ORDER BY a.time_applied DESC;`;
     return query(sql, [companyId]).then(function (result) {
         return result.rows;
@@ -938,20 +940,14 @@ module.exports.getCompletedJobsByCompany = function getCompletedJobsByCompany(co
 
 // ==================== REVIEW PERMISSIONS ====================
 
-// CHECK - Check if user can review a company
+// CHECK - Check if user can review a company - FIXED (removed review check)
 module.exports.canUserReviewCompany = function canUserReviewCompany(userId, companyId) {
     return module.exports.hasUserCompletedJobWithCompany(userId, companyId).then(function (completedJobs) {
         if (completedJobs.length === 0) {
             return { canReview: false, message: "You must complete a job with this company before reviewing." };
         }
-
-        let reviewSql = `SELECT id FROM review WHERE user_id = $1 AND company_id = $2;`;
-        return query(reviewSql, [userId, companyId]).then(function (reviewResult) {
-            if (reviewResult.rows.length > 0) {
-                return { canReview: false, message: "You have already reviewed this company." };
-            }
-            return { canReview: true, message: "You can review this company." };
-        });
+        // Allow review even if they've already reviewed (removed the check)
+        return { canReview: true, message: "You can review this company." };
     });
 }
 

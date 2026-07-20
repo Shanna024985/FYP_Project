@@ -76,7 +76,7 @@ module.exports.hasCompletedJobWithCompany = function hasCompletedJobWithCompany(
                JOIN job j ON a.job_id = j.id 
                WHERE a.user_id = $1 
                AND j.company_id = $2 
-               AND a.status IN ('Offered', 'Onboarded')`;
+               AND a.status IN ('Offer', 'Onboard')`;
     
     return query(sql, [userId, companyId])
         .then(function(result) {

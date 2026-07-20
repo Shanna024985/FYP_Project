@@ -1,9 +1,24 @@
 const reviewModel = require("../models/reviewModel");
+const { query } = require("../services/dbConnection");
+
+// Helper: Get user ID from JWT token
+const getUserIdFromReq = (req, res) => {
+    return res?.locals?.userId || req.user?.userId || req.user?.id;
+};
 
 // CREATE - Create a review (only if user completed a job)
 module.exports.createReview = (req, res, next) => {
+    const userId = getUserIdFromReq(req, res);
     let { company_id, rating, message } = req.body;
-    let userId = req.body.userId || 1;
+    
+    console.log('=== createReview ===');
+    console.log('userId from token:', userId);
+    console.log('company_id:', company_id);
+    console.log('rating:', rating);
+    
+    if (!userId) {
+        return res.status(401).json({ error: "Unauthorized: User not authenticated" });
+    }
     
     if (!company_id || !rating || !message) {
         return res.status(400).json({ 
@@ -56,13 +71,40 @@ module.exports.createReview = (req, res, next) => {
         });
 }
 
-// READ - Get all reviews for a company
+// READ - Get all reviews for a company (WITH STATISTICS)
 module.exports.getReviewsByCompany = (req, res, next) => {
     let companyId = req.params.companyId;
     
+    console.log('=== getReviewsByCompany ===');
+    console.log('companyId:', companyId);
+    
     return reviewModel.getReviewsByCompany(companyId)
         .then(function(reviews) {
-            res.json({ count: reviews.length, reviews: reviews });
+            const total = reviews.length;
+            
+            // Calculate statistics
+            let sum = 0;
+            const distribution = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+            
+            reviews.forEach(function(review) {
+                sum += review.rating;
+                const roundedRating = Math.round(review.rating);
+                if (distribution[roundedRating] !== undefined) {
+                    distribution[roundedRating]++;
+                }
+            });
+            
+            const average = total > 0 ? (sum / total) : 0;
+            
+            res.json({ 
+                count: total,
+                reviews: reviews,
+                statistics: {
+                    total_reviews: total,
+                    average_rating: parseFloat(average.toFixed(1)),
+                    rating_distribution: distribution
+                }
+            });
         }).catch(function(error) {
             console.error(error);
             return res.status(500).json({ error: error.message });
@@ -101,13 +143,44 @@ module.exports.getReviewById = (req, res, next) => {
         });
 }
 
-// READ - Get my reviews
+// READ - Get my reviews (WITH STATISTICS)
 module.exports.getMyReviews = (req, res, next) => {
-    let userId = req.query.userId || 1;
+    const userId = getUserIdFromReq(req, res);
+    
+    console.log('=== getMyReviews ===');
+    console.log('userId from token:', userId);
+    
+    if (!userId) {
+        return res.status(401).json({ error: "Unauthorized: User not authenticated" });
+    }
     
     return reviewModel.getReviewsByUser(userId)
         .then(function(reviews) {
-            res.json({ count: reviews.length, reviews: reviews });
+            const total = reviews.length;
+            
+            // Calculate statistics
+            let sum = 0;
+            const distribution = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+            
+            reviews.forEach(function(review) {
+                sum += review.rating;
+                const roundedRating = Math.round(review.rating);
+                if (distribution[roundedRating] !== undefined) {
+                    distribution[roundedRating]++;
+                }
+            });
+            
+            const average = total > 0 ? (sum / total) : 0;
+            
+            res.json({ 
+                count: total,
+                reviews: reviews,
+                statistics: {
+                    total_reviews: total,
+                    average_rating: parseFloat(average.toFixed(1)),
+                    rating_distribution: distribution
+                }
+            });
         }).catch(function(error) {
             console.error(error);
             return res.status(500).json({ error: error.message });
@@ -116,9 +189,19 @@ module.exports.getMyReviews = (req, res, next) => {
 
 // UPDATE - Update a review
 module.exports.updateReview = (req, res, next) => {
+    const userId = getUserIdFromReq(req, res);
     let reviewId = req.params.id;
-    let userId = req.body.userId || 1;
     let { rating, message } = req.body;
+    
+    console.log('=== updateReview ===');
+    console.log('userId from token:', userId);
+    console.log('reviewId:', reviewId);
+    console.log('rating:', rating);
+    console.log('message:', message);
+    
+    if (!userId) {
+        return res.status(401).json({ error: "Unauthorized: User not authenticated" });
+    }
     
     if (!rating && !message) {
         return res.status(400).json({ 
@@ -150,15 +233,23 @@ module.exports.updateReview = (req, res, next) => {
                 review: updated[0] 
             });
         }).catch(function(error) {
-            console.error(error);
+            console.error('Update review error:', error);
             return res.status(500).json({ error: error.message });
         });
 }
 
 // DELETE - Delete a review
 module.exports.deleteReview = (req, res, next) => {
+    const userId = getUserIdFromReq(req, res);
     let reviewId = req.params.id;
-    let userId = req.body.userId || 1;
+    
+    console.log('=== deleteReview ===');
+    console.log('userId from token:', userId);
+    console.log('reviewId:', reviewId);
+    
+    if (!userId) {
+        return res.status(401).json({ error: "Unauthorized: User not authenticated" });
+    }
     
     return reviewModel.deleteReview(reviewId, userId)
         .then(function(deleted) {
@@ -172,7 +263,7 @@ module.exports.deleteReview = (req, res, next) => {
                 deletedId: deleted[0].id 
             });
         }).catch(function(error) {
-            console.error(error);
+            console.error('Delete review error:', error);
             return res.status(500).json({ error: error.message });
         });
 }

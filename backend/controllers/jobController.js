@@ -27,7 +27,7 @@ module.exports.createJob = (req, res, next) => {
     let { 
         title, description, category, type, 
         salary_range_from, salary_range_to, salary_type, salary_period,
-        duration, deadline, experience, career_level, location, address,  // ← ADDED address
+        duration, deadline, experience, career_level, location, address,
         jobs_needed, reports 
     } = req.body;
     
@@ -68,7 +68,7 @@ module.exports.createJob = (req, res, next) => {
                 title, description, category, type,
                 salary_range_from, salary_range_to, salary_type: salary_type || 'Negotiable',
                 salary_period: salary_period || 'Month',
-                duration, deadline, experience, career_level, location, address,  // ← ADDED address
+                duration, deadline, experience, career_level, location, address,
                 jobs_needed: jobs_needed || 1, reports: reports || 0
             }, companyId)
             .then(function(jobDetails) {
@@ -262,7 +262,7 @@ module.exports.updateJob = (req, res, next) => {
 
 // ==================== SOFT DELETE & RESTORE ====================
 
-// SOFT DELETE - Soft delete a job (with undo support) - FIXED
+// SOFT DELETE - Soft delete a job (with undo support)
 module.exports.softDeleteJob = (req, res, next) => {
     let jobId = req.params.id;
     let companyId = req.body.companyId;
@@ -314,7 +314,7 @@ module.exports.softDeleteJob = (req, res, next) => {
         });
 }
 
-// RESTORE - Restore a soft-deleted job (UNDO DELETION) - FIXED
+// RESTORE - Restore a soft-deleted job (UNDO DELETION)
 module.exports.restoreJob = (req, res, next) => {
     let jobId = req.params.id;
     let companyId = req.body.companyId;
@@ -511,25 +511,75 @@ module.exports.applyForJob = async(req, res, next) => {
         if (req.file) {
             resumeFileName = req.file.originalname;
             resumeFileData = req.file.buffer;
+            
+            return jobModel.applyForJob(
+                userId,
+                jobId,
+                req.body.fullname,
+                req.body.email,
+                req.body.phone,
+                req.body.proposal || '',
+                resumeFileName,
+                resumeFileData
+            ).then(function(application) {
+                res.status(201).json({
+                    message: "Application submitted successfully",
+                    application
+                });
+            }).catch(function(error) {
+                if (error.code === "23505") {
+                    return res.status(409).json({
+                        error: "You have already applied for this job."
+                    });
+                }
+                res.status(500).json({
+                    error: error.message
+                });
+            });
         }
         // User selected an existing resume
         else if (resumeId) {
-            const result = await query(
+            return query(
                 `SELECT file_name, file_data
                  FROM resume
                  WHERE id = $1
                  AND user_id = $2`,
                 [resumeId, userId]
-            );
+            ).then(function(result) {
+                if (result.rows.length === 0) {
+                    return res.status(404).json({
+                        error: "Resume not found."
+                    });
+                }
 
-            if (result.rows.length === 0) {
-                return res.status(404).json({
-                    error: "Resume not found."
+                resumeFileName = result.rows[0].file_name;
+                resumeFileData = result.rows[0].file_data;
+
+                return jobModel.applyForJob(
+                    userId,
+                    jobId,
+                    req.body.fullname,
+                    req.body.email,
+                    req.body.phone,
+                    req.body.proposal || '',
+                    resumeFileName,
+                    resumeFileData
+                );
+            }).then(function(application) {
+                res.status(201).json({
+                    message: "Application submitted successfully",
+                    application
                 });
-            }
-
-            resumeFileName = result.rows[0].file_name;
-            resumeFileData = result.rows[0].file_data;
+            }).catch(function(error) {
+                if (error.code === "23505") {
+                    return res.status(409).json({
+                        error: "You have already applied for this job."
+                    });
+                }
+                res.status(500).json({
+                    error: error.message
+                });
+            });
         }
         // No resume provided
         else {
@@ -537,30 +587,12 @@ module.exports.applyForJob = async(req, res, next) => {
                 error: "Resume is required."
             });
         }
-
-        const application = await jobModel.applyForJob(
-            userId,
-            jobId,
-            fullname,
-            email,
-            phone,
-            proposal,
-            resumeFileName,
-            resumeFileData
-        );
-
-        res.status(201).json({
-            message: "Application submitted successfully",
-            application
-        });
-
     } catch (error) {
         if (error.code === "23505") {
             return res.status(409).json({
                 error: "You have already applied for this job."
             });
         }
-
         res.status(500).json({
             error: error.message
         });
@@ -621,22 +653,44 @@ module.exports.getJobApplications = (req, res, next) => {
         });
 }
 
-// UPDATE - Update application status
+// UPDATE - Update application status - FIXED
 module.exports.updateApplicationStatus = (req, res, next) => {
     let applicationId = req.params.applicationId;
     let { status, remarks } = req.body;
+    
+    console.log('=== updateApplicationStatus ===');
+    console.log('applicationId:', applicationId);
+    console.log('status:', status);
+    console.log('remarks:', remarks);
     
     if (!status) {
         return res.status(400).json({ error: "Status is required" });
     }
     
-    return jobModel.updateApplicationStatus(applicationId, status, remarks)
-        .then(function(updated) {
-            if (updated.length == 0) {
+    // Check if application exists first
+    let checkSql = `SELECT id, user_id, status FROM application WHERE id = $1;`;
+    return query(checkSql, [applicationId])
+        .then(function(checkResult) {
+            if (checkResult.rows.length === 0) {
                 return res.status(404).json({ error: "Application not found" });
             }
-            res.json({ message: "Application status updated", application: updated[0] });
-        }).catch(function(error) {
+            
+            console.log('Application found:', checkResult.rows[0]);
+            
+            // Update the application status
+            return jobModel.updateApplicationStatus(applicationId, status, remarks || '');
+        })
+        .then(function(updated) {
+            if (updated.length === 0) {
+                return res.status(404).json({ error: "Application not found" });
+            }
+            res.json({ 
+                message: "Application status updated", 
+                application: updated[0] 
+            });
+        })
+        .catch(function(error) {
+            console.error('Update error:', error);
             return res.status(500).json({ error: error.message });
         });
 }
@@ -734,9 +788,13 @@ module.exports.isJobSaved = (req, res, next) => {
 
 // ==================== JOB COMPLETION ====================
 
-// READ - Get completed jobs for a user
+// READ - Get completed jobs for a user - FIXED (removed userId from query)
 module.exports.getCompletedJobs = (req, res, next) => {
-    let userId = req.query.userId || 1;
+    const userId = getUserIdFromReq(req, res);
+    
+    if (!userId) {
+        return res.status(401).json({ error: "Unauthorized: User not authenticated" });
+    }
     
     return jobModel.getCompletedJobsByUser(userId)
         .then(function(completedJobs) {
@@ -758,15 +816,20 @@ module.exports.getCompanyCompletedJobs = (req, res, next) => {
         });
 }
 
-// CHECK - Check if user can review a company
+// CHECK - Check if user can review a company - FIXED (removed userId from query)
 module.exports.canReviewCompany = (req, res, next) => {
-    let userId = req.query.userId || 1;
+    const userId = getUserIdFromReq(req, res);
     let companyId = req.params.companyId;
+    
+    if (!userId) {
+        return res.status(401).json({ error: "Unauthorized: User not authenticated" });
+    }
     
     return jobModel.canUserReviewCompany(userId, companyId)
         .then(function(result) {
             res.json(result);
         }).catch(function(error) {
+            console.error('canReviewCompany error:', error);
             return res.status(500).json({ error: error.message });
         });
 }
@@ -793,7 +856,11 @@ module.exports.getJobSeekerDashboard = (req, res, next) => {
 
 // READ - Get user's resumes
 module.exports.getUserResumes = (req, res, next) => {
-    let userId = req.query.userId || 1;
+    const userId = getUserIdFromReq(req, res);
+    
+    if (!userId) {
+        return res.status(401).json({ error: "Unauthorized: User not authenticated" });
+    }
     
     let sql = `SELECT id, file_name, file_data FROM resume WHERE user_id = $1 ORDER BY id DESC;`;
     return require("../services/dbConnection").query(sql, [userId]).then(function(result) {
