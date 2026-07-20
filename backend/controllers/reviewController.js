@@ -3,7 +3,7 @@ const reviewModel = require("../models/reviewModel");
 // CREATE - Create a review (only if user completed a job)
 module.exports.createReview = (req, res, next) => {
     let { company_id, rating, message } = req.body;
-    let userId = req.body.userId || 1;
+    let userId = res.locals.userId
     
     if (!company_id || !rating || !message) {
         return res.status(400).json({ 

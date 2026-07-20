@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Plus, StarHalfIcon, StarIcon } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./components/ui/avatar";
 import { Button } from "./components/ui/button";
@@ -49,6 +49,8 @@ let StarsPage = (prop: Stars) => {
 const CompanyReviews = (prop: Props) => {
   const [rating, setRating] = useState(0);
   let [dataOfReviews, setDataOfReviews] = useState<Reviews[]>([]);
+  let inputRef = useRef<HTMLInputElement>(null);
+  let [numberOfReviews, setNumberOfReviews] = useState()
   useEffect(() => {
     let address = new URL(window.location.href);
     let queryParameters = address.searchParams;
@@ -59,6 +61,7 @@ const CompanyReviews = (prop: Props) => {
       })
       .then((values) => {
         setDataOfReviews(values.reviews);
+        
       });
   }, []);
   return (
@@ -97,12 +100,34 @@ const CompanyReviews = (prop: Props) => {
                 <Input
                   id="link"
                   placeholder="The company culture is great!..."
+                  ref={inputRef}
                 />
               </div>
             </div>
             <DialogFooter className="sm:justify-start">
               <DialogClose asChild>
-                <Button type="button" onClick={(e) => {}}>
+                <Button
+                  type="button"
+                  onClick={(e) => {
+                    let address = new URL(window.location.href);
+                    let queryParameters = address.searchParams;
+                    let id = queryParameters.get("id");
+                    let body = JSON.stringify({
+                      company_id: id,
+                      rating: rating,
+                      message: inputRef.current?.value,
+                    });
+                    fetch(prop.currentUrl + "/reviews", {
+                      headers: {
+                        "Content-Type": "application/json",
+                        Authorization:
+                          "Bearer " + localStorage.getItem("token"),
+                      },
+                      method: "POST",
+                      body: body,
+                    });
+                  }}
+                >
                   Submit
                 </Button>
               </DialogClose>
@@ -226,9 +251,7 @@ const CompanyReviews = (prop: Props) => {
                   <div className="flex gap-3">
                     <StarsPage averageRating={value.rating} />
                   </div>
-                  <p className="text-left">
-                    {value.message}
-                  </p>
+                  <p className="text-left">{value.message}</p>
                 </div>
               </div>
               <hr className="mx-4" />
