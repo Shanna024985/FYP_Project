@@ -111,3 +111,39 @@ module.exports.uploadCompanyProfile = (req, res, next) => {
         return res.status(500).json({ error: error.message });
     }
 };
+
+// Upload profile picture (NEW)
+module.exports.uploadProfilePicture = (req, res, next) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'No file uploaded' });
+        }
+
+        const b64 = Buffer.from(req.file.buffer).toString('base64');
+        const dataURI = `data:${req.file.mimetype};base64,${b64}`;
+
+        cloudinary.uploader.upload(dataURI, {
+            folder: 'profile-pictures',
+            public_id: uuidv4(),
+            transformation: [
+                { width: 500, height: 500, crop: 'limit' },
+                { quality: 'auto' }
+            ]
+        }, function(error, result) {
+            if (error) {
+                console.error(error);
+                return res.status(500).json({ error: 'Failed to upload image' });
+            }
+            
+            res.status(201).json({
+                message: 'Profile picture uploaded successfully',
+                profile_picture_url: result.secure_url,
+                profile_picture_file_name: result.public_id.split('/').pop()
+            });
+        });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: error.message });
+    }
+};
