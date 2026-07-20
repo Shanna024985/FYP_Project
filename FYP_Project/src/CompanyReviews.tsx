@@ -61,7 +61,7 @@ const CompanyReviews = (prop: Props) => {
       })
       .then((values) => {
         setDataOfReviews(values.reviews);
-        
+        setNumberOfReviews(values.count)
       });
   }, []);
   return (
@@ -139,7 +139,7 @@ const CompanyReviews = (prop: Props) => {
       <div className="flex mt-4 gap-10 w-full h-full items-center">
         <div className="text-left flex flex-col gap-2 align-middle h-full justify-center ">
           <p className="text-lg">Total Reviews</p>
-          <p className="font-semibold text-2xl ">10.0k</p>
+          <p className="font-semibold text-2xl ">{numberOfReviews}</p>
         </div>
         <div className="text-left  flex flex-col gap-2 h-full ">
           <p className="text-lg">Average Rating</p>
