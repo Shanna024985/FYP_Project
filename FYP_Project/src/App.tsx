@@ -27,8 +27,7 @@ import { CompanyPageRenderer } from "./CompanyPage";
 import CompanyReviews from "./CompanyReviews";
 import AddCompanies from "./AddCompanies";
 import Messages from "./Messages";
-import SuccessfulJobScreen from "./SuccessfulJobScreen";
-const linkForBackend = "http://localhost:3000/api";
+const linkForBackend = "https://fyp-project-backend-one.vercel.app/api";
 function App() {
 
   return (
