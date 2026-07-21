@@ -288,9 +288,11 @@ module.exports.getSingpassToken = (req, res, next) => {
                 }
             };
 
-            jose.compactDecrypt(value.id_token, JSON.parse(process.env.PRIVATE_KEY_ENC)).then((result, key) => {
-                jwt.verify(new TextDecoder().decode(result.plaintext), publicKeySingpassPem, callback);
-            });
+            jose.importJWK(JSON.parse(process.env.PRIVATE_KEY_ENC), 'ECDH-ES+A256KW').then(privateKeyEnc => {
+                jose.compactDecrypt(value.id_token, privateKeyEnc).then((result, key) => {
+                    jwt.verify(new TextDecoder().decode(result.plaintext), publicKeySingpassPem, callback);
+                });
+            })
         }
     })
     .catch((error) => console.error(error));
