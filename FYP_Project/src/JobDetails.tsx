@@ -1,6 +1,6 @@
 import { useSearchParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
-  Eye,
   BriefcaseBusiness,
   Clock3,
   GraduationCap,
@@ -160,9 +160,12 @@ export default function JobDetailsPage({ currentUrl }: Props) {
 
                   <p className="mt-2 text-lg text-muted-foreground">
                     From{" "}
-                    <span className="font-medium text-foreground">
+                    <Link
+                      to={`/company?id=${company.id}`}
+                      className="font-medium text-blue-600 hover:underline"
+                    >
                       {company?.name}
-                    </span>
+                    </Link>
                   </p>
                 </div>
 

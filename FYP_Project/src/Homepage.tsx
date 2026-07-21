@@ -1,4 +1,3 @@
-import React from "react";
 import NavigationMenus from "./NavigationMenu";
 import JobFilters from "./components/common sections/jobFilters";
 import NewestJobsSection from "./NewestJobsSection";
@@ -16,9 +15,9 @@ const Homepage = ({ currentUrl }: Props) => {
     <div className="flex-1 p-4">
 
       <NavigationMenus />
-      <JobFilters currentUrl={currentUrl} />
+      <JobFilters />
       <NewestJobsSection currentUrl={currentUrl} />
-      <Top3company currentUrl={currentUrl} />
+      <Top3company  />
     </div>
     </div>
   );

@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const jwtMiddleware = require('../middlewares/jwtMiddleware');
+const jwtMiddleware = require('../middlewares/jwtmiddleware');
 
 router.get("/",(req,res,next)=>{
     res.send("You are connected!")

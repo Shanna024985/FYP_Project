@@ -2,17 +2,14 @@
 import NavigationMenus from "./NavigationMenu";
 import { useNavigate } from "react-router-dom";
 import {
-  MapPin,
   Bookmark,
   Pencil,
   Eye,
-  ChevronLeft,
-  ChevronRight,
+  
 } from "lucide-react";
 import "./title.css";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Star } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -23,7 +20,6 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import JobCard from "@/components/common sections/JobCard";
-import JobSeekerRatingsPage from "./JobSeekerRating";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
@@ -94,7 +90,7 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
             Authorization: `Bearer ${token}`,
           },
         });
-
+        console.log(loadingSaved)
         setAppliedJobs(res.data.applications);
       } catch (err) {
         console.error(err);

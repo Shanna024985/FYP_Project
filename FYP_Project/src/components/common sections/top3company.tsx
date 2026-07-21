@@ -41,10 +41,8 @@ function CompanyCard({
     </Card>
   )
 }
-type Props = {
-  currentUrl: string;
-};
-export default function TopCompaniesSection({ currentUrl }: Props) {
+
+export default function TopCompaniesSection() {
   const companies = [
     {
       name: "Tech Corp",

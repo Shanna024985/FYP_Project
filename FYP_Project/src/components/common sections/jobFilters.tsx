@@ -15,10 +15,8 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-type Props = {
-  currentUrl: string;
-};
-export default function JobFilters({ currentUrl }: Props) {
+
+export default function JobFilters() {
   const [searchParams] = useSearchParams();
   const [showAdvanced, setShowAdvanced] = useState(false);
 
