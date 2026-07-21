@@ -17,6 +17,7 @@ type Props = {
 export default function SavedJobCard({
   currentUrl,
   job,
+  onApply,
   onUnsave,
 }: Props) {
   const navigate = useNavigate();
@@ -107,7 +108,7 @@ export default function SavedJobCard({
 
           {/* Right side - actions */}
           <div className="flex gap-2">
-            <Button variant="default" onClick={() => navigate(`/applyjob`)}>
+            <Button variant="default" onClick={() => onApply(job.jobId)}>
               Apply Job
             </Button>
             <Button
