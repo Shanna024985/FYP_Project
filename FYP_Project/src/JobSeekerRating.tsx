@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
-import { Star, Eye } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import './title.css';
@@ -13,9 +12,6 @@ import {
 } from "@/components/ui/select";
 import NavigationMenus from "./NavigationMenu";
 
-type Props = {
-  currentUrl: string;
-};
 
 type Review = {
   id: number;
@@ -66,7 +62,7 @@ const mockReviews: Review[] = [
   },
 ];
 
-export default function JobSeekerRatingsPage({ currentUrl }: Props) {
+export default function JobSeekerRatingsPage() {
   const [filter, setFilter] = useState("all");
   const [sort, setSort] = useState("recent");
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
 import {
   Table,
@@ -47,7 +47,7 @@ type Status = {
 };
 
 function NativeSelectFunction(status: Status) {
-  let [optionsForNativeSelect, setoptionsForNativeSelect] = useState([
+  let [optionsForNativeSelect] = useState([
     { option: "Offer", value: "Offer", seleted: false },
     { option: "Interview", value: "Interview", seleted: false },
     { option: "Rejected", value: "Rejected", seleted: false },
@@ -85,7 +85,7 @@ function NativeSelectFunction(status: Status) {
             .then((value) => {
               return value.json();
             })
-            .then((value) => {
+            .then(() => {
               alert("Successfully updated status");
 
               let dataOfCandidates = status.dataOfCandidates.map(
@@ -116,10 +116,11 @@ function NativeSelectFunction(status: Status) {
               console.log(dataOfCandidates);
               status.setDataOfCandidates(dataOfCandidates);
               setPreviousValue(valueChanged)
+              console.log(previousValue)
             });
         }}
       >
-        {optionsForNativeSelect.map((value, index) => {
+        {optionsForNativeSelect.map((value) => {
           return (
             <NativeSelectOption value={value.value} selected={value.seleted}>
               {value.option}

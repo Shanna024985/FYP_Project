@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from "react";
-import { NavigationMenu } from "./components/ui/navigation-menu";
+import  { useEffect, useState } from "react";
 import NavigationMenus from "./NavigationMenu";
-import { ChartBar, ChartColumnIncreasing } from "lucide-react";
+import {  ChartColumnIncreasing } from "lucide-react";
 import { ChartBarDefault } from "./BarCharts";
 import TabsForApplicant from "./tabsForApplicant";
 type Props = {

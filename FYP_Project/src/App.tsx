@@ -24,7 +24,7 @@ import { CompanyPageRenderer } from "./CompanyPage";
 import CompanyReviews from "./CompanyReviews";
 import AddCompanies from "./AddCompanies";
 import Messages from "./Messages";
-const linkForBackend = "http://localhost:3000/api";
+const linkForBackend = "https://fyp-project-backend-one.vercel.app/api";
 function App() {
 
   return (
@@ -34,7 +34,7 @@ function App() {
         <Route path="/browsejobs" element={<BrowseJobs currentUrl={linkForBackend}/>} />
         <Route path="/jobDetails" element={<JobDetails currentUrl={linkForBackend} />} />
         <Route path="/login" element={<LoginPage currentUrl={linkForBackend} />} />
-        <Route path="/login/callback" element={<LoginCallbackPage currentUrl={linkForBackend}/>} />
+        <Route path="/login/callback" element={<LoginCallbackPage/>} />
         {/* PROTECTED AREA */}
         <Route element={<ProtectedLayout />}>
           <Route
@@ -78,7 +78,7 @@ function App() {
           />
           <Route
             path="/jobSeeker/ratings"
-            element={<JobSeekerRatingsPage currentUrl={linkForBackend} />}
+            element={<JobSeekerRatingsPage/>}
           />
           <Route path="/applyjob" element={<ApplyJobPage currentUrl={linkForBackend}/>} />
         </Route>

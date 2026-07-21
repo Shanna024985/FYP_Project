@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect,  useState } from "react";
 import NavigationMenus from "./NavigationMenu";
 import {
   Field,
@@ -10,20 +10,15 @@ import { Input } from "./components/ui/input";
 import { DatePickerNaturalLanguage } from "./DatePicker";
 
 import {
-  NativeSelect,
-  NativeSelectOption,
-} from "./components/ui/native-select";
-import {
   Select,
   SelectContent,
   SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
-  SelectLabel,
 } from "./components/ui/select";
 import { Button } from "./components/ui/button";
-import { Navigate, useNavigate } from "react-router-dom";
+import {  useNavigate } from "react-router-dom";
 type Props = {
   currentUrl: String;
 };
@@ -296,7 +291,7 @@ const StepOneOfJobPostings = (props: stages) => {
       </div>
       <div
         className="flex"
-        onClick={(e) => {
+        onClick={() => {
           props.setStage(2);
         }}
       >
@@ -497,7 +492,7 @@ const StepTwoOfJobPostings = (props: stages) => {
       <div className="flex gap-3">
         <Button
           className="mt-10 bg-gray-400"
-          onClick={(e) => {
+          onClick={() => {
             props.setStage(1);
           }}
         >
@@ -506,7 +501,7 @@ const StepTwoOfJobPostings = (props: stages) => {
 
         <Button
           className="mt-10"
-          onClick={(e) => {
+          onClick={() => {
             props.setStage(3);
           }}
         >
@@ -518,7 +513,7 @@ const StepTwoOfJobPostings = (props: stages) => {
 };
 
 const StepThreeOfJobPostings = (props: stages) => {
-  let [cities, setCities] = React.useState({
+  let [cities] = React.useState({
     Singapore: ["Singapore"],
 
     Japan: ["Tokyo", "Osaka", "Kyoto", "Nagoya", "Sapporo", "Fukuoka"],
@@ -637,7 +632,7 @@ const StepThreeOfJobPostings = (props: stages) => {
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  {Object.entries(cities).map(([country, citiesLoop]) => {
+                  {Object.entries(cities).map(([country]) => {
                     return (
                       <>
                         <React.Fragment key={country}>
@@ -665,7 +660,7 @@ const StepThreeOfJobPostings = (props: stages) => {
         <div className="flex gap-3">
           <Button
             className="mt-10 bg-gray-400"
-            onClick={(e) => {
+            onClick={() => {
               props.setStage(2);
             }}
           >
