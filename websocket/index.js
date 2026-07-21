@@ -38,14 +38,18 @@ server.on('connection', (ws, req) => {
         const messageJSON = JSON.parse(message);
 
         if (messageJSON.action == 'update') {
-            const role = Object.entries(clients).find(wsPair => wsPair[1][0] == ws)[0];
-            if (role == 'admin') {
-                let wsUser = clients[messageJSON.userId];
-                if (wsUser) {
-                    wsUser.send(messageJSON.senderUserId);
-                } else {
-                    // senderUser is not online, maybe send email to user?
+            try {
+                const role = Object.entries(clients).find(wsPair => wsPair[1][0] == ws)[0];
+                if (role == 'admin') {
+                    let wsUser = clients[messageJSON.userId];
+                    if (wsUser) {
+                        wsUser.send(messageJSON.senderUserId);
+                    } else {
+                        // senderUser is not online, maybe send email to user?
+                    }
                 }
+            } catch (err) {
+                console.log(err)
             }
         }
     })
