@@ -31,7 +31,7 @@ module.exports.getMessageBetweenUsers = (userId1, userId2, page) => {
     JOIN user_detail d2 ON d2.user_id = m.receiver_user_id
     WHERE (sender_user_id = $1 AND receiver_user_id = $2)
     OR (receiver_user_id = $3 AND sender_user_id = $4)
-    ORDER BY m.time_sent DESC LIMIT 25 OFFSET $5;`;
+    ORDER BY m.time_sent DESC OFFSET $5;`;
     return query(sql, [userId1, userId2, userId1, userId2, (page - 1) * 25]).then(function (result) {
         return result.rows;
     });
