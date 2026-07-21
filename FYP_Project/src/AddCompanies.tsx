@@ -1,10 +1,6 @@
 import React, { useState } from "react";
 import { Field, FieldGroup, FieldLabel } from "./components/ui/field";
 import { Input } from "./components/ui/input";
-<<<<<<< HEAD
-=======
-
->>>>>>> 666da66a7983b1e7cf053f76aff325ddd3382e51
 import { Textarea } from "./components/ui/textarea";
 import { Button } from "./components/ui/button";
 import {

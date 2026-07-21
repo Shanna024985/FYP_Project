@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import {
   Bookmark,
   Pencil,
-  Eye,
   
 } from "lucide-react";
 import "./title.css";
