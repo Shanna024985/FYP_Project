@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import  { useEffect, useRef, useState } from "react";
 import NavigationMenus from "./NavigationMenu";
 import { Field, FieldGroup, FieldLabel } from "./components/ui/field";
 import { Input } from "./components/ui/input";
@@ -33,6 +33,7 @@ type JobsObject = {
   reports: string;
   created_at: string;
   updated_at: string;
+  address: string;
   company_name: string;
   company_city: string;
 };
@@ -40,7 +41,7 @@ type Statuses = {
   status?: string;
 };
 let StatusOfJob = (props: Statuses) => {
-  let [options, setOptions] = useState(["Active", "Closed"]);
+  let [options] = useState(["Active", "Closed"]);
   return (
     <>
       {options.map((value) => {
@@ -58,7 +59,7 @@ let StatusOfJob = (props: Statuses) => {
   );
 };
 let JobType = (props: Statuses) => {
-  let [options, setOptions] = useState([
+  let [options] = useState([
     "Full-Time",
     "Part-Time",
     "Contract",
@@ -77,7 +78,7 @@ let JobType = (props: Statuses) => {
   );
 };
 let LocationOptions = (props: Statuses) => {
-  let [options, setOptions] = useState([
+  let [options] = useState([
     "Singapore",
     "Japan",
     "South Korea",
@@ -126,7 +127,7 @@ let dateReturned = (stringOfDate: string) => {
   }
 };
 let CareerLevel = (props: Statuses) => {
-  let [options, setOptions] = useState([
+  let [options] = useState([
     {
       value: "entry",
       shownOnPage: "Entry Level/Early Career",
@@ -276,6 +277,17 @@ const EditJobs = (props: Props) => {
             </NativeSelect>
           </Field>
           <Field>
+            <FieldLabel htmlFor="address">Address</FieldLabel>
+            <Input id="address" placeholder="12 st abc, 123456" value={jobReturned?.address}     onChange={(e) => {
+                if (jobReturned) {
+                  setJobReturned({
+                    ...jobReturned,
+                    address: e.target.value,
+                  });
+                }
+              }}/>
+          </Field>
+          <Field>
             <FieldLabel htmlFor="date-optional">
               Application Deadline
             </FieldLabel>
@@ -362,7 +374,7 @@ const EditJobs = (props: Props) => {
         </FieldGroup>
         <div className="flex mt-9">
           <Button
-            onClick={(e) => {
+            onClick={() => {
               let companyId = jobReturned?.company_id
               let body = JSON.stringify({
                 companyId: companyId,

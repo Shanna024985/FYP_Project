@@ -5,15 +5,11 @@ import {
   Mail,
   MapPin,
   SquareArrowOutUpRightIcon,
-  SquareArrowUpRight,
-  Star,
-  StarHalf,
   StarHalfIcon,
   StarIcon,
 } from "lucide-react";
 import { Button } from "./components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { el } from "date-fns/locale";
 
 type Props = {
   currentUrl: String;
@@ -96,7 +92,7 @@ export const CompanyPageRenderer = (prop: Props) => {
       id: 6,
     },
   ]);
-  let [cities, setCities] = React.useState({
+  let [cities] = React.useState({
     Singapore: ["Singapore"],
 
     Japan: ["Tokyo", "Osaka", "Kyoto", "Nagoya", "Sapporo", "Fukuoka"],
@@ -347,8 +343,11 @@ export const CompanyPage = (prop: PropsForCompanyPage) => {
                     )}
                     <Button
                       className="w-fit"
-                      onClick={(e) => {
-                        navigate("/companyreviews");
+                      onClick={() => {
+                            let address = new URL(window.location.href);
+    let queryParameters = address.searchParams;
+    let id = queryParameters.get("id");
+                        navigate("/companyreviews?id=" + id);
                       }}
                     >
                       View all reviews
@@ -394,7 +393,7 @@ export const CompanyPage = (prop: PropsForCompanyPage) => {
                           <div className="flex">
                             <SquareArrowOutUpRightIcon
                               className="self-center justify-end"
-                              onClick={(e) => {
+                              onClick={() => {
                                 navigate("/jobDetails?id=" + value.id);
                               }}
                             />
@@ -427,7 +426,8 @@ export const CompanyPage = (prop: PropsForCompanyPage) => {
                           <div className="flex">
                             <SquareArrowOutUpRightIcon
                               className="self-center justify-end"
-                              onClick={(e) => {
+                              onClick={() => {
+                                
                                 navigate("/jobDetails?id=" + value.id);
                               }}
                             />

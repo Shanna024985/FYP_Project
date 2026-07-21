@@ -689,7 +689,8 @@ const StepThreeOfJobPostings = (props: stages) => {
                 experience: props.careerLevel,
                 location: props.location,
                 jobs_needed: props.numberOfJobs,
-                description: props.jobDescription
+                description: props.jobDescription,
+                address: props.address
               });
               fetch(props.currentUrl + "/jobs", {
                 method: "POST",

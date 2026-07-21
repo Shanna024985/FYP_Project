@@ -16,9 +16,9 @@ module.exports.createReview = function createReview(reviewData) {
 
 // READ - Get all reviews for a company
 module.exports.getReviewsByCompany = function getReviewsByCompany(companyId) {
-    let sql = `SELECT r.*, u.singpass_id as username 
+    let sql = `SELECT r.*, CONCAT(u.first_name,' ', u.last_name) as username, u.profile_picture_file_url 
                FROM review r 
-               JOIN user_ u ON r.user_id = u.id 
+               JOIN user_detail u ON r.user_id = u.user_id 
                WHERE r.company_id = $1 
                ORDER BY r.created_at DESC;`;
     
@@ -76,7 +76,7 @@ module.exports.hasCompletedJobWithCompany = function hasCompletedJobWithCompany(
                JOIN job j ON a.job_id = j.id 
                WHERE a.user_id = $1 
                AND j.company_id = $2 
-               AND a.status IN ('Offered', 'Onboarded')`;
+               AND a.status IN ('Offer', 'Onboard')`;
     
     return query(sql, [userId, companyId])
         .then(function(result) {
