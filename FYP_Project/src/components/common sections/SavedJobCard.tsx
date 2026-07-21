@@ -17,8 +17,6 @@ type Props = {
 export default function SavedJobCard({
   currentUrl,
   job,
-  onView,
-  onApply,
   onUnsave,
 }: Props) {
   const navigate = useNavigate();

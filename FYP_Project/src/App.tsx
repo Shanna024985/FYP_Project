@@ -1,8 +1,5 @@
-import { useState } from "react";
+
 import { Toaster } from "@/components/ui/sonner";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "./assets/vite.svg";
-import heroImg from "./assets/hero.png";
 import "./App.css";
 import { Route, Routes } from "react-router-dom";
 import Employer from "./employer";
@@ -27,7 +24,6 @@ import { CompanyPageRenderer } from "./CompanyPage";
 import CompanyReviews from "./CompanyReviews";
 import AddCompanies from "./AddCompanies";
 import Messages from "./Messages";
-import SuccessfulJobScreen from "./SuccessfulJobScreen";
 const linkForBackend = "http://localhost:3000/api";
 function App() {
 

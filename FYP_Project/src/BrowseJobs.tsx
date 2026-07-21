@@ -5,7 +5,7 @@ import JobFilters from "../src/components/common sections/jobFilters";
 import JobListItem from "../src/components/common sections/JobListItem";
 import { Button } from "@/components/ui/button";
 import Sidebar from "./Sidebar";
-import { useLocation, useSearchParams } from "react-router-dom";
+import {useSearchParams } from "react-router-dom";
 
 import type { Job } from "../src/types/job";
 type Props = {
@@ -88,7 +88,7 @@ export default function BrowseJobs({ currentUrl }: Props) {
       {token && <Sidebar />}
       <div className="flex-1 p-4">
         <NavigationMenus />
-        <JobFilters currentUrl={currentUrl} />
+        <JobFilters/>
 
         {/* RESULTS */}
         <div className="space-y-4">

@@ -1,14 +1,8 @@
 import React, { useState } from "react";
-import NavigationMenus from "./NavigationMenu";
 import { useNavigate, useParams } from "react-router-dom";
 import { Field, FieldGroup, FieldLabel } from "./components/ui/field";
 import { Input } from "./components/ui/input";
 import { toast } from "sonner";
-import {
-  NativeSelect,
-  NativeSelectOption,
-} from "./components/ui/native-select";
-import { DatePickerNaturalLanguage } from "./DatePicker";
 import { Textarea } from "./components/ui/textarea";
 import { Button } from "./components/ui/button";
 import {
@@ -22,7 +16,6 @@ import {
 } from "./components/ui/select";
 import { CompanyPage } from "./CompanyPage";
 import { Spinner } from "./components/ui/spinner";
-import SuccessfulJobScreen from "./SuccessfulJobScreen";
 type Props = {
   currentUrl: String;
 };
@@ -33,7 +26,7 @@ const EditCompany = (prop: Props) => {
   let [locationCoordinates, setLocationCoordinates] = React.useState("");
   let [linkOfCompany, setLinkOfCompany] = React.useState("");
   let [emailOfCompany, setEmailOfCompany] = React.useState("");
-  let [cities, setCities] = React.useState({
+  let [cities] = React.useState({
     Singapore: ["Singapore"],
 
     Japan: ["Tokyo", "Osaka", "Kyoto", "Nagoya", "Sapporo", "Fukuoka"],
@@ -102,7 +95,7 @@ const EditCompany = (prop: Props) => {
 
     Mexico: ["Mexico City", "Guadalajara", "Monterrey"],
   });
-  let [companyType, setCompanyType] = useState([
+  let [companyType] = useState([
     {
       value: "technology",
       label: "Technology",

@@ -15,10 +15,8 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-type Props = {
-  currentUrl: string;
-};
-export default function JobFilters({ currentUrl }: Props) {
+
+export default function JobFilters() {
   const [searchParams] = useSearchParams();
   const [showAdvanced, setShowAdvanced] = useState(false);
 
@@ -130,13 +128,13 @@ export default function JobFilters({ currentUrl }: Props) {
           <div className="flex flex-wrap gap-4">
             <Input
               placeholder="Enter company"
-              className="w-full lg:w-[280px]"
+              className="w-full"
               value={company}
               onChange={(e) => setCompany(e.target.value)}
             />
 
             <Select value={jobType} onValueChange={setJobType}>
-              <SelectTrigger className="w-full lg:w-[220px]">
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Duration" />
               </SelectTrigger>
               <SelectContent>
@@ -148,7 +146,7 @@ export default function JobFilters({ currentUrl }: Props) {
             </Select>
 
             <Select value={location} onValueChange={setLocation}>
-              <SelectTrigger className="w-full lg:w-[220px]">
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Country" />
               </SelectTrigger>
 
