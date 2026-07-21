@@ -182,7 +182,7 @@ module.exports.getEmployerDashboard = (req, res, next) => {
                     stats: { total: 0, active: 0, closed: 0, deleted: 0 }
                 });
             }
-            
+            console.log("done")
             let jobSql = `SELECT j.*, c.name as company_name
                          FROM job j
                          JOIN company c ON j.company_id = c.id
