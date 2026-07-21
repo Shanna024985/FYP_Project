@@ -129,8 +129,8 @@ module.exports.sendUpdateMessage = (userId, senderUserId) => {
 
             socket.addEventListener('open', ws => {
                 console.log('Connected!');
-                socket.send(JSON.stringify({action: 'update', userId, senderUserId}))
-                socket.close()
+                socket.send(JSON.stringify({action: 'update', userId, senderUserId}));
+                socket.close();
             });
 
             socket.addEventListener('error', error => {

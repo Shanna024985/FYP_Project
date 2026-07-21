@@ -36,10 +36,12 @@ server.on('connection', (ws, req) => {
 
     ws.on('message', message => {
         const messageJSON = JSON.parse(message);
+        console.log(messageJSON);
 
         if (messageJSON.action == 'update') {
             try {
-                const role = Object.entries(clients).find(wsPair => wsPair[1][0] == ws)[0];
+                const role = Object.entries(clients).find(wsPair => wsPair[1].ws == ws)[0];
+                console.log(role)
                 if (role == 'admin') {
                     let wsUser = clients[messageJSON.userId];
                     if (wsUser) {
@@ -55,6 +57,6 @@ server.on('connection', (ws, req) => {
     })
 
     ws.on('close', () => {
-        delete clients[Object.entries(clients).find(wsPair => wsPair[1][0] == ws)[0]];
+        delete clients[Object.entries(clients).find(wsPair => wsPair[1].ws == ws)[0]];
     })
 })
