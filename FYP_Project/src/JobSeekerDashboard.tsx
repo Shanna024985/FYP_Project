@@ -39,8 +39,7 @@ type UserProfile = {
   first_name: string;
   last_name: string;
   email: string;
-  profile_picture_file_data: string | null;
-  profile_picture_file_name: string | null;
+  profile_picture_url: string | null;
 };
 import type { SavedJob } from "../src/types/saved-job";
 import SavedJobCard from "@/components/common sections/SavedJobCard";
@@ -220,9 +219,8 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
           <Card className="flex items-center justify-center p-6">
             <img
               src={
-                profile?.profile_picture_file_data
-                  ? `data:image/jpeg;base64,${profile.profile_picture_file_data}`
-                  : "https://via.placeholder.com/150"
+                profile?.profile_picture_url ||
+                "https://via.placeholder.com/150"
               }
               alt="Profile"
               className="h-40 w-40 rounded-full object-cover"
