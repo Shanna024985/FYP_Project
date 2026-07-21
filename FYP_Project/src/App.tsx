@@ -18,12 +18,13 @@ import LoginCallbackPage from "./LoginCallback";
 import ProtectedLayout from "./ProtectedLayout";
 import SavedJobs from "./SavedJobsPage";
 import ApplyJobPage from "./ApplyJobPage";
-import MyReviewsPage from "./MyReviewsPage";
+// import MyReviewsPage from "./MyReviewsPage";
 import JobSeekerRatingsPage from "./JobSeekerRating";
 import { CompanyPageRenderer } from "./CompanyPage";
 import CompanyReviews from "./CompanyReviews";
 import AddCompanies from "./AddCompanies";
 import Messages from "./Messages";
+import ViewMyCompanies from "./ViewMyCompanies";
 const linkForBackend = "https://fyp-project-backend-one.vercel.app/api";
 function App() {
 
@@ -35,6 +36,8 @@ function App() {
         <Route path="/jobDetails" element={<JobDetails currentUrl={linkForBackend} />} />
         <Route path="/login" element={<LoginPage currentUrl={linkForBackend} />} />
         <Route path="/login/callback" element={<LoginCallbackPage/>} />
+        <Route path="/company" element={<CompanyPageRenderer  currentUrl={linkForBackend}/>}/>
+        <Route path="/companyreviews" element={<CompanyReviews currentUrl={linkForBackend}/>}/>
         {/* PROTECTED AREA */}
         <Route element={<ProtectedLayout />}>
           <Route
@@ -62,8 +65,6 @@ function App() {
             path="/jobSeeker/applications"
             element={<JobSeekerApplications currentUrl={linkForBackend} />}
           />
-                    <Route path="/company" element={<CompanyPageRenderer  currentUrl={linkForBackend}/>}/>
-          <Route path="/companyreviews" element={<CompanyReviews currentUrl={linkForBackend}/>}/>
           <Route path="/addcompanies" element={<AddCompanies currentUrl={linkForBackend}/>}/>
           <Route path="/messages" element={<Messages currentUrl={linkForBackend}/>}/>
           <Route path="/applyjob" element={<ApplyJobPage currentUrl={linkForBackend}/>} />
@@ -72,15 +73,16 @@ function App() {
             path="/jobSeeker/savedJobs"
             element={<SavedJobs currentUrl={linkForBackend} />}
           />
-          <Route
+          {/* <Route
             path="/jobSeeker/myReviews"
             element={<MyReviewsPage currentUrl={linkForBackend} />}
-          />
+          /> */}
           <Route
             path="/jobSeeker/ratings"
             element={<JobSeekerRatingsPage/>}
           />
           <Route path="/applyjob" element={<ApplyJobPage currentUrl={linkForBackend}/>} />
+          <Route path="/viewMyCompanies" element={<ViewMyCompanies currentUrl={linkForBackend}/>}/>
         </Route>
       </Routes>
       <Toaster position="top-center" />
