@@ -1,8 +1,5 @@
-import { useState } from "react";
 import { Toaster } from "@/components/ui/sonner";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "./assets/vite.svg";
-import heroImg from "./assets/hero.png";
+
 import "./App.css";
 import { Route, Routes } from "react-router-dom";
 import Employer from "./employer";
@@ -37,7 +34,7 @@ function App() {
         <Route path="/browsejobs" element={<BrowseJobs currentUrl={linkForBackend}/>} />
         <Route path="/jobDetails" element={<JobDetails currentUrl={linkForBackend} />} />
         <Route path="/login" element={<LoginPage currentUrl={linkForBackend} />} />
-        <Route path="/login/callback" element={<LoginCallbackPage currentUrl={linkForBackend}/>} />
+        <Route path="/login/callback" element={<LoginCallbackPage/>} />
         {/* PROTECTED AREA */}
         <Route element={<ProtectedLayout />}>
           <Route
@@ -81,7 +78,7 @@ function App() {
           />
           <Route
             path="/jobSeeker/ratings"
-            element={<JobSeekerRatingsPage currentUrl={linkForBackend} />}
+            element={<JobSeekerRatingsPage/>}
           />
           <Route path="/applyjob" element={<ApplyJobPage currentUrl={linkForBackend}/>} />
         </Route>

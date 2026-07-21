@@ -1,11 +1,8 @@
 import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
-type Props = {
-  currentUrl: string;
-};
 
-export default function LoginCallbackPage({ currentUrl }: Props) {
+export default function LoginCallbackPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
