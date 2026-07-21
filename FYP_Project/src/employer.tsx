@@ -198,7 +198,7 @@ let EmployerPage = (props: Props) => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[100px]">Job Title</TableHead>
+                  <TableHead className="w-25">Job Title</TableHead>
                   <TableHead>Application Deadline</TableHead>
                   <TableHead>Job Type</TableHead>
                   <TableHead className="text-left">Status</TableHead>

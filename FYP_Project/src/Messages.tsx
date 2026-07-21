@@ -372,7 +372,7 @@ const Messages = (props: Props) => {
                             <SquarePen /> Edit
                           </ContextMenuItem>
                           <ContextMenuItem
-                            onClick={(e) => {
+                            onClick={() => {
                               fetch(
                                 props.currentUrl +
                                   "/message/" +
@@ -482,7 +482,7 @@ const Messages = (props: Props) => {
               </Button>
               <Button
                 className={classNameForEditButton}
-                onClick={(value) => {
+                onClick={() => {
                   let body = JSON.stringify({
                     message: inputMessage,
                   });

@@ -41,7 +41,7 @@ type Statuses = {
   status?: string;
 };
 let StatusOfJob = (props: Statuses) => {
-  let [options, setOptions] = useState(["Active", "Closed"]);
+  let [options] = useState(["Active", "Closed"]);
   return (
     <>
       {options.map((value) => {
@@ -78,7 +78,7 @@ let JobType = (props: Statuses) => {
   );
 };
 let LocationOptions = (props: Statuses) => {
-  let [options, setOptions] = useState([
+  let [options] = useState([
     "Singapore",
     "Japan",
     "South Korea",
@@ -374,7 +374,7 @@ const EditJobs = (props: Props) => {
         </FieldGroup>
         <div className="flex mt-9">
           <Button
-            onClick={(e) => {
+            onClick={() => {
               let companyId = jobReturned?.company_id
               let body = JSON.stringify({
                 companyId: companyId,

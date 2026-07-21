@@ -343,7 +343,7 @@ export const CompanyPage = (prop: PropsForCompanyPage) => {
                     )}
                     <Button
                       className="w-fit"
-                      onClick={(e) => {
+                      onClick={() => {
                             let address = new URL(window.location.href);
     let queryParameters = address.searchParams;
     let id = queryParameters.get("id");
@@ -426,7 +426,7 @@ export const CompanyPage = (prop: PropsForCompanyPage) => {
                           <div className="flex">
                             <SquareArrowOutUpRightIcon
                               className="self-center justify-end"
-                              onClick={(e) => {
+                              onClick={() => {
                                 
                                 navigate("/jobDetails?id=" + value.id);
                               }}

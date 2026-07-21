@@ -135,7 +135,7 @@ const CompanyReviews = (prop: Props) => {
           </DialogTrigger>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle className="!text-black">Add reviews</DialogTitle>
+              <DialogTitle className="text-black!">Add reviews</DialogTitle>
               <DialogDescription>
                 Help others learn what it’s like to work at this company by
                 sharing your experience
@@ -167,7 +167,7 @@ const CompanyReviews = (prop: Props) => {
               <DialogClose asChild>
                 <Button
                   type="button"
-                  onClick={(e) => {
+                  onClick={() => {
                     let address = new URL(window.location.href);
                     let queryParameters = address.searchParams;
                     let id = queryParameters.get("id");
