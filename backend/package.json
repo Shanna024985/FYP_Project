@@ -12,5 +12,8 @@
     "pg": "^8.20.0",
     "pg-camelcase": "^0.0.3",
     "uuid": "^14.0.0"
+  },
+    "scripts": {
+    "dev": "nodemon index.js"
   }
 }
