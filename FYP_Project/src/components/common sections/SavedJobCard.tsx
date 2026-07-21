@@ -58,9 +58,12 @@ export default function SavedJobCard({
         {/* Row 1 */}
         <div className="flex items-center gap-3">
           <img
-            src={job.companyLogo}
+            src={job.companyLogo || "/default-company.png"}
             alt={job.companyName}
             className="h-12 w-12 rounded-md object-cover border"
+            onError={(e) => {
+              e.currentTarget.src = "/default-company.png";
+            }}
           />
 
           <div>

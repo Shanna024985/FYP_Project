@@ -1,7 +1,6 @@
 import NavigationMenus from "./NavigationMenu";
 import JobFilters from "./components/common sections/jobFilters";
 import NewestJobsSection from "./NewestJobsSection";
-import Top3company from "./components/common sections/top3company";
 import Sidebar from "./Sidebar";
 type Props = {
   currentUrl: string;
@@ -17,7 +16,7 @@ const Homepage = ({ currentUrl }: Props) => {
       <NavigationMenus />
       <JobFilters />
       <NewestJobsSection currentUrl={currentUrl} />
-      <Top3company  />
+      {/* <Top3company currentUrl={currentUrl} /> */}
     </div>
     </div>
   );

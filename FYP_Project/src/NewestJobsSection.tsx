@@ -46,7 +46,7 @@ export default function NewestJobsSection({ currentUrl }: Props) {
             id={job.id}
             title={job.title}
             companyName={job.company_name}
-            companyLogo={`data:image/png;base64,AA==`} // temporary (we fix company next step)
+            companyLogo={job.logo_url}
             salaryRangeFrom={job.salary_range_from}
             salaryRangeTo={job.salary_range_to}
             salaryType={job.salary_type}

@@ -113,8 +113,8 @@ export default function JobDetailsPage({ currentUrl }: Props) {
                 {/* LOGO */}
                 <div className="flex justify-center rounded-2xl border bg-muted/30 p-6">
                   <img
-                    src={`data:image/png;base64,${company?.logo_base64}`}
-                    alt={company?.name}
+                    src={company.logo_url}
+                    alt={company.name}
                     className="h-32 w-32 rounded-2xl object-cover"
                   />
                 </div>

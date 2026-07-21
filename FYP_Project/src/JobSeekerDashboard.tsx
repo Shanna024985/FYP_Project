@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import {
   Bookmark,
   Pencil,
-  Eye,
   
 } from "lucide-react";
 import "./title.css";
@@ -35,8 +34,7 @@ type UserProfile = {
   first_name: string;
   last_name: string;
   email: string;
-  profile_picture_file_data: string | null;
-  profile_picture_file_name: string | null;
+  profile_picture_url: string | null;
 };
 import type { SavedJob } from "../src/types/saved-job";
 import SavedJobCard from "@/components/common sections/SavedJobCard";
@@ -142,7 +140,7 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
           jobId: item.job_id,
 
           companyName: item.company_name,
-          companyLogo: `${currentUrl.replace("/api", "")}/uploads/company-logos/${item.logo_file_name}`,
+          companyLogo: item.logo_url,
 
           title: item.title,
 
@@ -215,11 +213,7 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
           {/* COLUMN 1 - PROFILE PIC */}
           <Card className="flex items-center justify-center p-6">
             <img
-              src={
-                profile?.profile_picture_file_data
-                  ? `data:image/jpeg;base64,${profile.profile_picture_file_data}`
-                  : "https://via.placeholder.com/150"
-              }
+              src={profile?.profile_picture_url || "/default-profile.png"}
               alt="Profile"
               className="h-40 w-40 rounded-full object-cover"
             />
@@ -235,18 +229,6 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
                     ? "Loading..."
                     : `${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`}
                 </h2>
-
-                {/* Rating */}
-                <Button
-                  variant="ghost"
-                  className="cursor-pointer transition-all hover:bg-primary/10 hover:text-primary hover:scale-105"
-                  onClick={() => navigate("/jobSeeker/ratings")}
-                >
-                  <Badge variant="secondary" className="cursor-pointer">
-                    ⭐ 4.8 (25 Reviews)
-                    <Eye className="h-4 w-4" />
-                  </Badge>
-                </Button>
                 {/* Email */}
                 <p className="text-muted-foreground">
                   {loadingProfile ? "Loading..." : profile?.email}
@@ -260,7 +242,7 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
           </Card>
 
           {/* COLUMN 3 + 4 - STATISTICS */}
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:col-span-2">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:col-span-2">
             {/* JOBS APPLIED */}
             <Card>
               <CardContent className="flex h-full flex-col justify-between space-y-4 p-6">
@@ -300,24 +282,6 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
                 </Button>
               </CardContent>
             </Card>
-
-            {/* REVIEWS */}
-            <Card>
-              <CardContent className="flex h-full flex-col justify-between space-y-4 p-6">
-                <div>
-                  <p className="text-sm text-muted-foreground">My Reviews</p>
-
-                  <h2 className="mt-2 text-4xl font-bold title-black">5</h2>
-                </div>
-
-                <Button
-                  variant="outline"
-                  onClick={() => navigate("/jobSeeker/myReviews")}
-                >
-                  View Details
-                </Button>
-              </CardContent>
-            </Card>
           </div>
         </div>
 
@@ -343,7 +307,7 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
                   id={job.id}
                   title={job.title}
                   companyName={job.company_name}
-                  companyLogo={`data:image/png;base64,AA==`}
+                  companyLogo={job.logo_url}
                   salaryRangeFrom={job.salary_range_from}
                   salaryRangeTo={job.salary_range_to}
                   salaryType={job.salary_type}
