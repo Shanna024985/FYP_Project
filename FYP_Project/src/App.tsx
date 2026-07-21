@@ -72,10 +72,10 @@ function App() {
             path="/jobSeeker/savedJobs"
             element={<SavedJobs currentUrl={linkForBackend} />}
           />
-          <Route
+          {/* <Route
             path="/jobSeeker/myReviews"
             element={<MyReviewsPage currentUrl={linkForBackend} />}
-          />
+          /> */}
           <Route
             path="/jobSeeker/ratings"
             element={<JobSeekerRatingsPage/>}
