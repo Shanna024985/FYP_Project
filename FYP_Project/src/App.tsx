@@ -18,7 +18,7 @@ import LoginCallbackPage from "./LoginCallback";
 import ProtectedLayout from "./ProtectedLayout";
 import SavedJobs from "./SavedJobsPage";
 import ApplyJobPage from "./ApplyJobPage";
-import MyReviewsPage from "./MyReviewsPage";
+// import MyReviewsPage from "./MyReviewsPage";
 import JobSeekerRatingsPage from "./JobSeekerRating";
 import { CompanyPageRenderer } from "./CompanyPage";
 import CompanyReviews from "./CompanyReviews";
