@@ -166,7 +166,7 @@ export const CompanyPageRenderer = (prop: Props) => {
     let address = new URL(window.location.href);
     let queryParameters = address.searchParams;
     let id = queryParameters.get("id");
-    fetch(prop.currentUrl + "/company/page/" + id )
+    fetch(prop.currentUrl + "/company/page/" + id)
       .then((value) => {
         return value.json();
       })
@@ -183,7 +183,7 @@ export const CompanyPageRenderer = (prop: Props) => {
         setLinkOfCompany(company.url);
         setImageOfBanner(company.banner_url);
         setImageOfTea(company.logo_url);
-        setLocationCoordinates(company.address)
+        setLocationCoordinates(company.address);
         Object.entries(cities).forEach(([countries, citiesLoop]) => {
           citiesLoop.forEach((value) => {
             if (value === company.city) {
@@ -317,6 +317,17 @@ export const CompanyPage = (prop: PropsForCompanyPage) => {
                 <p className="text-xl text-gray-500">
                   There are no ratings given to the company
                 </p>
+                <Button
+                  className="w-fit"
+                  onClick={() => {
+                    let address = new URL(window.location.href);
+                    let queryParameters = address.searchParams;
+                    let id = queryParameters.get("id");
+                    navigate("/companyreviews?id=" + id);
+                  }}
+                >
+                  Add reviews
+                </Button>
               </>
             ) : (
               <>
@@ -344,9 +355,9 @@ export const CompanyPage = (prop: PropsForCompanyPage) => {
                     <Button
                       className="w-fit"
                       onClick={() => {
-                            let address = new URL(window.location.href);
-    let queryParameters = address.searchParams;
-    let id = queryParameters.get("id");
+                        let address = new URL(window.location.href);
+                        let queryParameters = address.searchParams;
+                        let id = queryParameters.get("id");
                         navigate("/companyreviews?id=" + id);
                       }}
                     >
@@ -362,7 +373,8 @@ export const CompanyPage = (prop: PropsForCompanyPage) => {
         <div className="flex-1 bg-[#F2E9D9] rounded-md text-left p-4">
           <p className="font-bold text-2xl">Job Postings</p>
           <div className="mt-4 flex flex-col gap-4 h-54 overflow-y-scroll">
-            {prop.jobPostings?.length === undefined || prop.jobPostings.length === 0? (
+            {prop.jobPostings?.length === undefined ||
+            prop.jobPostings.length === 0 ? (
               <p className="text-xl text-gray-500">
                 There are no job postings by the company
               </p>
@@ -427,7 +439,6 @@ export const CompanyPage = (prop: PropsForCompanyPage) => {
                             <SquareArrowOutUpRightIcon
                               className="self-center justify-end"
                               onClick={() => {
-                                
                                 navigate("/jobDetails?id=" + value.id);
                               }}
                             />
