@@ -239,18 +239,6 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
                     ? "Loading..."
                     : `${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`}
                 </h2>
-
-                {/* Rating */}
-                <Button
-                  variant="ghost"
-                  className="cursor-pointer transition-all hover:bg-primary/10 hover:text-primary hover:scale-105"
-                  onClick={() => navigate("/jobSeeker/ratings")}
-                >
-                  <Badge variant="secondary" className="cursor-pointer">
-                    ⭐ 4.8 (25 Reviews)
-                    <Eye className="h-4 w-4" />
-                  </Badge>
-                </Button>
                 {/* Email */}
                 <p className="text-muted-foreground">
                   {loadingProfile ? "Loading..." : profile?.email}
@@ -264,7 +252,7 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
           </Card>
 
           {/* COLUMN 3 + 4 - STATISTICS */}
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:col-span-2">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:col-span-2">
             {/* JOBS APPLIED */}
             <Card>
               <CardContent className="flex h-full flex-col justify-between space-y-4 p-6">
@@ -299,24 +287,6 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
                 <Button
                   variant="outline"
                   onClick={() => navigate("/jobSeeker/savedJobs")}
-                >
-                  View Details
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* REVIEWS */}
-            <Card>
-              <CardContent className="flex h-full flex-col justify-between space-y-4 p-6">
-                <div>
-                  <p className="text-sm text-muted-foreground">My Reviews</p>
-
-                  <h2 className="mt-2 text-4xl font-bold title-black">5</h2>
-                </div>
-
-                <Button
-                  variant="outline"
-                  onClick={() => navigate("/jobSeeker/myReviews")}
                 >
                   View Details
                 </Button>
