@@ -18,7 +18,7 @@ import LoginCallbackPage from "./LoginCallback";
 import ProtectedLayout from "./ProtectedLayout";
 import SavedJobs from "./SavedJobsPage";
 import ApplyJobPage from "./ApplyJobPage";
-import MyReviewsPage from "./MyReviewsPage";
+// import MyReviewsPage from "./MyReviewsPage";
 import JobSeekerRatingsPage from "./JobSeekerRating";
 import { CompanyPageRenderer } from "./CompanyPage";
 import CompanyReviews from "./CompanyReviews";
@@ -72,10 +72,10 @@ function App() {
             path="/jobSeeker/savedJobs"
             element={<SavedJobs currentUrl={linkForBackend} />}
           />
-          <Route
+          {/* <Route
             path="/jobSeeker/myReviews"
             element={<MyReviewsPage currentUrl={linkForBackend} />}
-          />
+          /> */}
           <Route
             path="/jobSeeker/ratings"
             element={<JobSeekerRatingsPage/>}
