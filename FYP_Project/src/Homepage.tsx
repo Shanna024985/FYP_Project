@@ -18,7 +18,7 @@ const Homepage = ({ currentUrl }: Props) => {
       <NavigationMenus />
       <JobFilters currentUrl={currentUrl} />
       <NewestJobsSection currentUrl={currentUrl} />
-      <Top3company currentUrl={currentUrl} />
+      {/* <Top3company currentUrl={currentUrl} /> */}
     </div>
     </div>
   );

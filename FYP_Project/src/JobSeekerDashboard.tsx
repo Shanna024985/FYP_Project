@@ -145,7 +145,7 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
           jobId: item.job_id,
 
           companyName: item.company_name,
-          companyLogo: `${currentUrl.replace("/api", "")}/uploads/company-logos/${item.logo_file_name}`,
+          companyLogo: item.logo_url,
 
           title: item.title,
 
@@ -218,10 +218,7 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
           {/* COLUMN 1 - PROFILE PIC */}
           <Card className="flex items-center justify-center p-6">
             <img
-              src={
-                profile?.profile_picture_url ||
-                "https://via.placeholder.com/150"
-              }
+              src={profile?.profile_picture_url || "/default-profile.png"}
               alt="Profile"
               className="h-40 w-40 rounded-full object-cover"
             />
@@ -315,7 +312,7 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
                   id={job.id}
                   title={job.title}
                   companyName={job.company_name}
-                  companyLogo={`data:image/png;base64,AA==`}
+                  companyLogo={job.logo_url}
                   salaryRangeFrom={job.salary_range_from}
                   salaryRangeTo={job.salary_range_to}
                   salaryType={job.salary_type}

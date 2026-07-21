@@ -77,7 +77,7 @@ export default function BrowseJobs({ currentUrl }: Props) {
 
     date: new Date(job.deadline).toLocaleDateString(),
 
-    companyLogo: "https://via.placeholder.com/50",
+    companyLogo: job.logo_url || "/default-company.png",
   }));
 
   // LOADING / ERROR STATES
