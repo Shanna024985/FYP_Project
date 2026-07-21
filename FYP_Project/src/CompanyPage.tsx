@@ -317,7 +317,17 @@ export const CompanyPage = (prop: PropsForCompanyPage) => {
                 <p className="text-xl text-gray-500">
                   There are no ratings given to the company
                 </p>
-              </>
+     <Button
+                      className="w-fit"
+                      onClick={() => {
+                            let address = new URL(window.location.href);
+    let queryParameters = address.searchParams;
+    let id = queryParameters.get("id");
+                        navigate("/companyreviews?id=" + id);
+                      }}
+                    >
+                      Add reviews
+                    </Button>              </>
             ) : (
               <>
                 <div className="flex justify-between">
