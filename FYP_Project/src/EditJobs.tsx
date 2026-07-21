@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import  { useEffect, useRef, useState } from "react";
 import NavigationMenus from "./NavigationMenu";
 import { Field, FieldGroup, FieldLabel } from "./components/ui/field";
 import { Input } from "./components/ui/input";
@@ -59,7 +59,7 @@ let StatusOfJob = (props: Statuses) => {
   );
 };
 let JobType = (props: Statuses) => {
-  let [options, setOptions] = useState([
+  let [options] = useState([
     "Full-Time",
     "Part-Time",
     "Contract",
@@ -127,7 +127,7 @@ let dateReturned = (stringOfDate: string) => {
   }
 };
 let CareerLevel = (props: Statuses) => {
-  let [options, setOptions] = useState([
+  let [options] = useState([
     {
       value: "entry",
       shownOnPage: "Entry Level/Early Career",

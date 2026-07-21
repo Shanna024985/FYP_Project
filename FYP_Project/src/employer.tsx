@@ -5,7 +5,6 @@ import {
   SquarePenIcon,
   Trash,
 } from "lucide-react";
-import { Input } from "./components/ui/input";
 import {
   InputGroup,
   InputGroupAddon,
@@ -16,29 +15,20 @@ import { Button } from "./components/ui/button";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "./components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./components/ui/select";
+
 import {
   NativeSelect,
   NativeSelectOption,
 } from "./components/ui/native-select";
-import { data, useNavigate } from "react-router-dom";
+import {  useNavigate } from "react-router-dom";
 import { toast, Toaster } from "sonner";
 import { useEffect, useState } from "react";
 import Error from "./Error";
-import { el } from "date-fns/locale";
 type Props = {
   currentUrl: String;
 };
@@ -114,7 +104,7 @@ type Statuses = {
   status: string;
 };
 let StatusOfJob = (props: Statuses) => {
-  let [options, setOptions] = useState(["Active", "Closed"]);
+  let [options] = useState(["Active", "Closed"]);
   return (
     <>
       {options.map((value) => {
@@ -149,7 +139,7 @@ let EmployerPage = (props: Props) => {
       .then((valueForJobs) => {
         let newDataOfJobs: JobsObject[] = [];
         let jobs: Company[] = valueForJobs.companies;
-        jobs.forEach((element, index) => {
+        jobs.forEach((element) => {
           let jobList: JobsObject[] = element.active_jobs_list;
           let companyId = element.id;
           jobList.forEach((valuesOfJobsForShown, index) => {
@@ -330,7 +320,7 @@ let EmployerPage = (props: Props) => {
                               .then((valueNotCompatible) => {
                                 return valueNotCompatible.json();
                               })
-                              .then((values) => {
+                              .then(() => {
                                 toast("Job has been deleted", {
                                   action: {
                                     label: "Undo",
@@ -354,7 +344,7 @@ let EmployerPage = (props: Props) => {
                                         .then((value) => {
                                           return value.json();
                                         })
-                                        .then((valueToDo) => {
+                                        .then(() => {
                                           let newDataOfJobs: JobsObject[] = [];
                                           dataOfJobs.forEach(
                                             (valueOfExistingData) => {

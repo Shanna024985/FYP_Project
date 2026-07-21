@@ -1,5 +1,5 @@
-import { PlusCircle, Search, SmileIcon, SquarePen, Trash } from "lucide-react";
-import React, { useEffect, useRef, useState } from "react";
+import { Search, SquarePen, Trash } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { Input } from "./components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "./components/ui/avatar";
 import { Button } from "./components/ui/button";
@@ -71,7 +71,7 @@ const Messages = (props: Props) => {
     socket.current = new WebSocket(
       "ws://localhost:3001?token=" + localStorage.getItem("token"),
     );
-    socket.current.onopen = (event) => {
+    socket.current.onopen = () => {
       console.log("Connected");
     };
     socket.current.onmessage = (event) => {
@@ -361,7 +361,7 @@ const Messages = (props: Props) => {
                         </ContextMenuTrigger>
                         <ContextMenuContent>
                           <ContextMenuItem
-                            onClick={(e) => {
+                            onClick={() => {
                               setInputMessage(valueOfMessage.message);
                               setClassNameForButtons("hidden");
                               setClassNameForEditButton("");
@@ -389,7 +389,7 @@ const Messages = (props: Props) => {
                                 .then((values) => {
                                   return values.json();
                                 })
-                                .then((newThing) => {
+                                .then(() => {
                                   let newMessageJson = messagesJson.filter(
                                     (value) => value.id !== valueOfMessage.id,
                                   );
@@ -422,7 +422,7 @@ const Messages = (props: Props) => {
               {/* <SmileIcon className="self-center" /> */}
               <Button
                 className={classNameForButtons}
-                onClick={(e) => {
+                onClick={() => {
                   let body = JSON.stringify({
                     receiverUserId: profileOfUserSelected?.user_id,
                     message: inputMessage,
@@ -497,7 +497,7 @@ const Messages = (props: Props) => {
                     .then((Value) => {
                       return Value.json();
                     })
-                    .then((valuesOfStuff) => {
+                    .then(() => {
                       let newMessageJsonComplete = messagesJson?.map(
                         (values) => {
                           if (values.id == currentIdToEdit) {

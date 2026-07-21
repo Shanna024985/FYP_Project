@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Plus, Rat, StarHalfIcon, StarIcon } from "lucide-react";
+import  { useEffect, useRef, useState } from "react";
+import { Plus,  StarHalfIcon, StarIcon } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./components/ui/avatar";
 import { Button } from "./components/ui/button";
 import { Input } from "@/components/ui/input";
