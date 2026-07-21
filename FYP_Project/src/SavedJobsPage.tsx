@@ -38,7 +38,7 @@ export default function SavedJobsPage({ currentUrl }: Props) {
           jobId: item.job_id,
 
           companyName: item.company_name,
-          companyLogo: `http://localhost:3000/uploads/company-logos/${item.logo_file_name}`,
+          companyLogo: item.logo_url,
 
           title: item.title,
 

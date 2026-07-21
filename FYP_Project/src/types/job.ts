@@ -20,6 +20,7 @@ export type Job = {
   reports: number;
   company_name: string;
   company_city: string;
+  logo_url: string; 
   created_at: string;
   updated_at: string;
 };
