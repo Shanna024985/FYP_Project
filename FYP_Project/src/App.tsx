@@ -22,9 +22,13 @@ import SavedJobs from "./SavedJobsPage";
 import ApplyJobPage from "./ApplyJobPage";
 import MyReviewsPage from "./MyReviewsPage";
 import JobSeekerRatingsPage from "./JobSeekerRating";
+import { CompanyPageRenderer } from "./CompanyPage";
+import CompanyReviews from "./CompanyReviews";
+import AddCompanies from "./AddCompanies";
+import Messages from "./Messages";
+import SuccessfulJobScreen from "./SuccessfulJobScreen";
 const linkForBackend = "http://localhost:3000/api";
 function App() {
-  const [count, setCount] = useState(0);
 
   return (
     <>
@@ -61,18 +65,10 @@ function App() {
             path="/jobSeeker/applications"
             element={<JobSeekerApplications currentUrl={linkForBackend} />}
           />
-          <Route
-            path="/jobSeeker/savedJobs"
-            element={<SavedJobs currentUrl={linkForBackend} />}
-          />
-          <Route
-            path="/jobSeeker/myReviews"
-            element={<MyReviewsPage currentUrl={linkForBackend} />}
-          />
-          <Route
-            path="/jobSeeker/ratings"
-            element={<JobSeekerRatingsPage currentUrl={linkForBackend} />}
-          />
+                    <Route path="/company" element={<CompanyPageRenderer  currentUrl={linkForBackend}/>}/>
+          <Route path="/companyreviews" element={<CompanyReviews currentUrl={linkForBackend}/>}/>
+          <Route path="/addcompanies" element={<AddCompanies currentUrl={linkForBackend}/>}/>
+          <Route path="/messages" element={<Messages currentUrl={linkForBackend}/>}/>
           <Route path="/applyjob" element={<ApplyJobPage currentUrl={linkForBackend}/>} />
         </Route>
       </Routes>

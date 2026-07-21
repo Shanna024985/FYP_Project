@@ -30,7 +30,6 @@ module.exports.createJob = (req, res, next) => {
         duration, deadline, experience, career_level, location, address,
         jobs_needed, reports 
     } = req.body;
-    
     let companyId = req.body.companyId;
     const userId = getUserIdFromReq(req, res);
     
@@ -49,7 +48,6 @@ module.exports.createJob = (req, res, next) => {
                     error: "Unauthorized: You don't own this company. Only company owners can post jobs." 
                 });
             }
-            
             if (!title || !description || !category || !type || !salary_range_from || !salary_range_to || !deadline) {
                 return res.status(400).json({ 
                     error: "Required fields missing: title, description, category, type, salary_range_from, salary_range_to, deadline" 
@@ -63,7 +61,7 @@ module.exports.createJob = (req, res, next) => {
             if (new Date(deadline) < new Date()) {
                 return res.status(400).json({ error: "Deadline cannot be in the past" });
             }
-            
+            console.log(req.body)
             return jobModel.createJob({
                 title, description, category, type,
                 salary_range_from, salary_range_to, salary_type: salary_type || 'Negotiable',

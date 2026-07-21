@@ -1,4 +1,4 @@
-let app = require("./Backend/app")
+let app = require("./backend/app")
 const port = process.env.PORT || 3000;
 
 app.listen(port, ()=>{

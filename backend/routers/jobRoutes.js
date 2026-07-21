@@ -1,8 +1,19 @@
 const express = require("express");
 const router = express.Router();
 const jobController = require("../controllers/jobController");
-const jwtMiddleware = require("../middlewares/jwtmiddleware");
+const resumeController = require("../controllers/resumeController");
+const applicationController = require("../controllers/applicationController");
+const jwtMiddleware = require('../middlewares/jwtMiddleware');
 const upload = require("../middlewares/upload");
+
+// Company routes (SPECIFIC routes first)
+// router.post("/company", jwtMiddleware.verifyToken, jobController.createCompany);
+// router.get("/my/companies", jwtMiddleware.verifyToken, jobController.getMyCompanies);
+// router.get("/my/jobs", jwtMiddleware.verifyToken, jobController.getMyJobs);
+
+// update status of application
+router.put("/application/:id", jwtMiddleware.verifyToken, applicationController.verifyStatus, applicationController.getJobIdByApplicationId, applicationController.verifyJobOwnership, applicationController.updateStatusById);
+
 // ==================== PUBLIC JOB ROUTES ====================
 router.get("/", jobController.getAllJobs);
 router.get("/recommended", jobController.getRecommendedJobs);
@@ -59,5 +70,15 @@ router.get("/dashboard/job-seeker", jwtMiddleware.verifyToken, jobController.get
 
 // ==================== USER RESUMES ====================
 router.get("/resumes/user", jwtMiddleware.verifyToken, jobController.getUserResumes);
+router.post("/", jwtMiddleware.verifyToken, jobController.createJob);
+router.put("/:id", jwtMiddleware.verifyToken, jobController.updateJob);
+router.delete("/:id", jwtMiddleware.verifyToken, jobController.softDeleteJob);
+router.patch("/:id/close", jwtMiddleware.verifyToken, jobController.closeJob);
+
+// Application routes
+// router.post("/:id/apply", jwtMiddleware.verifyToken, applicationController.verifyJobId, applicationController.verifyJobExists, resumeController.verifyResumeExists, resumeController.verifyResumeOwnership);
+
+const applicationRoutes = require('./applicationRoutes');
+router.use("/:jobId/application", jwtMiddleware.verifyToken, applicationController.verifyJobId, applicationController.verifyJobExists, applicationController.verifyJobOwnership, applicationRoutes);
 
 module.exports = router;

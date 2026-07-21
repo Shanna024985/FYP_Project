@@ -301,7 +301,6 @@ module.exports.createJob = function createJob(jobData, companyId) {
     
     console.log('=== createJob ===');
     console.log('address received:', address);
-    
     const normalizedCategory = normalizeCategory(category);
     const normalizedType = normalizeType(type);
     const normalizedSalaryType = normalizeSalaryType(salary_type);
@@ -437,6 +436,7 @@ module.exports.getAllJobs = function getAllJobs(filters = {}) {
         return result.rows;
     });
 }
+
 
 // READ - Get total job count for pagination
 module.exports.getTotalJobCount = function getTotalJobCount(filters = {}) {
@@ -612,8 +612,8 @@ module.exports.updateJob = function updateJob(jobId, jobData, companyId) {
     const {
         title, description, category, type,
         salary_range_from, salary_range_to, salary_type, salary_period,
-        duration, deadline, experience, career_level, location, address,
-        jobs_needed, reports 
+        duration, deadline, experience, career_level, location, 
+        jobs_needed, reports, status, address 
     } = jobData;
     
     console.log('=== updateJob ===');
@@ -642,17 +642,18 @@ module.exports.updateJob = function updateJob(jobId, jobData, companyId) {
                    experience = COALESCE($11, experience),
                    career_level = COALESCE($12, career_level),
                    location = COALESCE($13, location),
-                   address = COALESCE($14, address),
-                   jobs_needed = COALESCE($15, jobs_needed),
-                   reports = COALESCE($16, reports)
-               WHERE id = $17 AND company_id = $18 AND deleted_at IS NULL
+                   jobs_needed = COALESCE($14, jobs_needed),
+                   reports = COALESCE($15, reports),
+                   status = COALESCE($16, status), 
+                   address = COALESCE($19, address)
+               WHERE id = $17 AND company_id = $18
                RETURNING *;`;
 
     return query(sql, [
         title, description, normalizedCategory, normalizedType,
         salary_range_from, salary_range_to, normalizedSalaryType,
         normalizedSalaryPeriod, normalizedDuration, deadline, normalizedExperience, 
-        normalizedCareerLevel, normalizedLocation, address, jobs_needed, reports, jobId, companyId
+        normalizedCareerLevel, normalizedLocation, jobs_needed, reports,status, jobId, companyId, address
     ]).then(function(result) {
         return result.rows;
     });

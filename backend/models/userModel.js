@@ -148,11 +148,12 @@ module.exports.updateProfilePhoto = function updateProfilePhoto(userId, fileName
     
     let sql = `UPDATE user_detail 
                SET profile_picture_file_name = $1, 
-                   profile_picture_file_data = $2
+                   profile_picture_file_data = $2,
+                   profile_picture_file_url = $4
                WHERE user_id = $3
                RETURNING id, user_id, profile_picture_file_name;`;
     
-    return query(sql, [photoName, photoData, userId]).then(function(result) {
+    return query(sql, [photoName, photoData, userId, fileUrl]).then(function(result) {
         return result.rows;
     });
 }
