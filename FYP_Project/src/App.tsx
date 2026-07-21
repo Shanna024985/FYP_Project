@@ -9,6 +9,7 @@ import Employer from "./employer";
 import Homepage from "./Homepage";
 import JobPostings from "./JobPostings";
 import EditJobs from "./EditJobs";
+import EditCompany from "./EditCompanies";
 import ViewApplicants from "./ViewApplicants";
 import BrowseJobs from "./BrowseJobs";
 import Profile from "./EditProfile";
@@ -69,6 +70,20 @@ function App() {
           <Route path="/companyreviews" element={<CompanyReviews currentUrl={linkForBackend}/>}/>
           <Route path="/addcompanies" element={<AddCompanies currentUrl={linkForBackend}/>}/>
           <Route path="/messages" element={<Messages currentUrl={linkForBackend}/>}/>
+          <Route path="/applyjob" element={<ApplyJobPage currentUrl={linkForBackend}/>} />
+          <Route path="/editCompany/:id" element={<EditCompany currentUrl={linkForBackend}/>}/>
+          <Route
+            path="/jobSeeker/savedJobs"
+            element={<SavedJobs currentUrl={linkForBackend} />}
+          />
+          <Route
+            path="/jobSeeker/myReviews"
+            element={<MyReviewsPage currentUrl={linkForBackend} />}
+          />
+          <Route
+            path="/jobSeeker/ratings"
+            element={<JobSeekerRatingsPage currentUrl={linkForBackend} />}
+          />
           <Route path="/applyjob" element={<ApplyJobPage currentUrl={linkForBackend}/>} />
         </Route>
       </Routes>
