@@ -88,7 +88,7 @@ export default function SavedJobsPage({ currentUrl }: Props) {
   };
 
   const handleApply = (jobId: number) => {
-    console.log("Apply", jobId);
+    navigate(`/applyjob?id=${jobId}`);
   };
 
   const handleUnsave = (removedJob: SavedJob) => {
