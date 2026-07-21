@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import {
-  DeleteIcon,
   Edit,
   Plus,
   StarHalfIcon,
@@ -227,7 +226,7 @@ const CompanyReviews = (prop: Props) => {
                       .then((value) => {
                         return value.json();
                       })
-                      .then((values) => {
+                      .then(() => {
                         alert("Review has been added!");
                       });
                   }}
