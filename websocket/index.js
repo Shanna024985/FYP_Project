@@ -18,7 +18,7 @@ server.on('connection', (ws, req) => {
     let token = params.get('token');
     if (token) {
         try {
-            clients[jwt.verify(token, secretKey).userId] = {ws, role: 'user'};
+            clients[jwt.verify(token, jwtSecretKey).userId] = {ws, role: 'user'};
         } catch (err) {
             console.log(err);
         }
