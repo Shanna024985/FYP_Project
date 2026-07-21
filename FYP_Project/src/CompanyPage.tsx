@@ -10,7 +10,8 @@ import {
 } from "lucide-react";
 import { Button } from "./components/ui/button";
 import { useNavigate } from "react-router-dom";
-
+import AuthLayout from "./AuthLayout";
+import NavigationMenus from "./NavigationMenu";
 type Props = {
   currentUrl: String;
 };
@@ -194,7 +195,9 @@ export const CompanyPageRenderer = (prop: Props) => {
       });
   }, []);
   return (
-    <>
+    <AuthLayout>
+      <NavigationMenus />
+      <br/>
       <CompanyPage
         profileImage={imageOfTea}
         setProfileImage={setImageOfTea}
@@ -221,7 +224,7 @@ export const CompanyPageRenderer = (prop: Props) => {
         locationCoordinates={locationCoordinates}
         setLocationCoordinates={setLocationCoordinates}
       />
-    </>
+    </AuthLayout>
   );
 };
 let StarsPage = (prop: Stars) => {
