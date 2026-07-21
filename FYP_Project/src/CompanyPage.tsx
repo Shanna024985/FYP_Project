@@ -348,7 +348,10 @@ export const CompanyPage = (prop: PropsForCompanyPage) => {
                     <Button
                       className="w-fit"
                       onClick={(e) => {
-                        navigate("/companyreviews");
+                            let address = new URL(window.location.href);
+    let queryParameters = address.searchParams;
+    let id = queryParameters.get("id");
+                        navigate("/companyreviews?id=" + id);
                       }}
                     >
                       View all reviews
@@ -428,6 +431,7 @@ export const CompanyPage = (prop: PropsForCompanyPage) => {
                             <SquareArrowOutUpRightIcon
                               className="self-center justify-end"
                               onClick={(e) => {
+                                
                                 navigate("/jobDetails?id=" + value.id);
                               }}
                             />

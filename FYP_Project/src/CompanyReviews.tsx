@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Plus, StarHalfIcon, StarIcon } from "lucide-react";
+import { Plus, Rat, StarHalfIcon, StarIcon } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./components/ui/avatar";
 import { Button } from "./components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +18,18 @@ import { Label } from "./components/ui/label";
 type Props = {
   currentUrl: String;
 };
+function getOrdinal(n: number) {
+  const s = ["th", "st", "nd", "rd"];
+  const v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+let dateChangedToProperReading = (date: string) => {
+  let newDate = new Date(date);
+  const day = newDate.getDate();
+  const month = newDate.toLocaleString("en-GB", { month: "long" });
+  const year = newDate.getFullYear();
+  return `${getOrdinal(day)} ${month} ${year}`;
+};
 type Reviews = {
   id: string;
   company_id: string;
@@ -26,9 +38,17 @@ type Reviews = {
   message: string;
   created_at: string;
   username: string;
+  profile_picture_file_url: string;
 };
 type Stars = {
   averageRating: number;
+};
+type RatingDistribution = {
+  "1": string;
+  "2": string;
+  "3": string;
+  "4": string;
+  "5": string;
 };
 let StarsPage = (prop: Stars) => {
   const stars = [];
@@ -46,11 +66,17 @@ let StarsPage = (prop: Stars) => {
   }
   return stars;
 };
+
 const CompanyReviews = (prop: Props) => {
   const [rating, setRating] = useState(0);
   let [dataOfReviews, setDataOfReviews] = useState<Reviews[]>([]);
   let inputRef = useRef<HTMLInputElement>(null);
-  let [numberOfReviews, setNumberOfReviews] = useState()
+  let [numberOfReviews, setNumberOfReviews] = useState();
+  let [averageRating, setAverageRating] = useState("");
+  let [RatingDistribution, setRatingDistribution] =
+    useState<RatingDistribution>();
+  let [widthOfBar, setWidthOfBar] = useState<RatingDistribution>();
+  let [classNameForAddReview, setClassNameForAddReview] = useState("self-center hidden")
   useEffect(() => {
     let address = new URL(window.location.href);
     let queryParameters = address.searchParams;
@@ -61,7 +87,40 @@ const CompanyReviews = (prop: Props) => {
       })
       .then((values) => {
         setDataOfReviews(values.reviews);
-        setNumberOfReviews(values.count)
+        setNumberOfReviews(values.count);
+        setAverageRating(values.statistics.average_rating);
+        setRatingDistribution(values.statistics.rating_distribution);
+        let newStuff: RatingDistribution = {
+          1: "w-0",
+          2: "w-0",
+          3: "w-0",
+          4: "w-0",
+          5: "w-0",
+        };
+        let ratings: RatingDistribution = values.statistics.rating_distribution;
+
+        for (const [key, value] of Object.entries(ratings)) {
+          const max = Math.max(
+            ...Object.values(parseInt(values.statistics.rating_distribution)),
+            1,
+          );
+          let width = (parseInt(value) / max) * 100;
+          let classses = "w-" + width;
+          newStuff[key as keyof RatingDistribution] = classses;
+        }
+        setWidthOfBar(newStuff);
+        fetch(prop.currentUrl + "/jobs/company/" + id + "/can-review", {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
+        }).then((valuesOfStuff)=>{
+          return valuesOfStuff.json()
+        }).then((valueToCheck)=>{
+          if (valueToCheck.canReview){
+            setClassNameForAddReview("self-center")
+          } 
+        })
       });
   }, []);
   return (
@@ -70,7 +129,7 @@ const CompanyReviews = (prop: Props) => {
         <p className="text-left text-3xl font-semibold">Reviews</p>
         <Dialog>
           <DialogTrigger asChild>
-            <Button className="self-center">
+            <Button className={classNameForAddReview}>
               <Plus /> Add reviews
             </Button>
           </DialogTrigger>
@@ -144,107 +203,69 @@ const CompanyReviews = (prop: Props) => {
         <div className="text-left  flex flex-col gap-2 h-full ">
           <p className="text-lg">Average Rating</p>
           <div className="flex gap-3">
-            <p className="font-semibold text-2xl">4.5</p>
-            <StarsPage averageRating={4.5} />
+            <p className="font-semibold text-2xl">{averageRating}</p>
+            <StarsPage averageRating={parseFloat(averageRating)} />
           </div>
         </div>
         <div className="flex flex-col gap-1">
           <div className="flex gap-3">
             <StarIcon className="self-center" fill="yellow" />
             <p className="font-semibold">5</p>
-            <div className="bg-green-700 rounded-2xl w-60"></div>
-            <p className="font-semibold">2.0k</p>
+            <div
+              className={"bg-green-700 rounded-2xl " + widthOfBar?.[5]}
+            ></div>
+            <p className="font-semibold">{RatingDistribution?.[5]}</p>
           </div>
           <div className="flex gap-3">
             <StarIcon className="self-center" fill="yellow" />
             <p className="font-semibold">4</p>
-            <div className="bg-[#00739D] rounded-2xl w-40"></div>
-            <p className="font-semibold">1.6k</p>
+            <div
+              className={"bg-[#00739D] rounded-2xl " + widthOfBar?.[4]}
+            ></div>
+            <p className="font-semibold">{RatingDistribution?.[4]}</p>
           </div>
           <div className="flex gap-3">
             <StarIcon className="self-center" fill="yellow" />
             <p className="font-semibold">3</p>
-            <div className="bg-amber-300 rounded-2xl w-20"></div>
-            <p className="font-semibold">400</p>
+            <div
+              className={"bg-amber-300 rounded-2xl " + widthOfBar?.[3]}
+            ></div>
+            <p className="font-semibold">{RatingDistribution?.[3]}</p>
           </div>
           <div className="flex gap-3">
             <StarIcon className="self-center" fill="yellow" />
             <p className="font-semibold">2</p>
-            <div className="bg-[#66009D] rounded-2xl w-10"></div>
-            <p className="font-semibold">200</p>
+            <div
+              className={"bg-[#66009D] rounded-2xl " + widthOfBar?.[2]}
+            ></div>
+            <p className="font-semibold">{RatingDistribution?.[2]}</p>
           </div>
           <div className="flex gap-3">
             <StarIcon className="self-center" fill="yellow" />
             <p className="font-semibold">1</p>
-            <div className="bg-[#9D0000] rounded-2xl w-4"></div>
-            <p className="font-semibold">16</p>
+            <div
+              className={"bg-[#9D0000] rounded-2xl " + widthOfBar?.[1]}
+            ></div>
+            <p className="font-semibold">{RatingDistribution?.[1]}</p>
           </div>
         </div>
       </div>
       <hr className="mt-4 " />
       <div className="flex flex-col gap-3 mt-4">
-        <div className="flex p-5 gap-7 align-middle">
-          <div className="flex items-center justify-center">
-            <Avatar className="size-20">
-              <AvatarImage src="../public/IMG_0230 copy.jpeg" />
-              <AvatarFallback>ProfilePic</AvatarFallback>
-            </Avatar>
-          </div>
-          <div className="text-left flex flex-col align-middle h-full">
-            <p className="font-bold text-2xl">Green Tea</p>
-            <div className="flex flex-col gap-2 mt-2.5">
-              <p>24-10-2026</p>
-            </div>
-          </div>
-          <div className="mt-1 flex flex-col gap-4">
-            <div className="flex gap-3">
-              <StarsPage averageRating={4.5} />
-            </div>
-            <p className="text-left">
-              My first job in this company went well it was very fruitful and
-              the company culture is great
-            </p>
-          </div>
-        </div>
-        <hr className="mx-4" />
-        <div className="flex p-5 gap-7 align-middle">
-          <div className="flex items-center justify-center">
-            <Avatar className="size-20">
-              <AvatarImage src="../public/IMG_0230 copy.jpeg" />
-              <AvatarFallback>ProfilePic</AvatarFallback>
-            </Avatar>
-          </div>
-          <div className="text-left flex flex-col align-middle h-full">
-            <p className="font-bold text-2xl">Green Tea</p>
-            <div className="flex flex-col gap-2 mt-2.5">
-              <p>24-10-2026</p>
-            </div>
-          </div>
-          <div className="mt-1 flex flex-col gap-4">
-            <div className="flex gap-3">
-              <StarsPage averageRating={4.5} />
-            </div>
-            <p className="text-left">
-              My first job in this company went well it was very fruitful and
-              the company culture is great
-            </p>
-          </div>
-        </div>
-        <hr className="mx-4" />
         {dataOfReviews.map((value) => {
           return (
             <>
               <div className="flex p-5 gap-7 align-middle">
                 <div className="flex items-center justify-center">
                   <Avatar className="size-20">
-                    <AvatarImage src="../public/IMG_0230 copy.jpeg" />
+                    <AvatarImage src={value.profile_picture_file_url} />
                     <AvatarFallback>ProfilePic</AvatarFallback>
                   </Avatar>
                 </div>
                 <div className="text-left flex flex-col align-middle h-full">
                   <p className="font-bold text-2xl">{value.username}</p>
                   <div className="flex flex-col gap-2 mt-2.5">
-                    <p>{new Date(value.created_at).toDateString()}</p>
+                    <p>{dateChangedToProperReading(value.created_at)}</p>
                   </div>
                 </div>
                 <div className="mt-1 flex flex-col gap-4">

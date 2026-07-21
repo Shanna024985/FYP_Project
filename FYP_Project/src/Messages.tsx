@@ -113,7 +113,6 @@ const Messages = (props: Props) => {
         .then((res) => res.json())
         .then((messagesJsonNew) => {
           setMessagesJson(messagesJsonNew);
-
           if (messagesJsonNew.length === 0) return;
 
           const latestMessage = messagesJsonNew[messagesJsonNew.length - 1];
