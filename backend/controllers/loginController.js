@@ -78,8 +78,8 @@ const generateCode = () => {
 
 const timeInSeconds = () => parseInt(Date.now() / 1000);
 const secretKey = process.env.JWT_SECRET_KEY.trim();
-const redirectURI =  process.env.SINGPASS_REDIRECT_URI.trim();
-
+// const redirectURI =  process.env.SINGPASS_REDIRECT_URI.trim();
+const redirectURI = 'http://localhost:3000/api/auth/token';
 const generateClientAssertion = endpoint => jwt.sign({
     sub: singpassAppID,
     aud: `https://stg-id.singpass.gov.sg/fapi/${endpoint}`,

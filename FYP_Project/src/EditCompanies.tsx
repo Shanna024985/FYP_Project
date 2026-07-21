@@ -5,6 +5,7 @@ import { Input } from "./components/ui/input";
 import { toast } from "sonner";
 import { Textarea } from "./components/ui/textarea";
 import { Button } from "./components/ui/button";
+import NavigationMenus from "./NavigationMenu";
 import {
   Select,
   SelectContent,
@@ -298,6 +299,7 @@ const EditCompany = (prop: Props) => {
   }, [id]);
   return (
     <div>
+      <NavigationMenus />
       <p className="text-left text-3xl font-semibold">Edit company</p>
       <hr className="mt-4" />
       <div className="flex gap-4 mt-5">

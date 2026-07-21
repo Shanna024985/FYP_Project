@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import {
   Bookmark,
   Pencil,
-  
+
 } from "lucide-react";
 import "./title.css";
 import { Button } from "@/components/ui/button";
@@ -211,13 +211,13 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
         {/* ========================================= */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
           {/* COLUMN 1 - PROFILE PIC */}
-          <Card className="flex items-center justify-center p-6">
+          <div className="flex items-center justify-center">
             <img
               src={profile?.profile_picture_url || "/default-profile.png"}
               alt="Profile"
-              className="h-40 w-40 rounded-full object-cover"
+              className="h-48 w-48 rounded-full object-cover border-4 border-white shadow-lg"
             />
-          </Card>
+          </div>
 
           {/* COLUMN 2 - USER INFO */}
           <Card className="flex flex-col justify-center p-6">

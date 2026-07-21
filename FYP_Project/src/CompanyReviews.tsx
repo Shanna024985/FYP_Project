@@ -9,7 +9,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "./components/ui/avatar";
 import { Button } from "./components/ui/button";
 import { Input } from "@/components/ui/input";
-
+import AuthLayout from "./AuthLayout";
+import NavigationMenus from "./NavigationMenu";
 import {
   Dialog,
   DialogClose,
@@ -162,7 +163,10 @@ const CompanyReviews = (prop: Props) => {
       });
   }, []);
   return (
+    <AuthLayout>
     <div>
+      <NavigationMenus />
+      <br/>
       <div className="flex justify-between">
         <p className="text-left text-3xl font-semibold">Reviews</p>
         <Dialog>
@@ -460,6 +464,7 @@ const CompanyReviews = (prop: Props) => {
         })}
       </div>
     </div>
+    </AuthLayout>
   );
 };
 

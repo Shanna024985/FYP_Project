@@ -20,9 +20,10 @@ export default function Sidebar() {
         ]
       : [
           { label: "Dashboard", path: "/employer" },
+          { label: "View My Companies", path: "/viewMyCompanies" },
+          { label: "Add Company", path: "/addcompanies" },
 
           // TODO: Employer future features:
-          // { label: "Job Postings", path: "/jobposting" },
           // { label: "Applicants", path: "/jobApplicants" },
           // { label: "Company Profile", path: "/company" },
         ];
