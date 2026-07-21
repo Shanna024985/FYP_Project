@@ -1,22 +1,26 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const companyController = require("../controllers/companyController");
+const companyController = require('../controllers/companyController');
+const { verifyToken } = require('../middlewares/jwtmiddleware');
 
-// IMPORTANT: Admin routes MUST come BEFORE /:id routes
-router.get("/admin/deleted", companyController.getDeletedCompanies);
+// Public routes (no authentication needed)
+router.get('/', companyController.getAllCompanies);
+router.get('/:id', companyController.getCompanyById);
+router.get('/page/:id', companyController.getCompanyPageData);
+router.get('/:id/jobs', companyController.getCompanyJobs);  // NEW: Get jobs for a company
 
-// Public routes (no authentication needed for testing)
-router.get("/", companyController.getAllCompanies);
-router.get("/:id", companyController.getCompanyById);
-router.get("/:id/page", companyController.getCompanyPageData);
+// Protected routes (authentication required)
+router.post('/', verifyToken, companyController.createCompany);
+router.put('/:id', verifyToken, companyController.updateCompany);
+router.delete('/:id', verifyToken, companyController.deleteCompany);
+router.post('/restore/:id', verifyToken, companyController.restoreCompany);
+router.get('/user/companies', verifyToken, companyController.getCompaniesByUser);
+router.get('/user/:userId/companies', verifyToken, companyController.getCompaniesByUserId);
+router.get('/deleted', verifyToken, companyController.getDeletedCompanies);
 
-// Protected routes (NO AUTH for testing - remove verifyToken)
-router.post("/", companyController.createCompany);
-router.put("/:id", companyController.updateCompany);
-router.put("/:id/logo", companyController.updateCompanyLogo);
-router.put("/:id/banner", companyController.updateCompanyBanner);
-router.put("/:id/profile", companyController.updateCompanyProfile);
-router.delete("/:id", companyController.deleteCompany);
-router.patch("/:id/restore", companyController.restoreCompany);
+// Image update routes
+router.put('/:id/logo', verifyToken, companyController.updateCompanyLogo);
+router.put('/:id/banner', verifyToken, companyController.updateCompanyBanner);
+router.put('/:id/profile', verifyToken, companyController.updateCompanyProfile);
 
 module.exports = router;

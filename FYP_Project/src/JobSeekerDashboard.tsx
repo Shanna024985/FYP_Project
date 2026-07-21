@@ -1,19 +1,14 @@
 // JobSeekerDashboard.tsx
 import NavigationMenus from "./NavigationMenu";
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  MapPin,
   Bookmark,
   Pencil,
-  Eye,
-  ChevronLeft,
-  ChevronRight,
+  
 } from "lucide-react";
 import "./title.css";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -22,93 +17,181 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
+import { Badge } from "@/components/ui/badge";
 import JobCard from "@/components/common sections/JobCard";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 type AppliedJob = {
+  id: number;
+  job_id: number;
   title: string;
-  company: string;
-  applicationDate: string;
+  company_name: string;
+  time_applied: string;
   status: string;
 };
-
-type SavedJob = {
-  title: string;
-  companyName: string;
-  companyLogo: string;
-  salary: string;
-  type: string;
-  location: string;
-  postedDate: string;
-  savedDate: string;
+type UserProfile = {
+  first_name: string;
+  last_name: string;
+  email: string;
+  profile_picture_url: string | null;
 };
+import type { SavedJob } from "../src/types/saved-job";
+import SavedJobCard from "@/components/common sections/SavedJobCard";
 
 type Props = {
   currentUrl: string;
 };
 
 export default function JobSeekerDashboard({ currentUrl }: Props) {
-  // ---------------------------------------
-  // Dummy Recommended Jobs
-  // ---------------------------------------
-  const recommendedJobs = Array.from({ length: 3 }).map((_, i) => ({
-    title: `Frontend Developer ${i + 1}`,
-    companyName: "Tech Company",
-    companyLogo: "https://via.placeholder.com/40",
-    salary: "$3000 / month",
-    location: "Singapore",
-    tags: ["Full-time", "Urgent"],
-    postedDate: "21 May 2026",
-  }));
+  const [recommendedJobs, setRecommendedJobs] = useState<any[]>([]);
+  const [loadingRecommended, setLoadingRecommended] = useState(true);
+  useEffect(() => {
+    const fetchRecommendedJobs = async () => {
+      try {
+        setLoadingRecommended(true);
 
-  // ---------------------------------------
-  // Dummy Applied Jobs
-  // ---------------------------------------
-  const appliedJobs: AppliedJob[] = Array.from({ length: 12 }).map((_, i) => ({
-    title: `Software Engineer ${i + 1}`,
-    company: "Google",
-    applicationDate: "20 May 2026",
-    status: i % 2 === 0 ? "Pending" : "Reviewed",
-  }));
+        const token = localStorage.getItem("token");
 
-  // ---------------------------------------
-  // Dummy Saved Jobs
-  // ---------------------------------------
-  const savedJobs: SavedJob[] = Array.from({ length: 14 }).map((_, i) => ({
-    title: `UI/UX Designer ${i + 1}`,
-    companyName: "Creative Studio",
-    companyLogo: "https://via.placeholder.com/50",
-    salary: "$2500 / month",
-    type: i % 2 === 0 ? "Full-time" : "Internship",
-    location: "Singapore",
-    postedDate: "19 May 2026",
-    savedDate: "22 May 2026",
-  }));
+        const res = await axios.get(`${currentUrl}/jobs/recommended?limit=3`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
+        setRecommendedJobs(res.data.jobs);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoadingRecommended(false);
+      }
+    };
+
+    fetchRecommendedJobs();
+  }, [currentUrl]);
+
+  const [appliedJobs, setAppliedJobs] = useState<AppliedJob[]>([]);
+  const [loadingApplied, setLoadingApplied] = useState(true);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [loadingProfile, setLoadingProfile] = useState(true);
+  const [savedJobs, setSavedJobs] = useState<SavedJob[]>([]);
+  const [loadingSaved, setLoadingSaved] = useState(true);
+  useEffect(() => {
+    const fetchAppliedJobs = async () => {
+      try {
+        setLoadingApplied(true);
+
+        const token = localStorage.getItem("token");
+
+        const res = await axios.get(`${currentUrl}/jobs/applications/my`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        console.log(loadingSaved)
+        setAppliedJobs(res.data.applications);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoadingApplied(false);
+      }
+    };
+
+    fetchAppliedJobs();
+  }, [currentUrl]);
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        setLoadingProfile(true);
+
+        const token = localStorage.getItem("token");
+
+        const res = await axios.get(`${currentUrl}/user/profile`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        setProfile(res.data.profile);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoadingProfile(false);
+      }
+    };
+
+    fetchProfile();
+  }, [currentUrl]);
+  useEffect(() => {
+    const fetchSavedJobs = async () => {
+      try {
+        setLoadingSaved(true);
+
+        const token = localStorage.getItem("token");
+
+        const res = await axios.get(`${currentUrl}/jobs/saved/user`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const jobs: SavedJob[] = res.data.saved_jobs.map((item: any) => ({
+          id: item.id,
+          jobId: item.job_id,
+
+          companyName: item.company_name,
+          companyLogo: item.logo_url,
+
+          title: item.title,
+
+          salaryFrom: item.salary_range_from,
+          salaryTo: item.salary_range_to,
+          salaryPeriod: item.salary_period,
+
+          jobType: item.type,
+
+          location: item.location,
+
+          postedDate: new Date(item.posted_date).toLocaleDateString("en-SG", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          }),
+
+          savedDate: new Date(item.created_at).toLocaleDateString("en-SG", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          }),
+        }));
+
+        setSavedJobs(jobs);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoadingSaved(false);
+      }
+    };
+
+    fetchSavedJobs();
+  }, [currentUrl]);
   // ---------------------------------------
   // Pagination
   // ---------------------------------------
   const appliedPerPage = 5;
-  const savedPerPage = 6;
 
   const [appliedPage, setAppliedPage] = useState(1);
-  const [savedPage, setSavedPage] = useState(1);
 
   const appliedTotalPages = Math.ceil(appliedJobs.length / appliedPerPage);
-
-  const savedTotalPages = Math.ceil(savedJobs.length / savedPerPage);
 
   const currentAppliedJobs = appliedJobs.slice(
     (appliedPage - 1) * appliedPerPage,
     appliedPage * appliedPerPage,
   );
 
-  const currentSavedJobs = savedJobs.slice(
-    (savedPage - 1) * savedPerPage,
-    savedPage * savedPerPage,
-  );
+  const currentSavedJobs = savedJobs.slice(0, 6);
   const navigate = useNavigate();
-  
+
   return (
     <div className="flex flex-col gap-6">
       <NavigationMenus />
@@ -130,7 +213,7 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
           {/* COLUMN 1 - PROFILE PIC */}
           <Card className="flex items-center justify-center p-6">
             <img
-              src="https://via.placeholder.com/150"
+              src={profile?.profile_picture_url || "/default-profile.png"}
               alt="Profile"
               className="h-40 w-40 rounded-full object-cover"
             />
@@ -140,11 +223,17 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
           <Card className="flex flex-col justify-center p-6">
             <CardContent className="space-y-4 p-0">
               <div>
-                <h2 className="text-2xl font-semibold title-black">John Doe</h2>
-
-                <p className="text-muted-foreground">johndoe@gmail.com</p>
+                {/* Name */}
+                <h2 className="text-2xl font-semibold title-black">
+                  {loadingProfile
+                    ? "Loading..."
+                    : `${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`}
+                </h2>
+                {/* Email */}
+                <p className="text-muted-foreground">
+                  {loadingProfile ? "Loading..." : profile?.email}
+                </p>
               </div>
-
               <Button className="w-fit" onClick={() => navigate("/profile")}>
                 <Pencil />
                 Edit Profile
@@ -153,17 +242,22 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
           </Card>
 
           {/* COLUMN 3 + 4 - STATISTICS */}
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:col-span-2">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:col-span-2">
             {/* JOBS APPLIED */}
             <Card>
               <CardContent className="flex h-full flex-col justify-between space-y-4 p-6">
                 <div>
                   <p className="text-sm text-muted-foreground">Jobs Applied</p>
 
-                  <h2 className="mt-2 text-4xl font-bold title-black">12</h2>
+                  <h2 className="mt-2 text-4xl font-bold title-black">
+                    {appliedJobs.length}
+                  </h2>
                 </div>
 
-                <Button variant="outline" onClick={() => navigate("/jobSeeker/applications")}>
+                <Button
+                  variant="outline"
+                  onClick={() => navigate("/jobSeeker/applications")}
+                >
                   View Details
                 </Button>
               </CardContent>
@@ -175,23 +269,17 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
                 <div>
                   <p className="text-sm text-muted-foreground">Saved Jobs</p>
 
-                  <h2 className="mt-2 text-4xl font-bold title-black">14</h2>
+                  <h2 className="mt-2 text-4xl font-bold title-black">
+                    {savedJobs.length}
+                  </h2>
                 </div>
 
-                <Button variant="outline">View Details</Button>
-              </CardContent>
-            </Card>
-
-            {/* REVIEWS */}
-            <Card>
-              <CardContent className="flex h-full flex-col justify-between space-y-4 p-6">
-                <div>
-                  <p className="text-sm text-muted-foreground">My Reviews</p>
-
-                  <h2 className="mt-2 text-4xl font-bold title-black">5</h2>
-                </div>
-
-                <Button variant="outline">View Details</Button>
+                <Button
+                  variant="outline"
+                  onClick={() => navigate("/jobSeeker/savedJobs")}
+                >
+                  View Details
+                </Button>
               </CardContent>
             </Card>
           </div>
@@ -208,11 +296,32 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
           </div>
 
           {/* 3 CARDS IN 1 ROW */}
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            {recommendedJobs.map((job, i) => (
-              <JobCard key={i} {...job} />
-            ))}
-          </div>
+          {loadingRecommended ? (
+            <p>Loading...</p>
+          ) : (
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+              {recommendedJobs.map((job) => (
+                <JobCard
+                  key={job.id}
+                  currentUrl={currentUrl}
+                  id={job.id}
+                  title={job.title}
+                  companyName={job.company_name}
+                  companyLogo={job.logo_url}
+                  salaryRangeFrom={job.salary_range_from}
+                  salaryRangeTo={job.salary_range_to}
+                  salaryType={job.salary_type}
+                  salaryPeriod={job.salary_period}
+                  location={`${job.location}`}
+                  type={job.type}
+                  category={job.category}
+                  postedDate={new Date(job.created_at).toLocaleDateString(
+                    "en-SG",
+                  )}
+                />
+              ))}
+            </div>
+          )}
         </section>
 
         {/* ========================================= */}
@@ -222,7 +331,12 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-semibold title-black">Jobs Applied</h2>
 
-            <Button variant="outline" onClick={() => navigate("/jobSeeker/applications")}>View All</Button>
+            <Button
+              variant="outline"
+              onClick={() => navigate("/jobSeeker/applications")}
+            >
+              View All
+            </Button>
           </div>
 
           <Card>
@@ -238,21 +352,69 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
                 </TableHeader>
 
                 <TableBody>
-                  {currentAppliedJobs.map((job, index) => (
-                    <TableRow key={index}>
-                      <TableCell className="text-left font-medium">
-                        {job.title}
+                  {loadingApplied ? (
+                    <TableRow>
+                      <TableCell colSpan={4} className="text-center py-6">
+                        Loading...
                       </TableCell>
-
-                      <TableCell className="text-left">{job.company}</TableCell>
-
-                      <TableCell className="text-left">
-                        {job.applicationDate}
-                      </TableCell>
-
-                      <TableCell className="text-left">{job.status}</TableCell>
                     </TableRow>
-                  ))}
+                  ) : currentAppliedJobs.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={4} className="py-8">
+                        <div className="flex flex-col items-center gap-4 text-center">
+                          <h3 className="text-lg font-semibold">
+                            No applications yet
+                          </h3>
+
+                          <p className="text-sm text-muted-foreground">
+                            You haven't applied for any jobs yet. Browse
+                            available jobs and submit your first application.
+                          </p>
+
+                          <Button onClick={() => navigate("/browsejobs")}>
+                            Browse Jobs
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    currentAppliedJobs.map((job) => (
+                      <TableRow key={job.id}>
+                        <TableCell className="text-left font-medium">
+                          {job.title}
+                        </TableCell>
+
+                        <TableCell className="text-left">
+                          {job.company_name}
+                        </TableCell>
+
+                        <TableCell className="text-left">
+                          {new Date(job.time_applied).toLocaleDateString(
+                            "en-SG",
+                            {
+                              day: "2-digit",
+                              month: "short",
+                              year: "numeric",
+                            },
+                          )}
+                        </TableCell>
+
+                        <TableCell className="text-left">
+                          <Badge
+                            variant={
+                              job.status === "Accepted"
+                                ? "default"
+                                : job.status === "Rejected"
+                                  ? "destructive"
+                                  : "secondary"
+                            }
+                          >
+                            {job.status}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </CardContent>
@@ -309,115 +471,52 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-semibold title-black">Saved Jobs</h2>
 
-            <Button variant="outline">View All</Button>
+            {savedJobs.length > 0 && (
+              <Button
+                variant="outline"
+                onClick={() => navigate("/jobSeeker/savedJobs")}
+              >
+                View All
+              </Button>
+            )}
           </div>
 
-          {/* SAVED JOB GRID */}
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {currentSavedJobs.map((job, index) => (
-              <Card key={index} className="hover:shadow-md transition">
-                <CardContent className="space-y-4 p-6">
-                  {/* ROW 1 */}
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={job.companyLogo}
-                      alt={job.companyName}
-                      className="h-12 w-12 rounded-md object-cover"
-                    />
+          {savedJobs.length === 0 ? (
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center gap-4 py-12 text-center">
+                <Bookmark className="h-12 w-12 text-muted-foreground" />
 
-                    <h3 className="font-semibold">{job.title}</h3>
-                  </div>
-
-                  {/* ROW 2 */}
-                  <p className="text-sm text-muted-foreground text-left">
-                    From {job.companyName}
+                <div>
+                  <h3 className="text-lg font-semibold">No saved jobs yet</h3>
+                  <p className="text-muted-foreground">
+                    Save jobs you're interested in so you can easily find them
+                    later.
                   </p>
+                </div>
 
-                  {/* ROW 3 */}
-                  <p className="font-medium text-left">{job.salary}</p>
-
-                  {/* ROW 4 */}
-                  <div className="flex justify-start">
-                    <span className="rounded-full bg-muted px-3 py-1 text-xs">
-                      {job.type}
-                    </span>
-                  </div>
-
-                  {/* ROW 5 */}
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <MapPin size={15} />
-                    <span className="text-left">{job.location}</span>
-                  </div>
-
-                  {/* ROW 6 */}
-                  <p className="text-xs text-muted-foreground text-left">
-                    Posted on {job.postedDate}
-                  </p>
-
-                  {/* ROW 7 */}
-                  <p className="text-xs text-muted-foreground text-left">
-                    Saved on {job.savedDate}
-                  </p>
-
-                  {/* ROW 8 */}
-                  <div className="flex items-center justify-between pt-2">
-                    <Button variant="ghost" size="icon">
-                      <Bookmark className="fill-current" />
-                    </Button>
-
-                    <div className="flex gap-2">
-                      <Button>Apply Now</Button>
-                      <Button variant="outline">View</Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          {/* PAGINATION */}
-          {/* PAGINATION */}
-          <div className="flex items-center justify-end gap-2">
-            {/* PREVIOUS BUTTON */}
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={savedPage === 1}
-              onClick={() => setSavedPage((prev) => prev - 1)}
-            >
-              Previous
-            </Button>
-
-            {/* PAGE NUMBERS */}
-            <div className="flex items-center gap-1">
-              {Array.from({
-                length: savedTotalPages,
-              }).map((_, i) => {
-                const page = i + 1;
-
-                return (
-                  <Button
-                    key={page}
-                    variant={savedPage === page ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setSavedPage(page)}
-                  >
-                    {page}
-                  </Button>
-                );
-              })}
+                <Button onClick={() => navigate("/browsejobs")}>
+                  Browse Jobs
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+              {currentSavedJobs.map((job) => (
+                <SavedJobCard
+                  key={job.id}
+                  currentUrl={currentUrl}
+                  job={job}
+                  onView={(jobId) => navigate(`/jobDetails?id=${jobId}`)}
+                  onApply={(jobId) => navigate(`/applyjob?id=${jobId}`)}
+                  onUnsave={(removedJob) => {
+                    setSavedJobs((prev) =>
+                      prev.filter((j) => j.jobId !== removedJob.jobId),
+                    );
+                  }}
+                />
+              ))}
             </div>
-
-            {/* NEXT BUTTON */}
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={savedPage === savedTotalPages}
-              onClick={() => setSavedPage((prev) => prev + 1)}
-            >
-              Next
-            </Button>
-          </div>
+          )}
         </section>
       </div>
     </div>

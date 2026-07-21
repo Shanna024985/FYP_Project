@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const jwtMiddleware = require('../middlewares/jwtMiddleware');
+const jwtMiddleware = require('../middlewares/jwtmiddleware');
 
 router.get("/",(req,res,next)=>{
     res.send("You are connected!")
@@ -11,6 +11,16 @@ const loginRoutes = require('./loginRoutes');
 router.use("/auth", loginRoutes);
 
 const jobRoutes = require("./jobRoutes");
+const companyRoutes = require("./companyRoutes");
+const uploadRoutes = require("./uploadRoutes");
+const locationRoutes = require("./locationRoutes");
+const reviewRoutes = require("./reviewRoutes");
+
+router.get("/", (req, res, next) => {
+    res.send("You are connected!");
+});
+
+router.use("/auth", loginRoutes);
 router.use("/jobs", jobRoutes);
 
 const resumeRoutes = require("./resumeRoutes");
@@ -21,5 +31,11 @@ router.use("/user", userRoutes);
 
 const messageRoutes = require("./messageRoutes");
 router.use("/message", jwtMiddleware.verifyToken, messageRoutes);
+router.use("/company", companyRoutes);
+router.use("/upload", uploadRoutes);
+router.use("/locations", locationRoutes);
+router.use("/resumes", resumeRoutes);
+router.use("/reviews", reviewRoutes);
+router.use("/user", userRoutes);
 
 module.exports = router;

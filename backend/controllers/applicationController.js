@@ -74,7 +74,10 @@ module.exports.getActiveCandidatesByJobId = (req, res, next) => {
             ]
 
             // return res.status(200).json({responses: res.locals.responses, responseDetails: res.locals.responseDetails, activeCandidates: applications});
-            return res.status(200).json({responses: res.locals.responses, responseDetails, activeCandidates: applications});
+            // return res.status(200).json({responses: res.locals.responses, responseDetails, activeCandidates: applications});
+            res.locals.responseDetails = responseDetails
+            res.locals.activeCandidates = applications
+            next()
         } else {
             return res.status(200).json(applications);
         }
@@ -97,9 +100,10 @@ module.exports.getResponsesByJobId = (req, res, next) => {
 
 // get responses awaiting action by job ID
 module.exports.getAwaitingResponsesByJobId = (req, res, next) => {
-    return model.getAwaitingResponsesByJobId(req.params.jobId)
+   
+    return model.getAwaitingResponsesByJobId(res.locals.jobId)
     .then((applications) => {
-        return res.status(200).json(applications);
+        return res.status(200).json({responses: res.locals.responses, responseDetails: res.locals.responseDetails, activeCandidates: res.locals.activeCandidates, awaitingCandidates: applications});
     }).catch(function (error) {
         console.error(error);
         return res.status(500).json({ error: error.message });

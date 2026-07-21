@@ -17,7 +17,7 @@ const jose = require("jose")
 // }
 
 module.exports.getMessageBetweenUsers = (userId1, userId2, page) => {
-    let sql = `SELECT m.message,
+    let sql = `SELECT m.id,m.message,
     d1.user_id sender_user_id,
     d1.first_name || ' ' || d1.last_name sender_user_name,
     d1.profile_picture_file_name sender_profile_picture_file_name,
@@ -31,30 +31,63 @@ module.exports.getMessageBetweenUsers = (userId1, userId2, page) => {
     JOIN user_detail d2 ON d2.user_id = m.receiver_user_id
     WHERE (sender_user_id = $1 AND receiver_user_id = $2)
     OR (receiver_user_id = $3 AND sender_user_id = $4)
-    ORDER BY 6 DESC LIMIT 25 OFFSET $5;`;
-    return query(sql, [userId1, userId2, userId1, userId2, (page - 1) * 25]).then(function(result) {
+    ORDER BY m.time_sent ASC LIMIT 25 OFFSET $5;`;
+    return query(sql, [userId1, userId2, userId1, userId2, (page - 1) * 25]).then(function (result) {
         return result.rows;
     });
 }
 
 module.exports.getUserList = (userId) => {
     let sql = `SELECT * FROM get_conversations($1);`;
-    return query(sql, [userId]).then(function(result) {
+    return query(sql, [userId]).then(function (result) {
         return result.rows;
     });
 }
 
 module.exports.insertSingleMessage = (senderUserId, receiverUserId, message) => {
-    let sql = `INSERT INTO message (sender_user_id, receiver_user_id, message)
-    VALUES ($1, $2, $3) RETURNING id;`;
-    return query(sql, [senderUserId, receiverUserId, message]).then(function(result) {
+    let sql = `WITH new_message AS (
+    INSERT INTO message (
+        sender_user_id,
+        receiver_user_id,
+        message
+    )
+    VALUES ($1, $2, $3)
+    RETURNING id,
+              sender_user_id,
+              receiver_user_id,
+              message,
+              time_sent
+)
+SELECT
+    nm.id,
+    nm.message,
+    nm.time_sent,
+
+    -- Sender information
+    sender.user_id AS sender_id,
+    sender.first_name|| ' ' || sender.last_name AS sender_user_name,
+    sender.profile_picture_file_name AS sender_profile_picture_file_name,
+    sender.profile_picture_file_url AS sender_profile_picture_file_url,
+
+    -- Receiver information
+    receiver.user_id AS receiver_id,
+    receiver.first_name || ' ' || receiver.last_name  AS receiver_user_name,
+    receiver.profile_picture_file_name AS receiver_profile_picture_file_name,
+    receiver.profile_picture_file_url AS receiver_profile_picture_file_url
+
+FROM new_message nm
+INNER JOIN user_detail sender
+    ON nm.sender_user_id = sender.user_id
+INNER JOIN user_detail receiver
+    ON nm.receiver_user_id = receiver.user_id;`;
+    return query(sql, [senderUserId, receiverUserId, message]).then(function (result) {
         return result.rows;
     });
 }
 
 module.exports.updateMessageById = (message, id) => {
     let sql = `UPDATE message SET message = $1 WHERE id = $2 RETURNING id, sender_user_id, receiver_user_id;`;
-    return query(sql, [message, id]).then(function(result) {
+    return query(sql, [message, id]).then(function (result) {
         return result.rows;
     });
 }
@@ -68,7 +101,7 @@ module.exports.deleteMessageById = (id) => {
 
 module.exports.getMessageById = (id) => {
     let sql = `SELECT * FROM message WHERE id = $1;`;
-    return query(sql, [id]).then(function(result) {
+    return query(sql, [id]).then(function (result) {
         return result.rows;
     });
 }
