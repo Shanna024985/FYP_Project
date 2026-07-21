@@ -1,5 +1,6 @@
 const { query } = require("../services/dbConnection");
-const { Server } = require('ws');
+const {Server} = require('ws');
+const jose = require("jose")
 
 // module.exports.getMessageByUserId = (userId, page) => {
 //     let sql = `GET m.message,
@@ -30,7 +31,7 @@ module.exports.getMessageBetweenUsers = (userId1, userId2, page) => {
     JOIN user_detail d2 ON d2.user_id = m.receiver_user_id
     WHERE (sender_user_id = $1 AND receiver_user_id = $2)
     OR (receiver_user_id = $3 AND sender_user_id = $4)
-    ORDER BY m.time_sent ASC LIMIT 25 OFFSET $5;`;
+    ORDER BY m.time_sent DESC LIMIT 25 OFFSET $5;`;
     return query(sql, [userId1, userId2, userId1, userId2, (page - 1) * 25]).then(function (result) {
         return result.rows;
     });
@@ -106,41 +107,35 @@ module.exports.getMessageById = (id) => {
 }
 
 const PORT = 3001;
-const server = new Server({ port: PORT }, () => {
-    console.log(`Websocket running on ws://localhost:${PORT}`);
-});
+// const server = new Server({port: PORT}, () => {
+//     console.log(`Websocket running on ws://localhost:${PORT}`);
+// });
 let clients = {};
 const jwt = require("jsonwebtoken");
-const secretKey = process.env.JWT_SECRET_KEY.trim();
-
-server.on('connection', (ws, req) => {
-    let params = new URLSearchParams(req.url.slice(2));
-    let token = params.get('token');
-    if (token) {
-        try {
-            clients[jwt.verify(token, secretKey).userId] = ws;
-        } catch (err) {
-            console.log(err);
-        }
-    }
-
-    ws.on('close', () => {
-        const key = Object.keys(clients).find(
-            id => clients[id] === ws
-        );
-
-
-        if (key) {
-            delete clients[key];
-        }
-    })
-})
-
+const jwtSecretKey = process.env.JWT_SECRET_KEY.trim();
+const websocketSecretKey = process.env.WEBSOCKET_SECRET_KEY.trim();
+const tokenDuration = process.env.JWT_EXPIRES_IN;
+const tokenAlgorithm = process.env.JWT_ALGORITHM;
+const websocketPublicKey = process.env.WEBSOCKET_PUBLIC_KEY.trim();
+const websocketAlg = process.env.WEBSOCKET_ALG.trim();
+const options = {
+    // algorithm: tokenAlgorithm,
+    // expiresIn: tokenDuration,
+};
 module.exports.sendUpdateMessage = (userId, senderUserId) => {
-    let wsUser = clients[userId];
-    if (wsUser) {
-        wsUser.send(senderUserId);
-    } else {
-        // senderUser is not online, maybe send email to user?
-    }
+    jwt.sign({"secret_key":  websocketSecretKey}, jwtSecretKey, options, (err, encoded) => {
+        new jose.CompactEncrypt(new TextEncoder().encode(encoded)).setProtectedHeader(JSON.parse(websocketAlg)).encrypt(JSON.parse(websocketPublicKey)).then(token => {
+            const socket = new WebSocket(`ws://localhost:${PORT}?admin_token=${token}`);
+
+            socket.addEventListener('open', ws => {
+                console.log('Connected!');
+                socket.send(JSON.stringify({action: 'update', userId, senderUserId}));
+                socket.close();
+            });
+
+            socket.addEventListener('error', error => {
+                console.error(error);
+            });
+        })
+    })
 }
