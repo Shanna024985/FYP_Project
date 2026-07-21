@@ -1,6 +1,6 @@
 const express = require('express');
 const loginController = require('../controllers/loginController');
-const jwtMiddleware = require('../middlewares/jwtMiddleware');
+const jwtMiddleware = require('../middlewares/jwtmiddleware');
 const router = express.Router();
 
 router.get('/', loginController.createSingpassURL);

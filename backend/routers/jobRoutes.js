@@ -3,7 +3,7 @@ const router = express.Router();
 const jobController = require("../controllers/jobController");
 const resumeController = require("../controllers/resumeController");
 const applicationController = require("../controllers/applicationController");
-const jwtMiddleware = require('../middlewares/jwtMiddleware');
+const jwtMiddleware = require('../middlewares/jwtmiddleware');
 const upload = require("../middlewares/upload");
 
 // Company routes (SPECIFIC routes first)
