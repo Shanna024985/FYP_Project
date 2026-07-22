@@ -151,20 +151,25 @@ wss.on("connection", (ws, req) => {
     ws.on("message", message => {
 
         const messageJSON = JSON.parse(message);
+        console.log(messageJSON)
 
         if (messageJSON.action == "update") {
 
             try {
 
+                console.log(clients)
                 const role = Object.entries(clients)
                     .find(wsPair => wsPair[1].ws == ws)?.[0];
+                console.log(role)
 
                 if (role == "admin") {
 
                     const wsUser = clients[messageJSON.userId];
+                    console.log(7)
 
                     if (wsUser) {
                         wsUser.ws.send(messageJSON.senderUserId);
+                        console.log(8)
                     }
 
                 }
