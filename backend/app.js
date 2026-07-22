@@ -122,27 +122,29 @@ wss.on("connection", (ws, req) => {
     }
     else if (admin_token) {
 
-        jose.compactDecrypt(admin_token, JSON.parse(websocketPrivateKey))
-        .then(result => {
+        jose.importJWK(JSON.parse(websocketPrivateKey), 'ECDH-ES+A256KW').then(privateKeyCrypto => {
+            jose.compactDecrypt(admin_token, privateKeyCrypto)
+            .then(result => {
 
-            jwt.verify(
-                new TextDecoder().decode(result.plaintext),
-                jwtSecretKey,
-                (err, admin_token) => {
+                jwt.verify(
+                    new TextDecoder().decode(result.plaintext),
+                    jwtSecretKey,
+                    (err, admin_token) => {
 
-                    if (admin_token.secret_key == websocketSecretKey) {
-                        clients.admin = {
-                            ws,
-                            role: "admin"
-                        };
-                    } else {
-                        ws.close();
+                        if (admin_token.secret_key == websocketSecretKey) {
+                            clients.admin = {
+                                ws,
+                                role: "admin"
+                            };
+                        } else {
+                            ws.close();
+                        }
+
                     }
+                );
 
-                }
-            );
-
-        });
+            });
+        })
 
     }
 
