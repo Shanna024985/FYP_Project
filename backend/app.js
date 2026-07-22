@@ -162,6 +162,7 @@ wss.on("connection", (ws, req) => {
                 if (role == "admin") {
 
                     const wsUser = clients[messageJSON.userId];
+                    console.log(wsUser)
 
                     if (wsUser) {
                         wsUser.ws.send(messageJSON.senderUserId);
