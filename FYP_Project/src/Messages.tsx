@@ -69,41 +69,14 @@ const Messages = (props: Props) => {
   let [currentIdToEdit, setCurrentIdToEdit] = useState("");
   useEffect(() => {
     socket.current = new WebSocket(
-      "wss://fyp-project-fkmo.onrender.com/?token=" + localStorage.getItem("token"),
+      "wss://fyp-project-fkmo.onrender.com/?token=" +
+        localStorage.getItem("token"),
     );
     socket.current.onopen = () => {
       console.log("Connected");
     };
     socket.current.onmessage = (event) => {
-      // fetch(props.currentUrl + "/message/" + event.data, {
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //     Authorization: "Bearer " + localStorage.getItem("token"),
-      //   },
-      // })
-      //   .then((value) => {
-      //     return value.json();
-      //   })
-      //   .then((messagesJsonNew) => {
-      //     setMessagesJson(messagesJsonNew);
-
-      //     let newListOfPeople = listOfPeople?.map((ValuesOfPeople) => {
-      //       if (
-      //         ValuesOfPeople.user_id ===
-      //         messagesJsonNew[messagesJsonNew.length - 1].sender_user_id
-      //       ) {
-      //         return {
-      //           ...ValuesOfPeople,
-      //           most_recent_message:
-      //             messagesJsonNew[messagesJsonNew.length - 1].message,
-      //         };
-      //       } else {
-      //         return ValuesOfPeople;
-      //       }
-      //     });
-      //     setListOfpeople(newListOfPeople);
-      //     console.log(messagesJson);
-      //   });
+      console.log(event)
       fetch(props.currentUrl + "/message/" + event.data, {
         headers: {
           "Content-Type": "application/json",
