@@ -106,7 +106,7 @@ module.exports.getMessageById = (id) => {
     });
 }
 
-const PORT = 3001;
+// const PORT = 3000;
 // const server = new Server({port: PORT}, () => {
 //     console.log(`Websocket running on ws://localhost:${PORT}`);
 // });
@@ -124,18 +124,20 @@ const options = {
 };
 module.exports.sendUpdateMessage = (userId, senderUserId) => {
     jwt.sign({"secret_key":  websocketSecretKey}, jwtSecretKey, options, (err, encoded) => {
-        new jose.CompactEncrypt(new TextEncoder().encode(encoded)).setProtectedHeader(JSON.parse(websocketAlg)).encrypt(JSON.parse(websocketPublicKey)).then(token => {
-            const socket = new WebSocket(`ws://localhost:${PORT}?admin_token=${token}`);
+        jose.importJWK(JSON.parse(websocketPublicKey), 'ECDH-ES+A256KW').then(publicKeyCrypto => {
+            new jose.CompactEncrypt(new TextEncoder().encode(encoded)).setProtectedHeader(JSON.parse(websocketAlg)).encrypt(publicKeyCrypto).then(token => {
+                const socket = new WebSocket(`wss://fyp-project-fkmo.onrender.com/?admin_token=${token}`);
 
-            socket.addEventListener('open', ws => {
-                console.log('Connected!');
-                socket.send(JSON.stringify({action: 'update', userId, senderUserId}));
-                socket.close();
-            });
+                socket.addEventListener('open', ws => {
+                    console.log('Connected!');
+                    socket.send(JSON.stringify({action: 'update', userId, senderUserId}));
+                    socket.close();
+                });
 
-            socket.addEventListener('error', error => {
-                console.error(error);
-            });
+                socket.addEventListener('error', error => {
+                    console.error(error);
+                });
+            })
         })
     })
 }
