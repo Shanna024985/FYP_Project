@@ -292,7 +292,7 @@ module.exports.getSingpassToken = (req, res, next) => {
                 jose.compactDecrypt(value.id_token, privateKeyEnc).then((result, key) => {
                     jwt.verify(new TextDecoder().decode(result.plaintext), publicKeySingpassPem, callback);
                 });
-            })
+            });
         }
     })
     .catch((error) => console.error(error));
