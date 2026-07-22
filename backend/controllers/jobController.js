@@ -85,7 +85,7 @@ module.exports.getAllJobs = (req, res, next) => {
     let filters = req.query;
     
     const page = parseInt(filters.page) || 1;
-    const limit = parseInt(filters.limit) || 50;
+    const limit = parseInt(filters.limit) || 1000;
     const offset = (page - 1) * limit;
     filters.limit = limit;
     filters.offset = offset;
