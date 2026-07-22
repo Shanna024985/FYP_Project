@@ -104,7 +104,7 @@ const mainRoutes = require("./routers/mainRoutes");
 app.use("/api", mainRoutes);
 
 wss.on("connection", (ws, req) => {
-
+    console.log("Websocket connection work")
     let params = new URLSearchParams(req.url.slice(2));
 
     let admin_token = params.get("admin_token");

@@ -69,7 +69,7 @@ const Messages = (props: Props) => {
   let [currentIdToEdit, setCurrentIdToEdit] = useState("");
   useEffect(() => {
     socket.current = new WebSocket(
-      "ws://localhost:3001?token=" + localStorage.getItem("token"),
+      "wss://fyp-project-fkmo.onrender.com/?token=" + localStorage.getItem("token"),
     );
     socket.current.onopen = () => {
       console.log("Connected");
