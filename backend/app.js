@@ -121,22 +121,27 @@ wss.on("connection", (ws, req) => {
         }
     }
     else if (admin_token) {
+        console.log(1)
 
         jose.importJWK(JSON.parse(websocketPrivateKey), 'ECDH-ES+A256KW').then(privateKeyCrypto => {
+            console.log(2)
             jose.compactDecrypt(admin_token, privateKeyCrypto)
             .then(result => {
-
+                console.log(3)
                 jwt.verify(
                     new TextDecoder().decode(result.plaintext),
                     jwtSecretKey,
                     (err, admin_token) => {
+                        console.log(4)
 
                         if (admin_token.secret_key == websocketSecretKey) {
+                            console.log(5)
                             clients.admin = {
                                 ws,
                                 role: "admin"
                             };
                         } else {
+                            console.log(6)
                             ws.close();
                         }
 
@@ -151,19 +156,22 @@ wss.on("connection", (ws, req) => {
     ws.on("message", message => {
 
         const messageJSON = JSON.parse(message);
+        console.log(7)
 
         if (messageJSON.action == "update") {
+            console.log(8)
 
             try {
-
+                console.log(9)
                 const role = Object.entries(clients)
                     .find(wsPair => wsPair[1].ws == ws)?.[0];
-
+                console.log(10)
                 if (role == "admin") {
-
+                    console.log(11)
                     const wsUser = clients[messageJSON.userId];
-
+                    console.log(12)
                     if (wsUser) {
+                        console.log(13)
                         wsUser.ws.send(messageJSON.senderUserId);
                     }
 
