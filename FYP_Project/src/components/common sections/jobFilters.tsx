@@ -163,7 +163,7 @@ export default function JobFilters() {
           {/* ROW 2 */}
           <div className="flex flex-wrap gap-4">
             <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger>
+              <SelectTrigger className="w-64">
                 <SelectValue placeholder="Job Categories" />
               </SelectTrigger>
 
@@ -192,7 +192,7 @@ export default function JobFilters() {
             </Select>
 
             <Select value={careerLevel} onValueChange={setCareerLevel}>
-              <SelectTrigger>
+              <SelectTrigger className="w-64">
                 <SelectValue placeholder="Career Level" />
               </SelectTrigger>
 
