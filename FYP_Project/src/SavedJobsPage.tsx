@@ -134,10 +134,6 @@ export default function SavedJobsPage({ currentUrl }: Props) {
 
             <div>
               <h2 className="text-xl font-semibold title-black">No saved jobs yet</h2>
-              <p className="text-muted-foreground">
-                Save jobs you're interested in and they'll appear here for easy
-                access.
-              </p>
             </div>
 
             <Button onClick={() => navigate("/browsejobs")}>Browse Jobs</Button>
