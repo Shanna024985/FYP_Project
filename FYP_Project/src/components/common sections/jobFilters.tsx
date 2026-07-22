@@ -3,6 +3,7 @@ import { Search, MapPin, ChevronDown, ChevronUp } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { countries } from "./locations";
 import {
   Select,
   SelectContent,
@@ -39,7 +40,7 @@ export default function JobFilters() {
     searchParams.get("salary_period") ?? "",
   );
   const [salaryType, setSalaryType] = useState(
-    searchParams.get("salary_type") ?? "negotiable",
+    searchParams.get("salary_type") ?? "any"
   );
 
   const navigate = useNavigate();
@@ -52,7 +53,7 @@ export default function JobFilters() {
     if (jobType) params.append("type", jobType);
     if (category) params.append("category", category);
     if (careerLevel) params.append("career_level", careerLevel);
-    if (salaryType) params.append("salary_type", salaryType);
+    if (salaryType !== "any") { params.append("salary_type", salaryType);}
     if (company) params.append("company", company);
     if (minSalary) params.append("min_salary", minSalary);
     if (maxSalary) params.append("max_salary", maxSalary);
@@ -70,7 +71,7 @@ export default function JobFilters() {
     setMinSalary("");
     setMaxSalary("");
     setSalaryPeriod("");
-    setSalaryType("negotiable");
+    setSalaryType("any");
   };
   return (
     <div className="w-full rounded-2xl border bg-background p-6 shadow-sm space-y-5">
@@ -125,7 +126,7 @@ export default function JobFilters() {
       {showAdvanced && (
         <div className="space-y-4">
           {/* ROW 1 */}
-          <div className="flex flex-wrap gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <Input
               placeholder="Enter company"
               className="w-full"
@@ -135,13 +136,13 @@ export default function JobFilters() {
 
             <Select value={jobType} onValueChange={setJobType}>
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Duration" />
+                <SelectValue placeholder="Job Type" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="Full-Time">Full-time</SelectItem>
                 <SelectItem value="Part-Time">Part-time</SelectItem>
                 <SelectItem value="Contract">Contract</SelectItem>
-                <SelectItem value="Internship">Internship</SelectItem>
+                <SelectItem value="GIG">GIG</SelectItem>
               </SelectContent>
             </Select>
 
@@ -151,11 +152,11 @@ export default function JobFilters() {
               </SelectTrigger>
 
               <SelectContent>
-                <SelectItem value="Singapore">Singapore</SelectItem>
-                <SelectItem value="Malaysia">Malaysia</SelectItem>
-                <SelectItem value="Indonesia">Indonesia</SelectItem>
-                <SelectItem value="Thailand">Thailand</SelectItem>
-                <SelectItem value="Vietnam">Vietnam</SelectItem>
+                {Object.keys(countries).map((country) => (
+                  <SelectItem key={country} value={country}>
+                    {country}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -167,38 +168,25 @@ export default function JobFilters() {
               </SelectTrigger>
 
               <SelectContent>
-                <SelectItem value="admin">Admin & Secretarial</SelectItem>
-
-                <SelectItem value="business">Business & Finance</SelectItem>
-
-                <SelectItem value="engineering">Engineering</SelectItem>
-
-                <SelectItem value="customer-support">
+                <SelectItem value={"admin"}>Admin & Secretarial</SelectItem>
+                <SelectItem value={"business"}>Business & Finance</SelectItem>
+                <SelectItem value={"engineering"}>Engineering</SelectItem>
+                <SelectItem value={"customersupport"}>
                   Customer Support
                 </SelectItem>
-
-                <SelectItem value="it">IT & Software</SelectItem>
-
-                <SelectItem value="design">Design & Creative</SelectItem>
-
+                <SelectItem value={"it"}>IT & Software</SelectItem>
+                <SelectItem value="design">Design & Creatives</SelectItem>
                 <SelectItem value="education">Education & Training</SelectItem>
-
-                <SelectItem value="healthcare">Healthcare & Science</SelectItem>
-
-                <SelectItem value="legal">Legal & Security</SelectItem>
-
-                <SelectItem value="logistics">
+                <SelectItem value="science">Healthcare & Science</SelectItem>
+                <SelectItem value="security">Legal & Security</SelectItem>
+                <SelectItem value="transportation">
                   Logistics & Transportation
                 </SelectItem>
-
                 <SelectItem value="marketing">
                   Marketing & Advertising
                 </SelectItem>
-
                 <SelectItem value="sales">Sales & Retail</SelectItem>
-
-                <SelectItem value="trades">Trades & Services</SelectItem>
-
+                <SelectItem value="trading">Trades & Services</SelectItem>
                 <SelectItem value="writing">Writing & Translation</SelectItem>
               </SelectContent>
             </Select>
@@ -209,17 +197,16 @@ export default function JobFilters() {
               </SelectTrigger>
 
               <SelectContent>
-                <SelectItem value="entry">Entry Level/Early Career</SelectItem>
-
-                <SelectItem value="experienced">
+                <SelectItem value={"early"}>
+                  Entry Level/Early Career
+                </SelectItem>
+                <SelectItem value={"experienced"}>
                   Experienced Professional
                 </SelectItem>
-
-                <SelectItem value="leadership">
+                <SelectItem value={"leadership"}>
                   Leadership/Management
                 </SelectItem>
-
-                <SelectItem value="owner">Independent/Owner</SelectItem>
+                <SelectItem value={"independent"}>Independent/Owner</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -232,16 +219,15 @@ export default function JobFilters() {
               </SelectTrigger>
 
               <SelectContent>
-                <SelectItem value="negotiable">Negotiable</SelectItem>
-
-                <SelectItem value="fixed">Fixed</SelectItem>
-
-                <SelectItem value="range">Range</SelectItem>
+                <SelectItem value="any">Any Salary Type</SelectItem>
+                <SelectItem value="Negotiable">Negotiable</SelectItem>
+                <SelectItem value="Fixed">Fixed</SelectItem>
+                <SelectItem value="Range">Range</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          {salaryType === "fixed" && (
+          {salaryType === "Fixed" && (
             <div className="grid gap-4 lg:grid-cols-2">
               <Input
                 type="number"
@@ -256,15 +242,15 @@ export default function JobFilters() {
                 </SelectTrigger>
 
                 <SelectContent>
-                  <SelectItem value="Month">Per month</SelectItem>
-                  <SelectItem value="Year">Per year</SelectItem>
-                  <SelectItem value="Hour">Per hour</SelectItem>
+                  <SelectItem value="Week">Per Week</SelectItem>
+                  <SelectItem value="Month">Per Month</SelectItem>
+                  <SelectItem value="Year">Per Year</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           )}
 
-          {salaryType === "range" && (
+          {salaryType === "Range" && (
             <div className="grid gap-4 lg:grid-cols-3">
               <Input
                 type="number"
@@ -285,9 +271,9 @@ export default function JobFilters() {
                   <SelectValue placeholder="Salary Type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Month">Per month</SelectItem>
-                  <SelectItem value="Year">Per year</SelectItem>
-                  <SelectItem value="Hour">Per hour</SelectItem>
+                  <SelectItem value="Week">Per Week</SelectItem>
+                  <SelectItem value="Month">Per Month</SelectItem>
+                  <SelectItem value="Year">Per Year</SelectItem>
                 </SelectContent>
               </Select>
             </div>
