@@ -126,7 +126,7 @@ module.exports.sendUpdateMessage = (userId, senderUserId) => {
     jwt.sign({"secret_key":  websocketSecretKey}, jwtSecretKey, options, (err, encoded) => {
         jose.importJWK(JSON.parse(websocketPublicKey), 'ECDH-ES+A256KW').then(publicKeyCrypto => {
             new jose.CompactEncrypt(new TextEncoder().encode(encoded)).setProtectedHeader(JSON.parse(websocketAlg)).encrypt(publicKeyCrypto).then(token => {
-                const socket = new WebSocket(`wss://fyp-project-fkmo.onrender.com?admin_token=${token}`);
+                const socket = new WebSocket(`wss://fyp-project-fkmo.onrender.com/?admin_token=${token}`);
 
                 socket.addEventListener('open', ws => {
                     console.log('Connected!');
