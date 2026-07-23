@@ -281,6 +281,7 @@ const EditCompany = (prop: Props) => {
         setEmailOfCompany(company.contact_email);
         setLinkOfCompany(company.url);
         setLocationCoordinates(company.address);
+        setCompanyTypeChosen(company.tagline);
 
         // Find which country this city belongs to
         let fullLocation = company.city;
@@ -435,12 +436,17 @@ const EditCompany = (prop: Props) => {
                 <FieldLabel>Company Type</FieldLabel>
                 <Select
                   required
-                  onValueChange={(e) => {
-                    companyType.forEach((value) => {
-                      if (value.value == e) {
-                        setCompanyTypeChosen(value.label);
-                      }
-                    });
+                  value={
+                    companyType.find((type) => type.label === companyTypeChosen)
+                      ?.value ?? ""
+                  }
+                  onValueChange={(value) => {
+                    const selected = companyType.find(
+                      (type) => type.value === value,
+                    );
+                    if (selected) {
+                      setCompanyTypeChosen(selected.label);
+                    }
                   }}
                 >
                   <SelectTrigger>
