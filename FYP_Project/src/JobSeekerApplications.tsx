@@ -138,11 +138,7 @@ export default function MyApplicationsPage({ currentUrl }: Props) {
           {/* Your existing card content */}
           <div className="flex items-center gap-4">
             <img
-              src={
-                application.logo_url
-                  ? `${currentUrl}/uploads/company/${application.logo_url}`
-                  : "https://placehold.co/80x80/png"
-              }
+              src={application.logo_url || "https://placehold.co/80x80/png"}
               alt={application.company_name}
               className="h-12 w-12 rounded-lg object-cover"
             />
