@@ -392,6 +392,7 @@ const CompanyReviews = (prop: Props) => {
                                     onChange={(e) => {
                                       setEditReviews(e.currentTarget.value);
                                     }}
+                                    minLength={10}
                                   />
                                 </div>
                               </div>
@@ -422,8 +423,13 @@ const CompanyReviews = (prop: Props) => {
                                         .then((value) => {
                                           return value.json();
                                         })
-                                        .then(() => {
+                                        .then((things) => {
+                                          if (things.error){
+                                            alert(things.error)
+                                          } else {
                                           window.location.reload();
+
+                                          }
                                         });
                                     }}
                                   >
