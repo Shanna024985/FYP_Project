@@ -66,7 +66,7 @@ const NavigationMenus = () => {
   };
 
   return (
-    <div className="flex w-full items-center justify-between">
+    <div className="sticky top-0 z-50 flex w-full items-center justify-between border-b bg-background/95 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       {/* LEFT SIDE */}
       <NavigationMenu>
         <NavigationMenuList>

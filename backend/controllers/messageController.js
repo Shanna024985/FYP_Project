@@ -101,9 +101,7 @@ module.exports.createMessage = (req, res, next) => {
 
     return model.insertSingleMessage(res.locals.userId, req.body.receiverUserId, req.body.message)
     .then((messages) => {
-        console.log(5)
         model.sendUpdateMessage(req.body.receiverUserId, res.locals.userId);
-        console.log(6)
         return res.status(200).json({message: 'message created successfully', messageJson: messages[0]});
     }).catch(function (error) {
         console.error(error);

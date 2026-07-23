@@ -123,13 +123,9 @@ const options = {
     // expiresIn: tokenDuration,
 };
 module.exports.sendUpdateMessage = (userId, senderUserId) => {
-    console.log(1)
     jwt.sign({"secret_key":  websocketSecretKey}, jwtSecretKey, options, (err, encoded) => {
-        console.log(2)
         jose.importJWK(JSON.parse(websocketPublicKey), 'ECDH-ES+A256KW').then(publicKeyCrypto => {
-            console.log(3)
             new jose.CompactEncrypt(new TextEncoder().encode(encoded)).setProtectedHeader(JSON.parse(websocketAlg)).encrypt(publicKeyCrypto).then(token => {
-                console.log(4)
                 const socket = new WebSocket(`wss://fyp-project-fkmo.onrender.com/?admin_token=${token}`);
 
                 socket.addEventListener('open', ws => {
