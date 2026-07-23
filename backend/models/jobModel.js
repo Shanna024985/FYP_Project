@@ -4,45 +4,37 @@ const { query } = require("../services/dbConnection");
 
 // Helper function to normalize category - FIXED for lowercase database values
 function normalizeCategory(category) {
-    if (!category) return "other";
+    if (!category) return 'other';
 
     const categoryMap = {
-        admin: "admin",
-        business: "business",
-        engineering: "engineering",
-
-        customersupport: "customer-support",
-        "customer-support": "customer-support",
-        "customer service": "customer-support",
-
-        it: "it",
-        design: "design",
-        education: "education",
-
-        science: "healthcare",
-        healthcare: "healthcare",
-
-        security: "legal",
-        legal: "legal",
-
-        transportation: "logistics",
-        logistics: "logistics",
-
-        marketing: "marketing",
-
-        sales: "sales",
-
-        trading: "trades",
-        trades: "trades",
-
-        writing: "writing",
-
-        "part-timer": "other",
-
-        other: "other",
+        'admin': 'admin',
+        'business': 'business',
+        'engineering': 'engineering',
+        'customer-support': 'customer-support',
+        'customer service': 'customer-support',
+        'it': 'it',
+        'design': 'design',
+        'education': 'education',
+        'healthcare': 'healthcare',
+        'legal': 'legal',
+        'logistics': 'logistics',
+        'marketing': 'marketing',
+        'sales': 'sales',
+        'trades': 'trades',
+        'writing': 'writing',
+        'other': 'other',
+        'IT': 'it',
+        'Marketing': 'marketing',
+        'Sales': 'sales',
+        'Finance': 'finance',
+        'HR': 'hr',
+        'Operations': 'operations',
+        'Customer Service': 'customer-support',
+        'Design': 'design',
+        'Other': 'other'
     };
 
-    return categoryMap[category.toLowerCase()] || "other";
+    return categoryMap[category] || category.toLowerCase();
 }
 
 // Helper function to normalize type
@@ -57,7 +49,6 @@ function normalizeType(type) {
         'part-time': 'Part-Time',
         'Part-Time': 'Part-Time',
         'part time': 'Part-Time',
-        'Part-time': 'Part-Time',
         'Part Time': 'Part-Time',
         'internship': 'Internship',
         'Internship': 'Internship',
@@ -90,20 +81,15 @@ function normalizeSalaryType(salaryType) {
 
 // Helper function to normalize salary period
 function normalizeSalaryPeriod(salaryPeriod) {
-    if (!salaryPeriod) return "Month";
+    if (!salaryPeriod) return 'Month';
 
     const salaryPeriodMap = {
-        week: "Week",
-        Week: "Week",
-
-        month: "Month",
-        Month: "Month",
-
-        year: "Year",
-        Year: "Year",
-
-        hour: "Hour",
-        Hour: "Hour",
+        'hour': 'Hour',
+        'Hour': 'Hour',
+        'month': 'Month',
+        'Month': 'Month',
+        'year': 'Year',
+        'Year': 'Year'
     };
 
     return salaryPeriodMap[salaryPeriod] || salaryPeriod;
@@ -129,42 +115,38 @@ function normalizeExperience(experience) {
 
 // Helper function to normalize duration
 function normalizeDuration(duration) {
-    if (!duration) return "1-3 days";
+    if (!duration) return '1-3 days';
 
     const durationMap = {
-        sevendays: "1 week",
-        thirtydays: "2-4 weeks",
-        sixmonth: ">4 weeks",
-        oneyear: ">4 weeks",
-        greaterthanoneyear: ">4 weeks",
-
-        "<1 day": "<1 day",
-        "1-3 days": "1-3 days",
-        "3-7 days": "3-7 days",
-        "1 week": "1 week",
-        "2-4 weeks": "2-4 weeks",
-        ">4 weeks": ">4 weeks",
+        '<1 day': '<1 day',
+        '1-3 days': '1-3 days',
+        '3-7 days': '3-7 days',
+        '1 week': '1 week',
+        '2-4 weeks': '2-4 weeks',
+        '>4 weeks': '>4 weeks'
     };
 
     return durationMap[duration] || duration;
 }
+
 // Helper function to normalize career level
 function normalizeCareerLevel(careerLevel) {
-    if (!careerLevel) return "entry";
+    if (!careerLevel) return 'entry';
 
     const careerMap = {
-        early: "entry",
-        entry: "entry",
-
-        experienced: "experienced",
-
-        leadership: "leadership",
-
-        independent: "owner",
-        owner: "owner",
+        'entry': 'entry',
+        'experienced': 'experienced',
+        'leadership': 'leadership',
+        'owner': 'owner',
+        'Entry': 'entry',
+        'Entry Level': 'entry',
+        'entry level': 'entry',
+        'Experienced': 'experienced',
+        'Leadership': 'leadership',
+        'Owner': 'owner'
     };
 
-    return careerMap[careerLevel.toLowerCase()] || "entry";
+    return careerMap[careerLevel] || careerLevel.toLowerCase();
 }
 
 // ==================== LOCATION HELPER (COUNTRY-BASED) ====================
@@ -404,18 +386,7 @@ module.exports.getAllJobs = function getAllJobs(filters = {}) {
         params.push(normalizedCareerLevel);
         paramIndex++;
     }
-if (filters.salary_type) {
-    const normalizedSalaryType = normalizeSalaryType(filters.salary_type);
-    conditions.push(` j.salary_type = $${paramIndex}`);
-    params.push(normalizedSalaryType);
-    paramIndex++;
-}
-if (filters.salary_period) {
-    const normalizedSalaryPeriod = normalizeSalaryPeriod(filters.salary_period);
-    conditions.push(` j.salary_period = $${paramIndex}`);
-    params.push(normalizedSalaryPeriod);
-    paramIndex++;
-}
+
     if (filters.duration) {
         const normalizedDuration = normalizeDuration(filters.duration);
         conditions.push(` j.duration = $${paramIndex}`);
@@ -446,13 +417,14 @@ if (filters.salary_period) {
         params.push(parseInt(filters.company_id));
         paramIndex++;
     }
+
+    if (conditions.length > 0) {
+        sql += " AND" + conditions.join(" AND");
+    }
     if (filters.address) {
       conditions.push(`j.address ILIKE $${paramIndex}`);
       params.push(`%${filters.address}%`);
       paramIndex++;
-    }
-    if (conditions.length > 0) {
-        sql += " AND " + conditions.join(" AND ");
     }
 
     const limit = filters.limit ? parseInt(filters.limit) : 10;
@@ -461,9 +433,6 @@ if (filters.salary_period) {
     params.push(limit, offset);
 
     return query(sql, params).then(function (result) {
-        console.log("Rows returned:", result.rows.length);
-    console.log(result.rows);
-
         return result.rows;
     });
 }
@@ -520,18 +489,7 @@ module.exports.getTotalJobCount = function getTotalJobCount(filters = {}) {
         params.push(normalizedCareerLevel);
         paramIndex++;
     }
-if (filters.salary_type) {
-    const normalizedSalaryType = normalizeSalaryType(filters.salary_type);
-    conditions.push(` j.salary_type = $${paramIndex}`);
-    params.push(normalizedSalaryType);
-    paramIndex++;
-}
-if (filters.salary_period) {
-    const normalizedSalaryPeriod = normalizeSalaryPeriod(filters.salary_period);
-    conditions.push(` j.salary_period = $${paramIndex}`);
-    params.push(normalizedSalaryPeriod);
-    paramIndex++;
-}
+
     if (filters.duration) {
         const normalizedDuration = normalizeDuration(filters.duration);
         conditions.push(` j.duration = $${paramIndex}`);
@@ -556,13 +514,9 @@ if (filters.salary_period) {
         params.push(`%${filters.search}%`);
         paramIndex++;
     }
-    if (filters.address) {
-      conditions.push(`j.address ILIKE $${paramIndex}`);
-      params.push(`%${filters.address}%`);
-      paramIndex++;
-    }
+
     if (conditions.length > 0) {
-        sql += " AND " + conditions.join(" AND ");
+        sql += " AND" + conditions.join(" AND");
     }
 
     return query(sql, params).then(function (result) {
@@ -594,14 +548,37 @@ module.exports.getRecommendedJobs = function getRecommendedJobs(userId, limit = 
         const categories = historyResult.rows.map(row => row.category);
         const types = historyResult.rows.map(row => row.type);
 
-        let sql = `SELECT j.*, c.name as company_name, c.city as company_city, c.logo_url,
-                   (SELECT COUNT(*) FROM saved_job WHERE job_id = j.id) as saved_count
-                   FROM job j 
-                   JOIN company c ON j.company_id = c.id 
-                   WHERE j.status = 'Active' AND j.deleted_at IS NULL
-                   AND (j.category = ANY($1) OR j.type = ANY($2))
-                   ORDER BY j.id DESC 
-                   LIMIT $3`;
+        let sql = `
+SELECT
+    j.*,
+    c.name AS company_name,
+    c.city AS company_city,
+    c.logo_url,
+    (SELECT COUNT(*) FROM saved_job WHERE job_id = j.id) AS saved_count,
+
+    (
+        CASE WHEN j.category = ANY($1) THEN 2 ELSE 0 END +
+        CASE WHEN j.type = ANY($2) THEN 1 ELSE 0 END
+    ) AS score
+
+FROM job j
+JOIN company c
+ON j.company_id = c.id
+
+WHERE
+    j.status = 'Active'
+    AND j.deleted_at IS NULL
+    AND (
+        j.category = ANY($1)
+        OR j.type = ANY($2)
+    )
+
+ORDER BY
+    score DESC,
+    j.created_at DESC
+
+LIMIT $3;
+`;
 
         return query(sql, [categories, types, limit]).then(function (result) {
             return result.rows;

@@ -16,7 +16,7 @@ router.put("/application/:id", jwtMiddleware.verifyToken, applicationController.
 
 // ==================== PUBLIC JOB ROUTES ====================
 router.get("/", jobController.getAllJobs);
-router.get("/recommended", jobController.getRecommendedJobs);
+router.get("/recommended", jwtMiddleware.verifyToken, jobController.getRecommendedJobs);
 router.get("/company/:companyId/jobs", jobController.getJobsByCompany);
 
 // ==================== DELETED JOBS ROUTES - MUST BE BEFORE /:id ====================
