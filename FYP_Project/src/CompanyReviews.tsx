@@ -226,6 +226,7 @@ const CompanyReviews = (prop: Props) => {
                         })
                         .then(() => {
                           alert("Review has been added!");
+                          window.location.reload()
                         });
                     }}
                   >
