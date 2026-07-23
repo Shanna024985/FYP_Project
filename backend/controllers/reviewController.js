@@ -49,23 +49,29 @@ module.exports.createReview = (req, res, next) => {
 
             // // Check if user already reviewed this company
             // return reviewModel.hasUserReviewedCompany(userId, company_id)
-            //     .then(function(reviewCheck) {
+            //     .then(function (reviewCheck) {
             //         if (reviewCheck.length > 0) {
-            //             return res.status(400).json({ 
-            //                 error: "You have already reviewed this company." 
+            //             return res.status(400).json({
+            //                 error: "You have already reviewed this company."
             //             });
             //         }
 
-            // Create the review
-            return reviewModel.createReview({ company_id, user_id: userId, rating, message })
-                .then(function (review) {
-                    res.status(201).json({
-                        message: "Review submitted successfully",
-                        review: review[0]
-                    });
-                });
+                    // Create the review
+                    return reviewModel.createReview({ company_id, user_id: userId, rating, message })
+                        .then(function (review) {
+                            res.status(201).json({
+                                message: "Review submitted successfully",
+                                review: review[0]
+                            });
+                        }).catch(function (error) {
+                            console.error(error);
+                            return res.status(500).json({ error: error.message });
+                        });
+                // });
+        }).catch(function (error) {
+            console.error(error);
+            return res.status(500).json({ error: error.message });
         });
-    // })
 }
 
 // READ - Get all reviews for a company (WITH STATISTICS)
