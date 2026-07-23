@@ -111,7 +111,8 @@ export default function MyApplicationsPage({ currentUrl }: Props) {
         </div>
 
         {/* APPLICATION CARDS */}
-{filteredApplications.length === 0 ? (
+{applications.length === 0 ? (
+  // Never applied for any jobs
   <Card>
     <CardContent className="flex flex-col items-center justify-center gap-4 py-12 text-center">
       <BriefcaseBusiness className="h-12 w-12 text-muted-foreground" />
@@ -120,14 +121,26 @@ export default function MyApplicationsPage({ currentUrl }: Props) {
         <h3 className="text-lg font-semibold">No applications yet</h3>
 
         <p className="text-muted-foreground">
-          You haven't applied for any jobs yet. Browse available jobs and
-          submit your first application.
+          You haven't applied for any jobs yet. Browse available jobs and submit your first application.
         </p>
       </div>
 
       <Button onClick={() => navigate("/browsejobs")}>
         Browse Jobs
       </Button>
+    </CardContent>
+  </Card>
+) : filteredApplications.length === 0 ? (
+  // Applied before, but none in this tab
+  <Card>
+    <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+      <h3 className="text-lg font-semibold">
+        No {selectedTab.toLowerCase()} applications
+      </h3>
+
+      <p className="text-muted-foreground">
+        You don't have any {selectedTab.toLowerCase()} applications.
+      </p>
     </CardContent>
   </Card>
 ) : (

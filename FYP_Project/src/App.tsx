@@ -25,7 +25,7 @@ import CompanyReviews from "./CompanyReviews";
 import AddCompanies from "./AddCompanies";
 import Messages from "./Messages";
 import ViewMyCompanies from "./ViewMyCompanies";
-const linkForBackend = "https://fyp-project-backend-one.vercel.app/api";
+const linkForBackend = "https://fyp-project-fkmo.onrender.com/api";
 function App() {
 
   return (
