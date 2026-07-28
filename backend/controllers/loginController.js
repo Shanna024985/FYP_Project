@@ -340,7 +340,7 @@ module.exports.processJSON = (req, res, next) => {
 
 // redirect user to login page
 module.exports.redirectUserToLogin = (req, res, next) => {
-    res.redirect(`http://localhost:5173/login/callback?token=${res.locals.token}&onboardingNeeded=${res.locals.onboardingNeeded}`);
+    res.redirect(`https://fyp-vercel-fawn.vercel.app/login/callback?token=${res.locals.token}&onboardingNeeded=${res.locals.onboardingNeeded}`);
 };
 
 // Debug session endpoint

@@ -145,7 +145,27 @@ type activeCandidates = {
   phone_number: string;
   email: string;
 };
+  type Resume = {
+    file_data: string;
+  };
+const handleDownloadResume = (resume: Resume) => {
+    const byteCharacters = atob(resume.file_data);
 
+    const byteNumbers = new Array(byteCharacters.length);
+
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+
+    const byteArray = new Uint8Array(byteNumbers);
+
+    const blob = new Blob([byteArray], {
+      type: "application/pdf",
+    });
+
+    const url = URL.createObjectURL(blob);
+return url;
+  };
 function setUpArray(activeCandidates: activeCandidates[]) {
   let thingToSet: dataOfApplicants[] = [];
   activeCandidates.forEach((value) => {
@@ -259,6 +279,7 @@ const TabsForApplicant = (props: Props) => {
             </TableHeader>
             <TableBody>
               {dataOfActiveCandidates.map((value, index) => {
+                console.log(value)
                 return (
                   <TableRow key={index}>
                     <TableCell>{value.candidates}</TableCell>
