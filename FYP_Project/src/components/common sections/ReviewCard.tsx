@@ -1,36 +1,29 @@
 import { Star } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
-
 import type { Review } from "../../types/review";
-
+import { useNavigate } from "react-router-dom";
 type Props = {
   review: Review;
   onEdit: (reviewId: number) => void;
   onDelete: (reviewId: number) => void;
 };
 
-export default function ReviewCard({
-  review,
-  onEdit,
-  onDelete,
-}: Props) {
+export default function ReviewCard({ review, onEdit, onDelete }: Props) {
+  const navigate = useNavigate();
   return (
     <div className="flex h-full flex-col rounded-xl border bg-card p-4 shadow-sm">
-      {/* Row 1 */}
-      <div className="mb-3 flex items-center gap-3">
-        <img
-          src={review.companyLogo}
-          alt={review.companyName}
-          className="h-12 w-12 rounded-md object-contain"
-        />
-
-        <div className="font-semibold">
-          {review.companyName}
-        </div>
+      {/* Company Name */}
+      <div className="mb-3">
+        <button
+          type="button"
+          onClick={() => navigate(`/company?id=${review.company_id}`)}
+          className="text-left text-lg font-semibold text-blue-600 hover:text-blue-800 hover:underline"
+        >
+          {review.company_name}
+        </button>
       </div>
 
-      {/* Row 2 */}
+      {/* Rating */}
       <div className="mb-3 flex">
         {Array.from({ length: 5 }).map((_, index) => (
           <Star
@@ -45,19 +38,17 @@ export default function ReviewCard({
         ))}
       </div>
 
-      {/* Row 3 */}
+      {/* Review Message */}
       <div className="mb-4 flex-1 text-sm text-muted-foreground">
-        {review.description}
+        {review.message}
       </div>
 
-      {/* Row 4 */}
+      {/* Created Date */}
       <div className="mb-4 text-xs text-muted-foreground">
-        {review.updatedAt
-          ? `Edited on ${review.updatedAt}`
-          : `Reviewed on ${review.createdAt}`}
+        Reviewed on {new Date(review.created_at).toLocaleDateString()}
       </div>
 
-      {/* Row 5 */}
+      {/* Buttons */}
       <div className="flex gap-2">
         <Button
           variant="outline"
