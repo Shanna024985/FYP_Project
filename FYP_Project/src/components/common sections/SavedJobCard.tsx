@@ -17,6 +17,7 @@ type Props = {
 export default function SavedJobCard({
   currentUrl,
   job,
+  onApply,
   onUnsave,
 }: Props) {
   const navigate = useNavigate();
@@ -58,9 +59,12 @@ export default function SavedJobCard({
         {/* Row 1 */}
         <div className="flex items-center gap-3">
           <img
-            src={job.companyLogo}
+            src={job.companyLogo || "/default-company.png"}
             alt={job.companyName}
             className="h-12 w-12 rounded-md object-cover border"
+            onError={(e) => {
+              e.currentTarget.src = "/default-company.png";
+            }}
           />
 
           <div>
@@ -104,7 +108,7 @@ export default function SavedJobCard({
 
           {/* Right side - actions */}
           <div className="flex gap-2">
-            <Button variant="default" onClick={() => navigate(`/applyjob`)}>
+            <Button variant="default" onClick={() => onApply(job.jobId)}>
               Apply Job
             </Button>
             <Button

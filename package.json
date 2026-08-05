@@ -1,8 +1,10 @@
 {
   "dependencies": {
     "chrono-node": "^2.9.1",
+    "dotenv": "^17.4.2",
     "express-session": "^1.19.0",
     "jose": "^6.2.3",
+    "jsonwebtoken": "^9.0.3",
     "lucide-react": "^1.16.0",
     "nodemon": "^3.1.14",
     "openid-client": "^6.8.4",
@@ -15,7 +17,8 @@
     "ws": "^8.21.0"
   },
   "scripts": {
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "ws": "nodemon websocket/index.js"
   },
   "devDependencies": {
     "@types/react": "^19.2.15",

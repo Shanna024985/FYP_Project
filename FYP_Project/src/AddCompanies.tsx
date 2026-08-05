@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { Field, FieldGroup, FieldLabel } from "./components/ui/field";
 import { Input } from "./components/ui/input";
-
 import { Textarea } from "./components/ui/textarea";
 import { Button } from "./components/ui/button";
+import NavigationMenus from "./NavigationMenu";
 import {
   Select,
   SelectContent,
@@ -272,6 +272,7 @@ const AddCompanies = (prop: Props) => {
   return (
 
     <div>
+      <NavigationMenus />
       <p className="text-left text-3xl font-semibold">Add companies</p>
       <hr className="mt-4" />
       <div className="flex gap-4 mt-5">

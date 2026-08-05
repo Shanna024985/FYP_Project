@@ -54,7 +54,7 @@ module.exports.createJob = (req, res, next) => {
                 });
             }
             
-            if (salary_range_from > salary_range_to) {
+            if (parseInt(salary_range_from) > parseInt(salary_range_to) ){
                 return res.status(400).json({ error: "Minimum salary cannot be greater than maximum salary" });
             }
             
@@ -85,7 +85,7 @@ module.exports.getAllJobs = (req, res, next) => {
     let filters = req.query;
     
     const page = parseInt(filters.page) || 1;
-    const limit = parseInt(filters.limit) || 50;
+    const limit = parseInt(filters.limit) || 1000;
     const offset = (page - 1) * limit;
     filters.limit = limit;
     filters.offset = offset;

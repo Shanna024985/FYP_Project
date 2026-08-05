@@ -38,7 +38,7 @@ export default function SavedJobsPage({ currentUrl }: Props) {
           jobId: item.job_id,
 
           companyName: item.company_name,
-          companyLogo: `http://localhost:3000/uploads/company-logos/${item.logo_file_name}`,
+          companyLogo: item.logo_url,
 
           title: item.title,
 
@@ -88,7 +88,7 @@ export default function SavedJobsPage({ currentUrl }: Props) {
   };
 
   const handleApply = (jobId: number) => {
-    console.log("Apply", jobId);
+    navigate(`/applyjob?id=${jobId}`);
   };
 
   const handleUnsave = (removedJob: SavedJob) => {
@@ -134,10 +134,6 @@ export default function SavedJobsPage({ currentUrl }: Props) {
 
             <div>
               <h2 className="text-xl font-semibold title-black">No saved jobs yet</h2>
-              <p className="text-muted-foreground">
-                Save jobs you're interested in and they'll appear here for easy
-                access.
-              </p>
             </div>
 
             <Button onClick={() => navigate("/browsejobs")}>Browse Jobs</Button>

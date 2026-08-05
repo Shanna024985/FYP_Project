@@ -15,7 +15,19 @@ module.exports.getMessageWithUserByUserId = (req, res, next) => {
 
     return model.getMessageBetweenUsers(res.locals.userId, req.params.userId, pageIfNoQuery)
     .then((messages) => {
-        return res.status(200).json(messages);
+        res.locals.messages = messages;
+        next();
+        // return res.status(200).json(messages);
+    }).catch(function (error) {
+        console.error(error);
+        return res.status(500).json({ error: error.message });
+    });
+}
+
+module.exports.updateMessagesToRead = (req, res, next) => {
+    return model.updateMessagesToRead(req.params.userId)
+    .then((messages) => {
+        return res.status(200).json(res.locals.messages);
     }).catch(function (error) {
         console.error(error);
         return res.status(500).json({ error: error.message });
@@ -103,6 +115,16 @@ module.exports.createMessage = (req, res, next) => {
     .then((messages) => {
         model.sendUpdateMessage(req.body.receiverUserId, res.locals.userId);
         return res.status(200).json({message: 'message created successfully', messageJson: messages[0]});
+    }).catch(function (error) {
+        console.error(error);
+        return res.status(500).json({ error: error.message });
+    });
+}
+
+module.exports.getUnreadMessageCount = (req, res, next) => {
+    return model.getUnreadMessageCount(res.locals.userId)
+    .then((messages) => {
+        return res.status(200).json({unreadMessageCount: messages[0].unread_message_count});
     }).catch(function (error) {
         console.error(error);
         return res.status(500).json({ error: error.message });

@@ -548,14 +548,37 @@ module.exports.getRecommendedJobs = function getRecommendedJobs(userId, limit = 
         const categories = historyResult.rows.map(row => row.category);
         const types = historyResult.rows.map(row => row.type);
 
-        let sql = `SELECT j.*, c.name as company_name, c.city as company_city, c.logo_url,
-                   (SELECT COUNT(*) FROM saved_job WHERE job_id = j.id) as saved_count
-                   FROM job j 
-                   JOIN company c ON j.company_id = c.id 
-                   WHERE j.status = 'Active' AND j.deleted_at IS NULL
-                   AND (j.category = ANY($1) OR j.type = ANY($2))
-                   ORDER BY j.id DESC 
-                   LIMIT $3`;
+        let sql = `
+SELECT
+    j.*,
+    c.name AS company_name,
+    c.city AS company_city,
+    c.logo_url,
+    (SELECT COUNT(*) FROM saved_job WHERE job_id = j.id) AS saved_count,
+
+    (
+        CASE WHEN j.category = ANY($1) THEN 2 ELSE 0 END +
+        CASE WHEN j.type = ANY($2) THEN 1 ELSE 0 END
+    ) AS score
+
+FROM job j
+JOIN company c
+ON j.company_id = c.id
+
+WHERE
+    j.status = 'Active'
+    AND j.deleted_at IS NULL
+    AND (
+        j.category = ANY($1)
+        OR j.type = ANY($2)
+    )
+
+ORDER BY
+    score DESC,
+    j.created_at DESC
+
+LIMIT $3;
+`;
 
         return query(sql, [categories, types, limit]).then(function (result) {
             return result.rows;

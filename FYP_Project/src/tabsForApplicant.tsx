@@ -54,9 +54,9 @@ function NativeSelectFunction(status: Status) {
     { option: "Screening", value: "Screening", seleted: false },
     { option: "Reviewing", value: "Reviewing", seleted: false },
   ]);
-  let [previousValue, setPreviousValue] = useState(status.status)
+  let [previousValue, setPreviousValue] = useState(status.status);
   optionsForNativeSelect.forEach((value) => {
-    debugger
+    debugger;
     if (value.value == status.status) {
       value.seleted = true;
     }
@@ -67,7 +67,7 @@ function NativeSelectFunction(status: Status) {
         id="status"
         onChange={(e) => {
           let valueChanged = e.currentTarget.value;
-         
+
           let body = JSON.stringify({
             status: valueChanged,
           });
@@ -98,9 +98,7 @@ function NativeSelectFunction(status: Status) {
                       ...valuesOfNewArray,
                       desktop: valuesOfNewArray.desktop + 1,
                     };
-                  } else if (
-                    valuesOfNewArray.month == status.status
-                  ) {
+                  } else if (valuesOfNewArray.month == status.status) {
                     console.log("done that");
                     return {
                       ...valuesOfNewArray,
@@ -111,12 +109,11 @@ function NativeSelectFunction(status: Status) {
                   }
                 },
               );
-                           
 
               console.log(dataOfCandidates);
               status.setDataOfCandidates(dataOfCandidates);
-              setPreviousValue(valueChanged)
-              console.log(previousValue)
+              setPreviousValue(valueChanged);
+              console.log(previousValue);
             });
         }}
       >
@@ -146,13 +143,16 @@ type activeCandidates = {
   email: string;
 };
 
+
 function setUpArray(activeCandidates: activeCandidates[]) {
   let thingToSet: dataOfApplicants[] = [];
   activeCandidates.forEach((value) => {
     let resumeBlob = value.resume_file_data;
     let resumeName = value.resume_file_name;
-    let resume = new File([resumeBlob.data], resumeName, {
-      type: resumeBlob.type,
+    const bytes = Uint8Array.from(resumeBlob.data);
+
+    const resume = new File([bytes], resumeName, {
+      type: "application/pdf",
     });
     let newObj: dataOfApplicants = {
       candidates: value.candidate,
@@ -165,6 +165,7 @@ function setUpArray(activeCandidates: activeCandidates[]) {
     };
     thingToSet.push(newObj);
   });
+
   return thingToSet;
 }
 
@@ -229,10 +230,11 @@ const TabsForApplicant = (props: Props) => {
       .then((thingToWorkWith) => {
         let activeCandidates: activeCandidates[] =
           thingToWorkWith.activeCandidates;
-
+        console.log(activeCandidates);
         let awaitingCandidates: activeCandidates[] =
           thingToWorkWith.awaitingCandidates;
         let thingToSetForActive = setUpArray(activeCandidates);
+
         setDataOfActiveCandidates(thingToSetForActive);
         let thingToSetForAwait = setUpArray(awaitingCandidates);
         setDataOfAwaitingCandidates(thingToSetForAwait);
@@ -259,6 +261,7 @@ const TabsForApplicant = (props: Props) => {
             </TableHeader>
             <TableBody>
               {dataOfActiveCandidates.map((value, index) => {
+                console.log(URL.createObjectURL(value.resume));
                 return (
                   <TableRow key={index}>
                     <TableCell>{value.candidates}</TableCell>

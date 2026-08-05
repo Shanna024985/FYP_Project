@@ -78,8 +78,8 @@ const generateCode = () => {
 
 const timeInSeconds = () => parseInt(Date.now() / 1000);
 const secretKey = process.env.JWT_SECRET_KEY.trim();
-const redirectURI = 'http://localhost:3000/api/auth/token';
-
+const redirectURI =  process.env.SINGPASS_REDIRECT_URI.trim();
+// const redirectURI = 'http://localhost:3000/api/auth/token';
 const generateClientAssertion = endpoint => jwt.sign({
     sub: singpassAppID,
     aud: `https://stg-id.singpass.gov.sg/fapi/${endpoint}`,
@@ -288,8 +288,10 @@ module.exports.getSingpassToken = (req, res, next) => {
                 }
             };
 
-            jose.compactDecrypt(value.id_token, JSON.parse(process.env.PRIVATE_KEY_ENC)).then((result, key) => {
-                jwt.verify(new TextDecoder().decode(result.plaintext), publicKeySingpassPem, callback);
+            jose.importJWK(JSON.parse(process.env.PRIVATE_KEY_ENC), 'ECDH-ES+A256KW').then(privateKeyEnc => {
+                jose.compactDecrypt(value.id_token, privateKeyEnc).then((result, key) => {
+                    jwt.verify(new TextDecoder().decode(result.plaintext), publicKeySingpassPem, callback);
+                });
             });
         }
     })
@@ -338,7 +340,7 @@ module.exports.processJSON = (req, res, next) => {
 
 // redirect user to login page
 module.exports.redirectUserToLogin = (req, res, next) => {
-    res.redirect(`http://localhost:5173/login/callback?token=${res.locals.token}&onboardingNeeded=${res.locals.onboardingNeeded}`);
+    res.redirect(`https://fyp-project-fawn.vercel.app/login/callback?token=${res.locals.token}&onboardingNeeded=${res.locals.onboardingNeeded}`);
 };
 
 // Debug session endpoint
