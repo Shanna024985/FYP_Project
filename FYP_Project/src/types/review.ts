@@ -1,12 +1,9 @@
-export type Review = {
+export interface Review {
   id: number;
-  companyId: number;
-  companyName: string;
-  companyLogo: string;
-
+  company_id: number;
+  user_id: number;
+  company_name: string;
   rating: number;
-  description: string;
-
-  createdAt: string;
-  updatedAt?: string;
-};
+  message: string;
+  created_at: string;
+}
