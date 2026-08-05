@@ -179,3 +179,10 @@ module.exports.insertNewUserByGoogleId = googleId => {
         return result.rows;
     });
 }
+
+module.exports.getUserByGoogleId = (googleId) => {
+    let sql = "SELECT * FROM user_ u WHERE google_id = $1;";
+    return query(sql, [googleId]).then(function (result) {
+        return result.rows;
+    });
+}

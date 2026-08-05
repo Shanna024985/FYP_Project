@@ -354,20 +354,97 @@ module.exports.debugSession = (req, res) => {
 };
 
 // login with google
+const googleClientId = process.env.GOOGLE_CLIENT_ID;
+const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
+const googleRedirectURI = process.env.GOOGLE_REDIRECT_URI;
+
 module.exports.redirectUserToGoogleLogin = (req, res, next) => {
     const state = generateUUIDV4();
     const nonce = generateUUIDV4();
+    req.session.googleSessionData = {state, nonce};
 
-    fetch('https://accounts.google.com/o/oauth2/v2/auth' + new URLSearchParams({
-        client_id: process.env.GOOGLE_CLIENT_ID,
+    res.redirect('https://accounts.google.com/o/oauth2/v2/auth?' + new URLSearchParams({
+        client_id: googleClientId,
         response_type: 'code',
         scope: 'openid email',
-        redirect_uri: process.env.GOOGLE_REDIRECT_URI,
+        redirect_uri: googleRedirectURI,
         state,
         nonce
-    }).toString(), {
-        method: "GET",
-        headers: generateHeaders('token'),
-        body: {}
+    }).toString());
+};
+
+module.exports.getGoogleToken = (req, res, next) => {
+    if (req.query.state != req.session.googleSessionData.state) {
+        return res.status(403).json({message: 'state does not match'});
+    }
+
+    fetch('https://oauth2.googleapis.com/token', {
+        method: "POST",
+        body: new URLSearchParams({
+            code: req.query.code,
+            client_id: googleClientId,
+            client_secret: googleClientSecret,
+            redirect_uri: googleRedirectURI,
+            grant_type: 'authorization_code'
+        })
     })
+    .then((response) => {
+        if (response.status != 200) {
+            console.log('Error!');
+            console.log(response);
+            return response.json();
+        } else {
+            return response.json();
+        }
+    })
+    .then((value) => {
+        if (value.error) {
+            console.log(value);
+            res.status(500).json({ message: 'Something wrong happened with the server!', errorDetails: value });
+        } else {
+            // Decrypt the ID Token
+            const decoded = jwt.decode(value.id_token);
+
+            if (decoded.iss != 'https://accounts.google.com' && decoded.iss != 'accounts.google.com') {
+                res.status(403).json({ message: 'ID Token is invalid' });
+            } else if (decoded.aud != googleClientId) {
+                res.status(403).json({ message: 'ID Token is invalid' });
+            } else if (decoded.exp < timeInSeconds()) {
+                res.status(403).json({ message: 'ID Token is invalid' });
+            } else if (decoded.nonce != req.session.googleSessionData.nonce) {
+                res.status(403).json({ message: 'ID Token is invalid' });
+            } else {
+                // clear session, this will no longer be needed
+                req.session.destroy((err) => {
+                    res.locals.googleId = decoded.sub;
+                    next();
+                });
+            }
+        }
+    })
+    .catch((error) => console.error(error));
+};
+
+module.exports.checkGoogleIdExists = (req, res, next) => {
+    return model.getUserByGoogleId(res.locals.googleId)
+    .then((user) => {
+        if (user.length == 0) {
+            return model.insertNewUserByGoogleId(res.locals.googleId)
+            .then((user) => {
+                res.locals.userId = user[0].id;
+                res.locals.status = 200;
+                next();
+            }).catch(function (error) {
+                console.error(error);
+                return res.status(500).json({ error: error.message });
+            });
+        } else {
+            res.locals.userId = user[0].id;
+            res.locals.status = 201;
+            next();
+        }
+    }).catch(function (error) {
+        console.error(error);
+        return res.status(500).json({ error: error.message });
+    });
 };
