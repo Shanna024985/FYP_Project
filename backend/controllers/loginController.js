@@ -352,3 +352,11 @@ module.exports.debugSession = (req, res) => {
         cookies: req.headers.cookie || 'No cookie header'
     });
 };
+
+// login with google
+module.exports.redirectUserToGoogleLogin = (req, res, next) => {
+    const state = generateUUIDV4();
+    const nonce = generateUUIDV4();
+    
+    'https://accounts.google.com/o/oauth2/v2/auth'
+};
