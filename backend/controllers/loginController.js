@@ -357,6 +357,17 @@ module.exports.debugSession = (req, res) => {
 module.exports.redirectUserToGoogleLogin = (req, res, next) => {
     const state = generateUUIDV4();
     const nonce = generateUUIDV4();
-    
-    'https://accounts.google.com/o/oauth2/v2/auth'
+
+    fetch('https://accounts.google.com/o/oauth2/v2/auth' + new URLSearchParams({
+        client_id: process.env.GOOGLE_CLIENT_ID,
+        response_type: 'code',
+        scope: 'openid email',
+        redirect_uri: process.env.GOOGLE_REDIRECT_URI,
+        state,
+        nonce
+    }).toString(), {
+        method: "GET",
+        headers: generateHeaders('token'),
+        body: {}
+    })
 };
