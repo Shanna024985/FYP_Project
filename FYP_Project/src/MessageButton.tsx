@@ -1,25 +1,32 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
-import { MessageSquare } from "lucide-react";
+import {
+  MessageSquare,
+  MessageSquareCheck,
+  MessageSquareDot,
+} from "lucide-react";
 type Props = {
   currentUrl: string;
 };
 const MessageButton = ({ currentUrl }: Props) => {
   const navigate = useNavigate();
-  useEffect(()=>{
-    fetch(currentUrl + "/message/count",{
+  let [count, setCount] = useState(0);
+  useEffect(() => {
+    fetch(currentUrl + "/message/count", {
       headers: {
         "Content-Type": "application/json",
         Authorization: "Bearer " + localStorage.getItem("token"),
-      }
+      },
     })
-    .then((values)=>{
-      return values.json()
-    }).then((thingsToUse)=>{
-      console.log(thingsToUse)
-    })
-  },[])
+      .then((values) => {
+        return values.json();
+      })
+      .then((thingsToUse) => {
+        console.log(thingsToUse);
+        setCount(thingsToUse.unreadMessageCount);
+      });
+  }, []);
   return (
     <div>
       <Button
@@ -27,7 +34,11 @@ const MessageButton = ({ currentUrl }: Props) => {
         onClick={() => navigate("/messages")}
         className="flex items-center gap-1.5 rounded-full px-3"
       >
-        <MessageSquare className="h-4 w-4" />
+        {count > 0 ? (
+          <MessageSquareDot className="h-4 w-4" />
+        ) : (
+          <MessageSquare className="h-4 w-4" />
+        )}
         <span>Messages</span>
       </Button>
     </div>
