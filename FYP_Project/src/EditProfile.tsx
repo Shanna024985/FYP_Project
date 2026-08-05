@@ -417,7 +417,7 @@ export default function EditProfilePage({ currentUrl }: Props) {
   }
   return (
     <div>
-      <NavigationMenus />
+      <NavigationMenus currentUrl={currentUrl}/>
       <div className="min-h-screen bg-background px-6 py-8">
         <div className="mx-auto max-w-4xl rounded-3xl border bg-card p-8 shadow-sm">
           {/* Header */}

@@ -4,7 +4,7 @@ import {  ChartColumnIncreasing } from "lucide-react";
 import { ChartBarDefault } from "./BarCharts";
 import TabsForApplicant from "./tabsForApplicant";
 type Props = {
-  currentUrl: String;
+  currentUrl: string;
 };
 interface dataType {
   month: String;
@@ -60,7 +60,7 @@ const ViewApplicants = (props: Props) => {
   }, []);
   return (
     <div>
-      <NavigationMenus />
+      <NavigationMenus currentUrl={props.currentUrl}/>
       <div className="mt-5 ml-2">
         <p className="text-2xl font-bold text-left">Employer Dashboard</p>
         <hr className="mt-3" />

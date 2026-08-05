@@ -11,7 +11,7 @@ export default function LoginPage({ currentUrl }: Props) {
 
   return (
     <div className="flex flex-col gap-6 items-center">
-        <NavigationMenus />
+        <NavigationMenus currentUrl={currentUrl}/>
       <h1 className="text-2xl font-bold title-black">Login into your account</h1>
 
       <button

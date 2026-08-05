@@ -87,7 +87,7 @@ export default function BrowseJobs({ currentUrl }: Props) {
     <div className="flex">
       {token && <Sidebar />}
       <div className="flex-1 p-4">
-        <NavigationMenus />
+        <NavigationMenus currentUrl={currentUrl}/>
         <JobFilters/>
 
         {/* RESULTS */}

@@ -86,7 +86,7 @@ export default function MyApplicationsPage({ currentUrl }: Props) {
   console.log(applications);
   return (
     <div className="flex flex-col gap-6">
-      <NavigationMenus />
+      <NavigationMenus currentUrl={currentUrl}/>
       <div className="mx-auto max-w-7xl space-y-6">
         {/* PAGE TITLE */}
         <div>

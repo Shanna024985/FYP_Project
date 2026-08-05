@@ -103,7 +103,7 @@ export default function JobSeekerRatingsPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 p-6">
-        <NavigationMenus />
+        {/* <NavigationMenus currentUrl={}/> */}
       {/* HEADER */}
       <div>
         <h1 className="text-3xl font-bold title-black">My Ratings</h1>

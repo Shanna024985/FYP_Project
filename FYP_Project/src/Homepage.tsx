@@ -13,7 +13,7 @@ const Homepage = ({ currentUrl }: Props) => {
     {token && <Sidebar />}
     <div className="flex-1 p-4">
 
-      <NavigationMenus />
+      <NavigationMenus currentUrl={currentUrl}/>
       <JobFilters />
       <NewestJobsSection currentUrl={currentUrl} />
       {/* <Top3company currentUrl={currentUrl} /> */}

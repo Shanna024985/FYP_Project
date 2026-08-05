@@ -13,7 +13,7 @@ import { useNavigate } from "react-router-dom";
 import AuthLayout from "./AuthLayout";
 import NavigationMenus from "./NavigationMenu";
 type Props = {
-  currentUrl: String;
+  currentUrl: string;
 };
 type ArrayType = {
   title: string;
@@ -196,7 +196,7 @@ export const CompanyPageRenderer = (prop: Props) => {
   }, []);
   return (
     <AuthLayout>
-      <NavigationMenus />
+      <NavigationMenus currentUrl={prop.currentUrl}/>
       <br/>
       <CompanyPage
         profileImage={imageOfTea}

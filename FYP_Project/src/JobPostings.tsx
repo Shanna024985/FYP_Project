@@ -20,7 +20,7 @@ import {
 import { Button } from "./components/ui/button";
 import {  useNavigate } from "react-router-dom";
 type Props = {
-  currentUrl: String;
+  currentUrl: string;
 };
 type stages = {
   stage: Number;
@@ -952,7 +952,7 @@ const JobPostings = (props: Props) => {
   let [jobDescription, setJobDescription] = useState("");
   return (
     <div>
-      <NavigationMenus />
+      <NavigationMenus currentUrl={props.currentUrl}/>
       <div className="mt-10 p-5 flex gap-5 justify-center">
         <div className="flex flex-col gap-2 justify-center" id="step1SVG">
           {stage >= 2 ? (
