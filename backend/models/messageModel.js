@@ -106,6 +106,34 @@ module.exports.getMessageById = (id) => {
     });
 }
 
+module.exports.updateMessagesToRead = (senderUserId) => {
+    let sql = `UPDATE message SET read = TRUE WHERE sender_user_id = $1 AND read = FALSE;`;
+    return query(sql, [senderUserId]).then(function (result) {
+        return result.rows;
+    });
+}
+
+module.exports.getUnreadMessageCount = (receiverUserId) => {
+    let sql = `GET COUNT(id) unread_message_count FROM messages WHERE receiver_user_id = $1 AND read = FALSE;`;
+    return query(sql, [receiverUserId]).then(function (result) {
+        return result.rows;
+    });
+}
+
+module.exports.updateMessagesToRead = (senderUserId) => {
+    let sql = `UPDATE message SET read = TRUE WHERE sender_user_id = $1 AND read = FALSE;`;
+    return query(sql, [senderUserId]).then(function (result) {
+        return result.rows;
+    });
+}
+
+module.exports.getUnreadMessageCount = (receiverUserId) => {
+    let sql = `GET COUNT(id) unread_message_count FROM messages WHERE receiver_user_id = $1 AND read = FALSE;`;
+    return query(sql, [receiverUserId]).then(function (result) {
+        return result.rows;
+    });
+}
+
 // const PORT = 3000;
 // const server = new Server({port: PORT}, () => {
 //     console.log(`Websocket running on ws://localhost:${PORT}`);
