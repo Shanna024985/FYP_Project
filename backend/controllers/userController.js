@@ -100,6 +100,8 @@ module.exports.getUserProfile = (req, res, next) => {
                     github_profile: userProfile.github_profile,
                     profile_picture_url: userProfile.profile_picture_url || null,
                     default_resume_id: userProfile.default_resume_id,
+                    is_linked_with_singpass: (userProfile.singpass_id) ? true : false,
+                    is_linked_with_google: (userProfile.google_id) ? true : false
                 }
             });
         })

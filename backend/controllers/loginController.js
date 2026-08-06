@@ -531,3 +531,55 @@ module.exports.setTokenFromQuery = (req, res, next) => {
     res.locals.token = req.query.token;
     next();
 }
+
+module.exports.checkSingpassIdExistsUnlink = (req, res, next) => {
+    return model.getUserById(res.locals.id)
+    .then((user) => {
+        if (!user[0].singpass_id) {
+            return res.status(403).json({message: 'Singpass account is not linked to user'});
+        } else if (user[0].google_id) {
+            next();
+        } else {
+            return res.status(403).json({message: 'You cannot unlink your Singpass account from an account without a linked Google account'});
+        }
+    }).catch(function (error) {
+        console.error(error);
+        return res.status(500).json({ error: error.message });
+    });
+};
+
+module.exports.checkGoogleIdExistsUnlink = (req, res, next) => {
+    return model.getUserById(res.locals.id)
+    .then((user) => {
+        if (!user[0].google_id) {
+            return res.status(403).json({message: 'Google account is not linked to user'});
+        } else if (user[0].singpass_id) {
+            next();
+        } else {
+            return res.status(403).json({message: 'You cannot unlink your Google account from an account without a linked Singpass account'});
+        }
+    }).catch(function (error) {
+        console.error(error);
+        return res.status(500).json({ error: error.message });
+    });
+};
+
+module.exports.unlinkSingpassIdById = (req, res, next) => {
+    return model.unlinkSingpassIdById(res.locals.userId)
+    .then((user) => {
+        return res.status(200).json({message: 'Singpass account successfully unlinked'});
+    }).catch(function (error) {
+        console.error(error);
+        return res.status(500).json({ error: error.message });
+    });
+};
+
+module.exports.unlinkGoogleIdById = (req, res, next) => {
+    return model.unlinkGoogleIdById(res.locals.userId)
+    .then((user) => {
+        return res.status(200).json({message: 'Google account successfully unlinked'});
+    }).catch(function (error) {
+        console.error(error);
+        return res.status(500).json({ error: error.message });
+    });
+};

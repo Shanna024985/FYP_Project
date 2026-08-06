@@ -13,4 +13,7 @@ router.get('/link/google', loginController.setTokenFromQuery, jwtMiddleware.veri
 router.get('/link/token', loginController.changeRedirectURIToLink, loginController.checkRedirectIsValid, loginController.getSingpassToken, loginController.checkSingpassIdExistsLink, loginController.linkSingpassIdById);
 router.get('/link/google/token', loginController.changeRedirectURIToLink, loginController.getGoogleToken, loginController.checkGoogleIdExistsLink, loginController.linkGoogleIdById);
 
+router.delete('/unlink', jwtMiddleware.verifyToken, loginController.checkSingpassIdExistsUnlink, loginController.unlinkSingpassIdById);
+router.delete('/unlink/google', jwtMiddleware.verifyToken, loginController.checkGoogleIdExistsUnlink, loginController.unlinkGoogleIdById);
+
 module.exports = router;
