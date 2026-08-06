@@ -280,6 +280,10 @@ module.exports.getSingpassToken = (req, res, next) => {
                 } else if (decoded.nonce != req.session.singpassSessionData.nonce) {
                     res.status(403).json({ message: 'ID Token is invalid' });
                 } else {
+                    if (req.session.userId) {
+                        res.locals.userId = req.session.userId;
+                    }
+                    
                     // clear session, this will no longer be needed
                     req.session.destroy((err) => {
                         res.locals.singpassId = decoded.sub;
@@ -414,6 +418,10 @@ module.exports.getGoogleToken = (req, res, next) => {
             } else if (decoded.nonce != req.session.googleSessionData.nonce) {
                 res.status(403).json({ message: 'ID Token is invalid' });
             } else {
+                if (req.session.userId) {
+                    res.locals.userId = req.session.userId;
+                }
+
                 // clear session, this will no longer be needed
                 req.session.destroy((err) => {
                     res.locals.googleId = decoded.sub;
@@ -456,7 +464,7 @@ module.exports.checkSingpassIdExistsLink = (req, res, next) => {
     return model.getUserBySingpassId(res.locals.singpassId)
     .then((user) => {
         if (user.length == 1) {
-            if (user[0].id == res.locals.userId) {
+            if (user[0].id != res.locals.userId) {
                 res.redirect('https://fyp-project-fawn.vercel.app/profile?linkError=Another user has linked to this Singpass account');
             } else {
                 res.redirect('https://fyp-project-fawn.vercel.app/profile?linkError=You have already linked to this Singpass account');
@@ -474,7 +482,7 @@ module.exports.checkGoogleIdExistsLink = (req, res, next) => {
     return model.getUserByGoogleId(res.locals.googleId)
     .then((user) => {
         if (user.length == 1) {
-            if (user[0].id == res.locals.userId) {
+            if (user[0].id != res.locals.userId) {
                 res.redirect('https://fyp-project-fawn.vercel.app/profile?linkError=Another user has linked to this Google account');
             } else {
                 res.redirect('https://fyp-project-fawn.vercel.app/profile?linkError=You have already linked to this Google account');
@@ -513,6 +521,9 @@ const googleRedirectURILink = process.env.GOOGLE_REDIRECT_URI_LINK;
 module.exports.changeRedirectURIToLink = (req, res, next) => {
     res.locals.redirectURI = singpassRedirectURILink;
     res.locals.googleRedirectURI = googleRedirectURILink;
+    if (res.locals.userId) {
+        req.session.userId = res.locals.userId;
+    }
     next();
 }
 
