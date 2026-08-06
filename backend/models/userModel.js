@@ -186,3 +186,17 @@ module.exports.getUserByGoogleId = (googleId) => {
         return result.rows;
     });
 }
+
+module.exports.linkSingpassIdById = (singpassId, id) => {
+    let sql = "UPDATE user_ SET singpass_id = $1 WHERE id = $2 RETURNING id;";
+    return query(sql, [singpassId, id]).then(function (result) {
+        return result.rows;
+    });
+}
+
+module.exports.linkGoogleIdById = (googleId, id) => {
+    let sql = "UPDATE user_ SET google_id = $1 WHERE id = $2 RETURNING id;";
+    return query(sql, [googleId, id]).then(function (result) {
+        return result.rows;
+    });
+}

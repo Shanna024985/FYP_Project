@@ -136,7 +136,7 @@ module.exports.createSingpassURL = (req, res, next) => {
             state,
             nonce,
             client_id: singpassAppID,
-            redirect_uri: redirectURI,
+            redirect_uri: (res.locals.redirectURI) ? res.locals.redirectURI : redirectURI,
             client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
             client_assertion: generateClientAssertion('par'),
             code_challenge: code.codeChallenge,
@@ -384,7 +384,7 @@ module.exports.getGoogleToken = (req, res, next) => {
             code: req.query.code,
             client_id: googleClientId,
             client_secret: googleClientSecret,
-            redirect_uri: googleRedirectURI,
+            redirect_uri: (res.locals.googleRedirectURI) ? res.locals.googleRedirectURI : googleRedirectURI,
             grant_type: 'authorization_code'
         })
     })
@@ -448,3 +448,62 @@ module.exports.checkGoogleIdExists = (req, res, next) => {
         return res.status(500).json({ error: error.message });
     });
 };
+
+// allow user to link google account with singpass (and vice versa)
+// if account has already been created with google and user links google account with that email,
+// the system rejects the linking
+module.exports.checkSingpassIdExistsLink = (req, res, next) => {
+    return model.getUserBySingpassId(res.locals.singpassId)
+    .then((user) => {
+        if (user[0].id != res.locals.userId) {
+            res.redirect('https://fyp-project-fawn.vercel.app/profile?linkError=Another user has linked to this Singpass account');
+        } else {
+            next();
+        }
+    }).catch(function (error) {
+        console.error(error);
+        return res.status(500).json({ error: error.message });
+    });
+};
+
+module.exports.checkGoogleIdExistsLink = (req, res, next) => {
+    return model.getUserByGoogleId(res.locals.googleId)
+    .then((user) => {
+        if (user[0].id != res.locals.userId) {
+            res.redirect('https://fyp-project-fawn.vercel.app/profile?linkError=Another user has linked to this Google account');
+        } else {
+            next();
+        }
+    }).catch(function (error) {
+        console.error(error);
+        return res.status(500).json({ error: error.message });
+    });
+};
+
+module.exports.linkSingpassIdById = (req, res, next) => {
+    return model.linkSingpassIdById(res.locals.singpassId, res.locals.userId)
+    .then((user) => {
+        res.redirect('https://fyp-project-fawn.vercel.app/profile?linkSuccess=Account successfully linked');
+    }).catch(function (error) {
+        console.error(error);
+        return res.status(500).json({ error: error.message });
+    });
+};
+
+module.exports.linkGoogleIdById = (req, res, next) => {
+    return model.linkGoogleIdById(res.locals.googleId, res.locals.userId)
+    .then((user) => {
+        res.redirect('https://fyp-project-fawn.vercel.app/profile?linkSuccess=Account successfully linked');
+    }).catch(function (error) {
+        console.error(error);
+        return res.status(500).json({ error: error.message });
+    });
+};
+
+const singpassRedirectURILink = process.env.GOOGLE_REDIRECT_URI_LINK;
+const googleRedirectURILink = process.env.GOOGLE_REDIRECT_URI_LINK;
+module.exports.changeRedirectURIToLink = (req, res, next) => {
+    res.locals.redirectURI = singpassRedirectURILink;
+    res.locals.googleRedirectURI = googleRedirectURILink;
+    next();
+}
