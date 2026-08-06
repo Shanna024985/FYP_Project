@@ -1,11 +1,7 @@
 // JobSeekerDashboard.tsx
 import NavigationMenus from "./NavigationMenu";
 import { useNavigate } from "react-router-dom";
-import {
-  Bookmark,
-  Pencil,
-
-} from "lucide-react";
+import { Bookmark, Pencil } from "lucide-react";
 import "./title.css";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -77,6 +73,8 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [savedJobs, setSavedJobs] = useState<SavedJob[]>([]);
   const [loadingSaved, setLoadingSaved] = useState(true);
+  const [reviewCount, setReviewCount] = useState(0);
+  const [loadingReviews, setLoadingReviews] = useState(true);
   useEffect(() => {
     const fetchAppliedJobs = async () => {
       try {
@@ -89,7 +87,7 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
             Authorization: `Bearer ${token}`,
           },
         });
-        console.log(loadingSaved)
+        console.log(loadingSaved);
         setAppliedJobs(res.data.applications);
       } catch (err) {
         console.error(err);
@@ -176,6 +174,29 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
 
     fetchSavedJobs();
   }, [currentUrl]);
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        setLoadingReviews(true);
+
+        const token = localStorage.getItem("token");
+
+        const res = await axios.get(`${currentUrl}/reviews/user/my`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        setReviewCount(res.data.count);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoadingReviews(false);
+      }
+    };
+
+    fetchReviews();
+  }, [currentUrl]);
   // ---------------------------------------
   // Pagination
   // ---------------------------------------
@@ -243,7 +264,7 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
           </Card>
 
           {/* COLUMN 3 + 4 - STATISTICS */}
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:col-span-2">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:col-span-2">
             {/* JOBS APPLIED */}
             <Card>
               <CardContent className="flex h-full flex-col justify-between space-y-4 p-6">
@@ -278,6 +299,25 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
                 <Button
                   variant="outline"
                   onClick={() => navigate("/jobSeeker/savedJobs")}
+                >
+                  View Details
+                </Button>
+              </CardContent>
+            </Card>
+            {/* REVIEWS */}
+            <Card>
+              <CardContent className="flex h-full flex-col justify-between space-y-4 p-6">
+                <div>
+                  <p className="text-sm text-muted-foreground">My Reviews</p>
+
+                  <h2 className="mt-2 text-4xl font-bold title-black">
+                    {loadingReviews ? "..." : reviewCount}
+                  </h2>
+                </div>
+
+                <Button
+                  variant="outline"
+                  onClick={() => navigate("/jobSeeker/myReviews")}
                 >
                   View Details
                 </Button>

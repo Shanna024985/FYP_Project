@@ -7,6 +7,8 @@ router.put("/:id", messageController.checkMessageExists, messageController.updat
 
 router.post("/", messageController.checkReceiverUserIdExists, messageController.createMessage);
 router.get("/list", messageController.getUserList);
-router.get("/:userId", messageController.getMessageWithUserByUserId);
+router.get("/:userId", messageController.getMessageWithUserByUserId, messageController.updateMessagesToRead);
+
+router.get("/count", messageController.getUnreadMessageCount);
 
 module.exports = router;

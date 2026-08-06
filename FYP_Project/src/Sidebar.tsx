@@ -12,6 +12,9 @@ import {
   Building2,
   Plus,
   LogOut,
+  Star,
+  Bookmark,
+  FileText
 } from "lucide-react";
 import { useState } from "react";
 export default function Sidebar() {
@@ -32,6 +35,21 @@ export default function Sidebar() {
           label: "Profile",
           path: "/profile",
           icon: User,
+        },
+        {
+          label: "My Applications",
+          path: "/jobSeeker/applications",
+          icon: FileText,
+        },
+        {
+          label: "Saved Jobs",
+          path: "/jobSeeker/savedJobs",
+          icon: Bookmark,
+        },
+        {
+          label: "My Reviews",
+          path: "/jobSeeker/myReviews",
+          icon: Star,
         },
       ]
       : [
