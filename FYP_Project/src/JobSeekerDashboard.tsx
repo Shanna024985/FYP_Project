@@ -34,6 +34,7 @@ type UserProfile = {
 };
 import type { SavedJob } from "../src/types/saved-job";
 import SavedJobCard from "@/components/common sections/SavedJobCard";
+import Footer from "./Footer";
 
 type Props = {
   currentUrl: string;
@@ -559,6 +560,7 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
           )}
         </section>
       </div>
+      <Footer/>
     </div>
   );
 }

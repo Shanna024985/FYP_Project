@@ -25,6 +25,7 @@ import CompanyReviews from "./CompanyReviews";
 import AddCompanies from "./AddCompanies";
 import Messages from "./Messages";
 import ViewMyCompanies from "./ViewMyCompanies";
+import Footer from "./Footer";
 const linkForBackend = "https://fyp-project-fkmo.onrender.com/api";
 function App() {
 
@@ -85,6 +86,7 @@ function App() {
           <Route path="/viewMyCompanies" element={<ViewMyCompanies currentUrl={linkForBackend}/>}/>
         </Route>
       </Routes>
+      <Footer />
       <Toaster position="top-center" />
     </>
   );
