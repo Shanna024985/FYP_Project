@@ -54,7 +54,7 @@ const generateRandomHex = length => {
     return hex;
 };
 
-const generateUUIDV4 = () => generateRandomHex(8) + '-' + generateRandomHex(4) + '-' + generateRandomHex(4) + '-' + generateRandomHex(12);
+// const generateUUIDV4 = () => generateRandomHex(8) + '-' + generateRandomHex(4) + '-' + generateRandomHex(4) + '-' + generateRandomHex(12);
 
 const singpassAppID = process.env.SINGPASS_APP_ID;
 const options = {
@@ -70,7 +70,7 @@ const publicKeySingpassPem = crypto.createPublicKey({ key: publicKeySingpass, fo
 const generateCode = () => {
     let codeVerifier = '';
     for (let i = 0; i < 128; i++) {
-        codeVerifier += 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_'.charAt(Math.floor(Math.random() * 64));
+        codeVerifier += 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_'.charAt(crypto.randomInt(64));
     }
     let codeChallenge = crypto.createHash('sha256').update(codeVerifier).digest('base64').replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '');
     return { codeVerifier, codeChallenge };
@@ -86,7 +86,8 @@ const generateClientAssertion = endpoint => jwt.sign({
     iss: singpassAppID,
     iat: timeInSeconds(),
     exp: timeInSeconds() + 120,
-    jti: generateUUIDV4()
+    // jti: generateUUIDV4()
+    jti: crypto.randomUUID()
 }, privateKeyPem, {
     ...options,
     header: {
@@ -101,7 +102,8 @@ const generateDpopJkt = endpoint => jwt.sign({
     htu: `https://stg-id.singpass.gov.sg/fapi/${endpoint}`,
     iat: timeInSeconds(),
     exp: timeInSeconds() + 120,
-    jti: generateUUIDV4()
+    // jti: generateUUIDV4()
+    jti: crypto.randomUUID()
 }, privateKeyPem, {
     ...options,
     header: {
@@ -119,8 +121,10 @@ const generateHeaders = endpoint => {
 
 // 1: Redirect user to Singpass login
 module.exports.createSingpassURL = (req, res, next) => {
-    const state = generateUUIDV4();
-    const nonce = generateUUIDV4();
+    // const state = generateUUIDV4();
+    const state = crypto.randomUUID();
+    // const nonce = generateUUIDV4();
+    const nonce = crypto.randomUUID();
     const code = generateCode();
     
     console.log('=== createSingpassURL ===');
@@ -363,8 +367,10 @@ const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
 const googleRedirectURI = process.env.GOOGLE_REDIRECT_URI;
 
 module.exports.redirectUserToGoogleLogin = (req, res, next) => {
-    const state = generateUUIDV4();
-    const nonce = generateUUIDV4();
+    // const state = generateUUIDV4();
+    const state = crypto.randomUUID();
+    // const nonce = generateUUIDV4();
+    const nonce = crypto.randomUUID();
     req.session.googleSessionData = {state, nonce};
 
     res.redirect('https://accounts.google.com/o/oauth2/v2/auth?' + new URLSearchParams({
