@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "./components/ui/label";
 type Props = {
-  currentUrl: String;
+  currentUrl: string;
 };
 function getOrdinal(n: number) {
   const s = ["th", "st", "nd", "rd"];
@@ -159,7 +159,7 @@ const CompanyReviews = (prop: Props) => {
   return (
     <AuthLayout>
       <div>
-        <NavigationMenus />
+        <NavigationMenus currentUrl={prop.currentUrl}/>
         <br />
         <div className="flex justify-between">
           <p className="text-left text-3xl font-semibold">Reviews</p>

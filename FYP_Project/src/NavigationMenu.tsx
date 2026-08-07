@@ -34,7 +34,6 @@
 // export default NavigationMenus;
 
 import { Link, useNavigate } from "react-router-dom";
-import { MessageSquare } from "lucide-react";
 import {
   NavigationMenuItem,
   NavigationMenuLink,
@@ -52,6 +51,9 @@ import {
 
 import { Button } from "@/components/ui/button";
 import MessageButton from "./MessageButton";
+import { Switch } from "./components/ui/switch";
+import { Label } from "./components/ui/label";
+import { DarkModeButton } from "./DarkModeButton";
 type Props = {
   currentUrl: string;
 };
@@ -99,7 +101,7 @@ const NavigationMenus = ({ currentUrl }: Props) => {
       ) : (
         // LOGGED IN
         <div className="flex items-center gap-4">
-          <MessageButton currentUrl={currentUrl}/>
+          <MessageButton currentUrl={currentUrl} />
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -114,6 +116,9 @@ const NavigationMenus = ({ currentUrl }: Props) => {
               <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          <NavigationMenuItem className="flex">
+            <DarkModeButton/>
+          </NavigationMenuItem>
         </div>
       )}
     </div>

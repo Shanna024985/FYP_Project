@@ -215,7 +215,7 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
 
   return (
     <div className="flex flex-col gap-6">
-      <NavigationMenus />
+      <NavigationMenus currentUrl={currentUrl}/>
       <div className="mx-auto max-w-7xl space-y-10">
         {/* ========================================= */}
         {/* ROW 1 - WELCOME */}

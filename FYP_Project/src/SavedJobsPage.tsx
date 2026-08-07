@@ -117,7 +117,7 @@ export default function SavedJobsPage({ currentUrl }: Props) {
 
   return (
     <div className="flex flex-col gap-6">
-      <NavigationMenus />
+      <NavigationMenus currentUrl={currentUrl}/>
       {/* Row 1 */}
       <h1 className="text-3xl font-bold title-black">Saved Jobs</h1>
 

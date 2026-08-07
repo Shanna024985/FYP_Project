@@ -610,7 +610,7 @@ export default function EditProfilePage({ currentUrl }: Props) {
               No education added yet
             </div>
           </div> */}
-
+           
           {/* Resume */}
           <div className="mt-10 border-t pt-8">
             <div className="mb-6 flex items-center justify-center gap-3">
