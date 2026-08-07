@@ -53,7 +53,7 @@ router.get("/applications/stats", jwtMiddleware.verifyToken, jobController.getAp
 router.get("/:id/applications", jwtMiddleware.verifyToken, jobController.getJobApplications);
 router.patch("/applications/:applicationId/status", jwtMiddleware.verifyToken, jobController.updateApplicationStatus);
 router.delete("/applications/:applicationId", jwtMiddleware.verifyToken, jobController.deleteApplication);
-
+router.get("/applications/check/:jobId",jwtMiddleware.verifyToken, jobController.checkApplication);
 // ==================== SAVED JOBS ====================
 router.post("/:id/save", jwtMiddleware.verifyToken, jobController.saveJob);
 router.delete("/:id/save", jwtMiddleware.verifyToken, jobController.unsaveJob);

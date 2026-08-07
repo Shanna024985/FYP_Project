@@ -725,6 +725,30 @@ module.exports.deleteApplication = (req, res, next) => {
         });
 }
 
+module.exports.checkApplication = async function (req, res) {
+    try {
+        const userId = getUserIdFromReq(req, res);
+
+        if (!userId) {
+            return res.status(401).json({
+                error: "Unauthorized: User not authenticated"
+            });
+        }
+
+        const jobId = req.params.jobId;
+
+        const applied = await jobModel.hasApplied(userId, jobId);
+
+        return res.json({ applied });
+
+    } catch (error) {
+        console.error(error);
+
+        return res.status(500).json({
+            error: "Failed to check application"
+        });
+    }
+};
 // ==================== SAVED JOBS ====================
 
 // CREATE - Save a job

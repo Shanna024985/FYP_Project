@@ -857,6 +857,20 @@ module.exports.updateApplicationStatus = function updateApplicationStatus(applic
         return result.rows;
     });
 }
+module.exports.hasApplied = function hasApplied(userId, jobId) {
+    let sql = `
+        SELECT EXISTS (
+            SELECT 1
+            FROM application
+            WHERE user_id = $1
+            AND job_id = $2
+        ) AS applied;
+    `;
+
+    return query(sql, [userId, jobId]).then(function (result) {
+        return result.rows[0].applied;
+    });
+};
 
 // ==================== SAVED JOBS ====================
 
