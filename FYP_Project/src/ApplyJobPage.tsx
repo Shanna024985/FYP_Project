@@ -338,200 +338,255 @@ export default function ApplyJobPage({ currentUrl }: Props) {
           date={new Date(job.created_at).toLocaleDateString("en-SG")}
           companyLogo={`data:image/png;base64,${company?.logo_base64 ?? ""}`}
         />
-        {hasApplied && (
-          <div className="rounded-md border border-green-200 bg-green-50 p-4 text-center">
-            <p className="font-medium text-green-700">
-              You have already applied for this job.
+        {checkingApplication ? (
+          <div className="p-6 text-center">
+            Checking application status...
+          </div>
+        ) : hasApplied ? (
+          <div className="rounded-md border border-green-200 bg-green-50 p-6 text-center">
+            <p className="text-lg font-semibold text-green-700">
+              Already Applied
             </p>
-            <p className="text-sm text-green-600">
-              You cannot submit another application for this job.
+
+            <p className="mt-1 text-sm text-green-600">
+              You have already submitted an application for this job.
             </p>
           </div>
-        )}
-        <Card>
-          <CardContent className="space-y-5">
-            <fieldset disabled={hasApplied} className="space-y-5">
+        ) : (
+          <Card>
+            <CardContent className="space-y-5">
+              <fieldset disabled={hasApplied} className="space-y-5">
 
-              {/* ROW 2 */}
-              <div>
-                <label className="font-medium">Name *</label>
+                {/* ROW 2 */}
+                <div>
+                  <label className="font-medium">Name *</label>
 
-                <input
-                  ref={nameRef}
-                  className="w-full border rounded-md p-2 mt-1"
-                  value={form.name}
-                  onChange={(e) => {
-                    setForm({ ...form, name: e.target.value });
+                  <input
+                    ref={nameRef}
+                    className="w-full border rounded-md p-2 mt-1"
+                    value={form.name}
+                    onChange={(e) => {
+                      setForm({ ...form, name: e.target.value });
 
-                    setErrors((prev) => ({
-                      ...prev,
-                      name: "",
-                    }));
-                  }}
-                />
+                      setErrors((prev) => ({
+                        ...prev,
+                        name: "",
+                      }));
+                    }}
+                  />
 
-                {errors.name && (
-                  <p className="text-sm text-red-500">{errors.name}</p>
-                )}
-              </div>
+                  {errors.name && (
+                    <p className="text-sm text-red-500">{errors.name}</p>
+                  )}
+                </div>
 
-              {/* ROW 3 */}
-              <div>
-                <label className="font-medium">Email *</label>
+                {/* ROW 3 */}
+                <div>
+                  <label className="font-medium">Email *</label>
 
-                <input
-                  ref={emailRef}
-                  type="email"
-                  className="w-full border rounded-md p-2 mt-1"
-                  value={form.email}
-                  onChange={(e) => {
-                    setForm({ ...form, email: e.target.value });
+                  <input
+                    ref={emailRef}
+                    type="email"
+                    className="w-full border rounded-md p-2 mt-1"
+                    value={form.email}
+                    onChange={(e) => {
+                      setForm({ ...form, email: e.target.value });
 
-                    setErrors((prev) => ({
-                      ...prev,
-                      email: "",
-                    }));
-                  }}
-                />
+                      setErrors((prev) => ({
+                        ...prev,
+                        email: "",
+                      }));
+                    }}
+                  />
 
-                {errors.email && (
-                  <p className="text-sm text-red-500">{errors.email}</p>
-                )}
-              </div>
+                  {errors.email && (
+                    <p className="text-sm text-red-500">{errors.email}</p>
+                  )}
+                </div>
 
-              {/* ROW 4 */}
-              <div>
-                <label className="font-medium">Phone *</label>
+                {/* ROW 4 */}
+                <div>
+                  <label className="font-medium">Phone *</label>
 
-                <input
-                  ref={phoneRef}
-                  className="w-full border rounded-md p-2 mt-1"
-                  value={form.phone}
-                  onChange={(e) => {
-                    setForm({ ...form, phone: e.target.value });
+                  <input
+                    ref={phoneRef}
+                    className="w-full border rounded-md p-2 mt-1"
+                    value={form.phone}
+                    onChange={(e) => {
+                      setForm({ ...form, phone: e.target.value });
 
-                    setErrors((prev) => ({
-                      ...prev,
-                      phone: "",
-                    }));
-                  }}
-                />
+                      setErrors((prev) => ({
+                        ...prev,
+                        phone: "",
+                      }));
+                    }}
+                  />
 
-                {errors.phone && (
-                  <p className="text-sm text-red-500">{errors.phone}</p>
-                )}
-              </div>
+                  {errors.phone && (
+                    <p className="text-sm text-red-500">{errors.phone}</p>
+                  )}
+                </div>
 
-              {/* ROW 5 */}
-              <div>
-                <label className="font-medium">Proposal *</label>
+                {/* ROW 5 */}
+                <div>
+                  <label className="font-medium">Proposal *</label>
 
-                <textarea
-                  ref={proposalRef}
-                  rows={6}
-                  className="w-full border rounded-md p-2 mt-1"
-                  value={form.proposal}
-                  onChange={(e) => {
-                    setForm({
-                      ...form,
-                      proposal: e.target.value,
-                    });
+                  <textarea
+                    ref={proposalRef}
+                    rows={6}
+                    className="w-full border rounded-md p-2 mt-1"
+                    value={form.proposal}
+                    onChange={(e) => {
+                      setForm({
+                        ...form,
+                        proposal: e.target.value,
+                      });
 
-                    setErrors((prev) => ({
-                      ...prev,
-                      proposal: "",
-                    }));
-                  }}
-                />
+                      setErrors((prev) => ({
+                        ...prev,
+                        proposal: "",
+                      }));
+                    }}
+                  />
 
-                {errors.proposal && (
-                  <p className="text-sm text-red-500">{errors.proposal}</p>
-                )}
-              </div>
+                  {errors.proposal && (
+                    <p className="text-sm text-red-500">{errors.proposal}</p>
+                  )}
+                </div>
 
-              {/* ROW 6 */}
-              <div className="space-y-3">
-                <label className="font-medium">Resume *</label>
-                {errors.resume && (
-                  <p className="text-sm text-red-500">{errors.resume}</p>
-                )}
+                {/* ROW 6 */}
+                <div className="space-y-3">
+                  <label className="font-medium">Resume *</label>
+                  {errors.resume && (
+                    <p className="text-sm text-red-500">{errors.resume}</p>
+                  )}
 
-                {resumes.length > 0 ? (
-                  <div className="space-y-3">
-                    <label className="font-medium">Choose Resume</label>
+                  {resumes.length > 0 ? (
+                    <div className="space-y-3">
+                      <label className="font-medium">Choose Resume</label>
 
-                    {resumes.map((resume) => (
-                      <label
-                        key={resume.id}
-                        className="flex items-center justify-between rounded-lg border p-3 cursor-pointer"
-                      >
-                        <div className="flex items-center gap-3">
-                          <input
-                            type="radio"
-                            name="resume"
-                            checked={selectedResumeId === resume.id}
-                            onChange={() => {
-                              setSelectedResumeId(resume.id);
+                      {resumes.map((resume) => (
+                        <label
+                          key={resume.id}
+                          className="flex items-center justify-between rounded-lg border p-3 cursor-pointer"
+                        >
+                          <div className="flex items-center gap-3">
+                            <input
+                              type="radio"
+                              name="resume"
+                              checked={selectedResumeId === resume.id}
+                              onChange={() => {
+                                setSelectedResumeId(resume.id);
 
-                              // user chose an existing resume
-                              setUploadedResume(null);
+                                // user chose an existing resume
+                                setUploadedResume(null);
 
-                              setErrors((prev) => ({
-                                ...prev,
-                                resume: "",
-                              }));
-                            }}
-                          />
+                                setErrors((prev) => ({
+                                  ...prev,
+                                  resume: "",
+                                }));
+                              }}
+                            />
 
-                          <div>
-                            <div className="font-medium">{resume.file_name}</div>
+                            <div>
+                              <div className="font-medium">{resume.file_name}</div>
 
-                            {resume.is_default && (
-                              <p className="text-xs text-green-600">
-                                Default Resume
-                              </p>
-                            )}
+                              {resume.is_default && (
+                                <p className="text-xs text-green-600">
+                                  Default Resume
+                                </p>
+                              )}
+                            </div>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => viewResume(resume)}
+                            >
+                              View
+                            </Button>
                           </div>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => viewResume(resume)}
-                          >
-                            View
-                          </Button>
+                        </label>
+                      ))}
+
+                      <div className="border-t pt-4">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => fileInputRef.current?.click()}
+                        >
+                          <Upload className="mr-2 h-4 w-4" />
+                          Upload New Resume Instead
+                        </Button>
+
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept=".pdf,.doc,.docx"
+                          className="hidden"
+                          onChange={handleResumeUpload}
+                        />
+                        {uploadedResume && (
+                          <div className="rounded-md border border-green-200 bg-green-50 p-3 space-y-3">
+                            <div>
+                              <p className="text-sm font-medium text-green-700">
+                                Using uploaded resume:{" "}
+                                <strong>{uploadedResume.name}</strong>
+                              </p>
+
+                              <p className="text-xs text-muted-foreground">
+                                This resume will only be used for this application
+                                and will not be saved to your profile.
+                              </p>
+                            </div>
+
+                            <div className="flex justify-center items-center gap-3">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={viewUploadedResume}
+                              >
+                                View Resume
+                              </Button>
+
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => fileInputRef.current?.click()}
+                              >
+                                Choose Another Resume
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      {!uploadedResume ? (
+                        <div
+                          onClick={() => fileInputRef.current?.click()}
+                          className="cursor-pointer rounded-lg border-2 border-dashed p-6 text-center transition hover:bg-muted"
+                        >
+                          <Upload className="mx-auto mb-2 text-muted-foreground" />
+
+                          <p className="text-sm font-medium">
+                            Upload resume (required)
+                          </p>
+
+                          <p className="text-xs text-muted-foreground">
+                            PDF, DOC, DOCX (max 5MB)
+                          </p>
                         </div>
-                      </label>
-                    ))}
-
-                    <div className="border-t pt-4">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => fileInputRef.current?.click()}
-                      >
-                        <Upload className="mr-2 h-4 w-4" />
-                        Upload New Resume Instead
-                      </Button>
-
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept=".pdf,.doc,.docx"
-                        className="hidden"
-                        onChange={handleResumeUpload}
-                      />
-                      {uploadedResume && (
-                        <div className="rounded-md border border-green-200 bg-green-50 p-3 space-y-3">
+                      ) : (
+                        <div className="rounded-lg border p-4 space-y-3">
                           <div>
-                            <p className="text-sm font-medium text-green-700">
-                              Using uploaded resume:{" "}
-                              <strong>{uploadedResume.name}</strong>
-                            </p>
+                            <p className="font-medium">{uploadedResume.name}</p>
 
                             <p className="text-xs text-muted-foreground">
-                              This resume will only be used for this application
-                              and will not be saved to your profile.
+                              This resume will only be used for this application.
                             </p>
                           </div>
 
@@ -539,7 +594,6 @@ export default function ApplyJobPage({ currentUrl }: Props) {
                             <Button
                               type="button"
                               variant="outline"
-                              size="sm"
                               onClick={viewUploadedResume}
                             >
                               View Resume
@@ -548,7 +602,6 @@ export default function ApplyJobPage({ currentUrl }: Props) {
                             <Button
                               type="button"
                               variant="outline"
-                              size="sm"
                               onClick={() => fileInputRef.current?.click()}
                             >
                               Choose Another Resume
@@ -556,79 +609,32 @@ export default function ApplyJobPage({ currentUrl }: Props) {
                           </div>
                         </div>
                       )}
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    {!uploadedResume ? (
-                      <div
-                        onClick={() => fileInputRef.current?.click()}
-                        className="cursor-pointer rounded-lg border-2 border-dashed p-6 text-center transition hover:bg-muted"
-                      >
-                        <Upload className="mx-auto mb-2 text-muted-foreground" />
 
-                        <p className="text-sm font-medium">
-                          Upload resume (required)
-                        </p>
-
-                        <p className="text-xs text-muted-foreground">
-                          PDF, DOC, DOCX (max 5MB)
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="rounded-lg border p-4 space-y-3">
-                        <div>
-                          <p className="font-medium">{uploadedResume.name}</p>
-
-                          <p className="text-xs text-muted-foreground">
-                            This resume will only be used for this application.
-                          </p>
-                        </div>
-
-                        <div className="flex justify-center items-center gap-3">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={viewUploadedResume}
-                          >
-                            View Resume
-                          </Button>
-
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => fileInputRef.current?.click()}
-                          >
-                            Choose Another Resume
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept=".pdf,.doc,.docx"
-                      className="hidden"
-                      onChange={handleResumeUpload}
-                    />
-                  </>
-                )}
-              </div>
-            </fieldset>
-            <Button
-              className="w-full"
-              onClick={handleSubmit}
-              disabled={hasApplied || checkingApplication}
-            >
-              {checkingApplication
-                ? "Checking Application..."
-                : hasApplied
-                  ? "Already Applied"
-                  : "Submit Application"}
-            </Button>
-          </CardContent>
-        </Card>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".pdf,.doc,.docx"
+                        className="hidden"
+                        onChange={handleResumeUpload}
+                      />
+                    </>
+                  )}
+                </div>
+              </fieldset>
+              <Button
+                className="w-full"
+                onClick={handleSubmit}
+                disabled={hasApplied || checkingApplication}
+              >
+                {checkingApplication
+                  ? "Checking Application..."
+                  : hasApplied
+                    ? "Already Applied"
+                    : "Submit Application"}
+              </Button>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
