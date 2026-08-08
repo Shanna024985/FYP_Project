@@ -454,11 +454,35 @@ module.exports.checkGoogleIdExists = (req, res, next) => {
                 return res.status(500).json({ error: error.message });
             });
         } else {
-            return model.updateGoogleEmailById(res.locals.googleEmail, user[0].id)
+            return model.userProfileExists(user[0].id)
             .then((user) => {
-                res.locals.userId = user[0].id;
-                res.locals.status = 200;
-                next();
+                if (user.length == 0) {
+                    return model.updateGoogleEmailById(res.locals.googleEmail, user[0].id)
+                    .then((user) => {
+                        res.locals.userId = user[0].id;
+                        res.locals.status = 200;
+                        next();
+                    }).catch(function (error) {
+                        console.error(error);
+                        return res.status(500).json({ error: error.message });
+                    });
+                } else {
+                    return model.updateGoogleEmailById(null, user[0].id)
+                    .then((user) => {
+                        return model.updateEmailByUserId(res.locals.googleEmail, user[0].id)
+                        .then((user) => {
+                            res.locals.userId = user[0].user_id;
+                            res.locals.status = 200;
+                            next();
+                        }).catch(function (error) {
+                            console.error(error);
+                            return res.status(500).json({ error: error.message });
+                        });
+                    }).catch(function (error) {
+                        console.error(error);
+                        return res.status(500).json({ error: error.message });
+                    });
+                }
             }).catch(function (error) {
                 console.error(error);
                 return res.status(500).json({ error: error.message });

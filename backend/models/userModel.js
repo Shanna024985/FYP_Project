@@ -74,7 +74,7 @@ module.exports.getUserProfile = function getUserProfile(userId) {
 
 // READ - Check if user profile exists
 module.exports.userProfileExists = function userProfileExists(userId) {
-    let sql = "SELECT d.id, u.google_email FROM user_detail d JOIN user_ u on d.user_id = u.id WHERE user_id = $1;";
+    let sql = "SELECT u.id, u.google_email FROM user_detail d JOIN user_ u on d.user_id = u.id WHERE user_id = $1;";
     return query(sql, [userId]).then(function(result) {
         return result.rows;
     });
@@ -223,8 +223,15 @@ module.exports.getUserById = (id) => {
 }
 
 module.exports.updateGoogleEmailById = (googleEmail, id) => {
-    let sql = "UPDATE user_ SET google_email = $1 WHERE id = $2;";
+    let sql = "UPDATE user_ SET google_email = $1 WHERE id = $2 RETURNING id;";
     return query(sql, [googleEmail, id]).then(function (result) {
+        return result.rows;
+    });
+}
+
+module.exports.updateEmailByUserId = (email, id) => {
+    let sql = "UPDATE user_detail SET email = $1 WHERE user_id = $2 RETURNING user_id;";
+    return query(sql, [email, id]).then(function (result) {
         return result.rows;
     });
 }
