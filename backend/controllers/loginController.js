@@ -455,8 +455,8 @@ module.exports.checkGoogleIdExists = (req, res, next) => {
             });
         } else {
             return model.userProfileExists(user[0].id)
-            .then((user) => {
-                if (user.length == 0) {
+            .then((userProfile) => {
+                if (userProfile.length == 0) {
                     return model.updateGoogleEmailById(res.locals.googleEmail, user[0].id)
                     .then((user) => {
                         res.locals.userId = user[0].id;
