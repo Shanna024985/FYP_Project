@@ -215,13 +215,13 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
 
   return (
     <div className="flex flex-col gap-6">
-      <NavigationMenus />
+      <NavigationMenus currentUrl={currentUrl}/>
       <div className="mx-auto max-w-7xl space-y-10">
         {/* ========================================= */}
         {/* ROW 1 - WELCOME */}
         {/* ========================================= */}
         <div>
-          <h1 className="text-3xl font-bold title-black">Welcome!</h1>
+          <h1 className="text-3xl font-bold text-black! dark:text-white!">Welcome!</h1>
           <p className="text-muted-foreground">
             Manage your applications and saved jobs
           </p>
@@ -245,7 +245,7 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
             <CardContent className="space-y-4 p-0">
               <div>
                 {/* Name */}
-                <h2 className="text-2xl font-semibold title-black">
+                <h2 className="text-2xl font-semibold text-black! dark:text-white!">
                   {loadingProfile
                     ? "Loading..."
                     : `${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`}
@@ -270,7 +270,7 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
                 <div>
                   <p className="text-sm text-muted-foreground">Jobs Applied</p>
 
-                  <h2 className="mt-2 text-4xl font-bold title-black">
+                  <h2 className="mt-2 text-4xl font-bold text-black! dark:text-white!">
                     {appliedJobs.length}
                   </h2>
                 </div>
@@ -290,7 +290,7 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
                 <div>
                   <p className="text-sm text-muted-foreground">Saved Jobs</p>
 
-                  <h2 className="mt-2 text-4xl font-bold title-black">
+                  <h2 className="mt-2 text-4xl font-bold text-black! dark:text-white!">
                     {savedJobs.length}
                   </h2>
                 </div>
@@ -309,7 +309,7 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
                 <div>
                   <p className="text-sm text-muted-foreground">My Reviews</p>
 
-                  <h2 className="mt-2 text-4xl font-bold title-black">
+                  <h2 className="mt-2 text-4xl font-bold text-black! dark:text-white!">
                     {loadingReviews ? "..." : reviewCount}
                   </h2>
                 </div>

@@ -13,7 +13,7 @@ import { useNavigate } from "react-router-dom";
 import AuthLayout from "./AuthLayout";
 import NavigationMenus from "./NavigationMenu";
 type Props = {
-  currentUrl: String;
+  currentUrl: string;
 };
 type ArrayType = {
   title: string;
@@ -196,7 +196,7 @@ export const CompanyPageRenderer = (prop: Props) => {
   }, []);
   return (
     <AuthLayout>
-      <NavigationMenus />
+      <NavigationMenus currentUrl={prop.currentUrl}/>
       <br/>
       <CompanyPage
         profileImage={imageOfTea}
@@ -309,12 +309,12 @@ export const CompanyPage = (prop: PropsForCompanyPage) => {
       </div>
       <div className="flex gap-10">
         <div className="flex-2 flex flex-col gap-5">
-          <div className="bg-[#F2E9D9] text-left p-4 rounded-md gap-4 flex-col flex h-fit">
+          <div className="bg-[#F2E9D9] dark:bg-[#bab4a9]  text-left p-4 rounded-md gap-4 flex-col flex h-fit">
             <p className="font-bold text-2xl">Overview</p>
             <p>{prop.overviewPage}</p>
           </div>
 
-          <div className="bg-[#F2E9D9] text-left p-4 rounded-md gap-4 flex-col  flex h-fit">
+          <div className="bg-[#F2E9D9] dark:bg-[#bab4a9] text-left p-4 rounded-md gap-4 flex-col  flex h-fit">
             {prop.totalReviews == 0 ? (
               <>
                 <p className="text-xl text-gray-500">
@@ -373,7 +373,7 @@ export const CompanyPage = (prop: PropsForCompanyPage) => {
           </div>
         </div>
 
-        <div className="flex-1 bg-[#F2E9D9] rounded-md text-left p-4">
+        <div className="flex-1 bg-[#F2E9D9] dark:bg-[#bab4a9]  rounded-md text-left p-4">
           <p className="font-bold text-2xl">Job Postings</p>
           <div className="mt-4 flex flex-col gap-4 h-54 overflow-y-scroll">
             {prop.jobPostings?.length === undefined ||

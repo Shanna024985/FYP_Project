@@ -69,12 +69,12 @@ const ViewCompaniesPage = ({ currentUrl }: Props) => {
 
   return (
     <div className="flex flex-col gap-6">
-      <NavigationMenus />
+      <NavigationMenus currentUrl="" />
 
       <div className="px-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold title-black">My Companies</h1>
+            <h1 className="text-2xl font-bold text-black! dark:text-white!">My Companies</h1>
             <p className="text-muted-foreground">
               Manage all companies that you own.
             </p>

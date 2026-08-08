@@ -417,12 +417,12 @@ export default function EditProfilePage({ currentUrl }: Props) {
   }
   return (
     <div>
-      <NavigationMenus />
+      <NavigationMenus currentUrl={currentUrl}/>
       <div className="min-h-screen bg-background px-6 py-8">
         <div className="mx-auto max-w-4xl rounded-3xl border bg-card p-8 shadow-sm">
           {/* Header */}
           <div className="relative mb-10 flex items-center justify-center">
-            <h1 className="text-3xl font-bold title-black">Edit Profile</h1>
+            <h1 className="text-3xl font-bold text-black! dark:text-white!">Edit Profile</h1>
 
             <Button
               className="absolute right-0 top-0"
@@ -561,7 +561,7 @@ export default function EditProfilePage({ currentUrl }: Props) {
 
           {/* Link Profiles */}
           <div className="mt-10 border-t pt-8">
-            <h2 className="mb-5 text-center text-2xl font-bold title-black">
+            <h2 className="mb-5 text-center text-2xl font-bold text-black! dark:text-white!">
               Link Profiles
             </h2>
 
@@ -610,11 +610,11 @@ export default function EditProfilePage({ currentUrl }: Props) {
               No education added yet
             </div>
           </div> */}
-
+           
           {/* Resume */}
           <div className="mt-10 border-t pt-8">
             <div className="mb-6 flex items-center justify-center gap-3">
-              <h2 className="text-2xl font-bold title-black">Resume</h2>
+              <h2 className="text-2xl font-bold text-black! dark:text-white!">Resume</h2>
 
               <Button
                 variant="outline"

@@ -17,7 +17,7 @@ import { CompanyPage } from "./CompanyPage";
 import { Spinner } from "./components/ui/spinner";
 import SuccessfulJobScreen from "./SuccessfulJobScreen";
 type Props = {
-  currentUrl: String;
+  currentUrl: string;
 };
 const AddCompanies = (prop: Props) => {
   let [overviewPage, setOverviewPage] = React.useState("");
@@ -272,7 +272,7 @@ const AddCompanies = (prop: Props) => {
   return (
 
     <div>
-      <NavigationMenus />
+      <NavigationMenus currentUrl={prop.currentUrl}/>
       <p className="text-left text-3xl font-semibold">Add companies</p>
       <hr className="mt-4" />
       <div className="flex gap-4 mt-5">

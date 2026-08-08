@@ -95,11 +95,13 @@ module.exports.getUserProfile = (req, res, next) => {
                     first_name: userProfile.first_name,
                     last_name: userProfile.last_name,
                     phone_number: userProfile.phone_number,
-                    email: userProfile.email,
+                    email: (userProfile.googleEmail) ? userProfile.googleEmail : userProfile.email,
                     linkedin_profile: userProfile.linkedin_profile,
                     github_profile: userProfile.github_profile,
                     profile_picture_url: userProfile.profile_picture_url || null,
                     default_resume_id: userProfile.default_resume_id,
+                    is_linked_with_singpass: (userProfile.singpass_id) ? true : false,
+                    is_linked_with_google: (userProfile.google_id) ? true : false
                 }
             });
         })
@@ -142,7 +144,7 @@ module.exports.updateUserProfile = (req, res, next) => {
                     first_name,
                     last_name,
                     phone_number,
-                    email,
+                    email: (existing[0].google_email) ? existing[0].google_email : email,
                     linkedin_profile,
                     github_profile,
                     profile_picture_file_url,
