@@ -1,25 +1,45 @@
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 export default function RoleSelector() {
-  const role = localStorage.getItem("role") || "jobseeker";
+  const role =
+    localStorage.getItem("role") || "jobseeker";
 
-  const changeRole = (newRole: "jobseeker" | "employer") => {
+  const changeRole = (
+    newRole: "jobseeker" | "employer"
+  ) => {
     localStorage.setItem("role", newRole);
-    window.location.reload(); // simple refresh for now
+    window.location.reload();
   };
 
   return (
-    <div className="mb-4">
-      <label className="text-sm font-semibold">Switch Role:</label>
+    <div className="flex items-center">
+      <span>Switch Role:</span>
 
-      <select
+      <Select
         value={role}
-        onChange={(e) =>
-          changeRole(e.target.value as "jobseeker" | "employer")
+        onValueChange={(value) =>
+          changeRole(value as "jobseeker" | "employer")
         }
-        className="ml-2 border px-2 py-1 rounded"
       >
-        <option value="jobseeker">Jobseeker</option>
-        <option value="employer">Employer</option>
-      </select>
+        <SelectTrigger className="ml-2 w-[140px]">
+          <SelectValue />
+        </SelectTrigger>
+
+        <SelectContent>
+          <SelectItem value="jobseeker">
+            Jobseeker
+          </SelectItem>
+
+          <SelectItem value="employer">
+            Employer
+          </SelectItem>
+        </SelectContent>
+      </Select>
     </div>
   );
 }
