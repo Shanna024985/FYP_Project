@@ -51,8 +51,8 @@ import {
 
 import { Button } from "@/components/ui/button";
 import MessageButton from "./MessageButton";
-import { Switch } from "./components/ui/switch";
-import { Label } from "./components/ui/label";
+// import { Switch } from "./components/ui/switch";
+// import { Label } from "./components/ui/label";
 import { DarkModeButton } from "./DarkModeButton";
 type Props = {
   currentUrl: string;
