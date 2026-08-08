@@ -2,9 +2,26 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 // Initialize Gemini AI
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ 
-    model: "gemini-2.0-flash-exp"  // Best for free tier (60 requests/min)
-});
+
+// Google has been aggressively deprecating/restricting model names (2.0-flash-exp retired,
+// then 2.5-flash blocked for new API keys). Try several current names in order and cache
+// whichever one actually works for this key, instead of hardcoding one that might break again.
+const MODEL_CANDIDATES = [
+    "gemini-2.5-flash-lite",
+    "gemini-2.5-flash",
+    "gemini-3-flash-preview",
+    "gemini-2.5-pro"
+];
+
+let cachedModelName = null;
+
+function isModelUnavailableError(error) {
+    const msg = (error && error.message || "").toLowerCase();
+    return error?.status === 404 ||
+        msg.includes("not found") ||
+        msg.includes("no longer available") ||
+        msg.includes("is not supported for generatecontent");
+}
 
 // ==================== RATE LIMITER ====================
 let lastRequestTime = 0;
@@ -27,14 +44,42 @@ const getAIResponse = async (prompt, retryCount = 0) => {
             await new Promise(resolve => setTimeout(resolve, waitTime));
         }
         lastRequestTime = Date.now();
-        
-        // Make the API call
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        return response.text();
-        
+
+        // If we already know which model works for this API key, use it directly.
+        const namesToTry = cachedModelName ? [cachedModelName] : MODEL_CANDIDATES;
+        let lastModelError = null;
+
+        for (const modelName of namesToTry) {
+            try {
+                const model = genAI.getGenerativeModel({ model: modelName });
+                const result = await model.generateContent(prompt);
+                const response = await result.response;
+
+                if (cachedModelName !== modelName) {
+                    console.log(`Gemini: using model "${modelName}"`);
+                    cachedModelName = modelName;
+                }
+
+                return response.text();
+            } catch (modelError) {
+                lastModelError = modelError;
+                if (isModelUnavailableError(modelError)) {
+                    console.warn(`Gemini: model "${modelName}" unavailable, trying next candidate...`);
+                    continue; // try the next candidate model
+                }
+                throw modelError; // a real error (quota, auth, etc.) - don't keep trying models
+            }
+        }
+
+        // Every candidate model was unavailable
+        throw lastModelError;
+
     } catch (error) {
-        console.error(`Gemini API Error (attempt ${retryCount + 1}):`, error.message);
+        console.error(`Gemini API Error (attempt ${retryCount + 1}):`, {
+            status: error.status,
+            message: error.message,
+            errorDetails: error.errorDetails
+        });
         
         // Handle rate limiting (429) with exponential backoff
         if (error.status === 429 && retryCount < MAX_RETRIES) {
@@ -64,7 +109,7 @@ const getAIResponse = async (prompt, retryCount = 0) => {
             return "I'm currently experiencing high demand. Please wait a moment and try again.";
         } else if (error.message.includes('quota')) {
             return "I've reached my usage limit. Please try again later or check your billing details.";
-        } else if (error.message.includes('model')) {
+        } else if (isModelUnavailableError(error)) {
             return "I'm having trouble with the AI model. Please try again.";
         } else if (error.message.includes('network') || error.message.includes('timeout')) {
             return "I'm having network connectivity issues. Please check your internet connection.";
