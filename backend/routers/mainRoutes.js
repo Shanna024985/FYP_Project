@@ -8,6 +8,7 @@ const locationRoutes = require("./locationRoutes");
 const resumeRoutes = require("./resumeRoutes");
 const reviewRoutes = require("./reviewRoutes");
 const userRoutes = require("./userRoutes");
+const geminiRoutes = require("./geminiRoutes");
 
 router.get("/", (req, res, next) => {
     res.send("You are connected!");
@@ -21,5 +22,6 @@ router.use("/locations", locationRoutes);
 router.use("/resumes", resumeRoutes);
 router.use("/reviews", reviewRoutes);
 router.use("/user", userRoutes);
+router.use("/ai", geminiRoutes);
 
 module.exports = router;
