@@ -868,6 +868,7 @@ const JobPostings = (props: Props) => {
         let paragraph = document.getElementById("paragraphOfJobOverview");
         if (paragraph) {
           paragraph.classList.replace("text-[#2A88E0]", "text-[#000000]");
+          paragraph.classList.add("dark:text-[#ffffff]")
         }
       }
       if (step2SvgDiv) {
@@ -898,6 +899,7 @@ const JobPostings = (props: Props) => {
         let p = document.getElementById("paragraphOfPayTerms");
         if (p) {
           p.classList.replace("text-[#2A88E0]", "text-[#000000]");
+          p.classList.add("dark:text-[#FFFFFF]")
         }
       }
       if (step3SvgDiv) {

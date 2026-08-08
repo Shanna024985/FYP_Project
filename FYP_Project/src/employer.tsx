@@ -287,7 +287,7 @@ let EmployerPage = (props: Props) => {
                             navigate("/jobApplicants?id=" + value.id);
                           }}
                         >
-                          <FileUserIcon color="black" />
+                          <FileUserIcon className="text-black dark:text-white" />
                         </Button>
                       </TableCell>
                       <TableCell>
@@ -297,7 +297,7 @@ let EmployerPage = (props: Props) => {
                             navigate("/editjobs?id=" + value.id);
                           }}
                         >
-                          <SquarePenIcon color="black" />
+                          <SquarePenIcon className="text-black dark:text-white" />
                         </Button>
                       </TableCell>
                       <TableCell>

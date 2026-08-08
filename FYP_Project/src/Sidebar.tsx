@@ -121,7 +121,7 @@ export default function Sidebar() {
           </div>
         </div>
       ) : (
-        <h2 className="text-lg font-semibold capitalize title-black">
+        <h2 className="text-lg font-semibold capitalize text-black! dark:text-white!">
           {role} Panel
         </h2>
       )}

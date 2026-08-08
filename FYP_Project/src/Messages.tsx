@@ -156,7 +156,7 @@ const Messages = (props: Props) => {
               if (index == 0) {
                 return (
                   <>
-                    <div className="flex gap-3 bg-blue-100 p-2">
+                    <div className="flex gap-3 bg-blue-100 dark:bg-[#172c67] p-2">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="7"
@@ -254,7 +254,7 @@ const Messages = (props: Props) => {
             </div>
             {/* <Button className="bg-blue-500 self-center">View profile</Button> */}
           </div>
-          <div className="bg-gray-200 mt-4 h-[82vh] flex flex-col justify-end gap-4">
+          <div className="bg-gray-200 dark:bg-[#4f4c4c] mt-4 h-[82vh] flex flex-col justify-end gap-4">
             <div
               className="p-4 flex flex-col gap-5 overflow-y-scroll"
               ref={messageDiv}
