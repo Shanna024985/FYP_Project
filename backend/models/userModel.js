@@ -60,7 +60,7 @@ module.exports.getUserProfile = function getUserProfile(userId) {
                       ud.phone_number, ud.email, ud.linkedin_profile, ud.github_profile,
                       ud.profile_picture_file_url as profile_picture_url,
                       ud.default_resume_id,
-                      u.singpass_id, u.role,
+                      u.singpass_id, u.google_id, u.role,
                (SELECT json_agg(json_build_object('id', r.id, 'file_name', r.file_name)) 
                 FROM resume r WHERE r.user_id = u.id) as resumes
                FROM user_detail ud
@@ -183,6 +183,41 @@ module.exports.insertNewUserByGoogleId = googleId => {
 module.exports.getUserByGoogleId = (googleId) => {
     let sql = "SELECT * FROM user_ u WHERE google_id = $1;";
     return query(sql, [googleId]).then(function (result) {
+        return result.rows;
+    });
+}
+
+module.exports.linkSingpassIdById = (singpassId, id) => {
+    let sql = "UPDATE user_ SET singpass_id = $1 WHERE id = $2 RETURNING id;";
+    return query(sql, [singpassId, id]).then(function (result) {
+        return result.rows;
+    });
+}
+
+module.exports.linkGoogleIdById = (googleId, id) => {
+    let sql = "UPDATE user_ SET google_id = $1 WHERE id = $2 RETURNING id;";
+    return query(sql, [googleId, id]).then(function (result) {
+        return result.rows;
+    });
+}
+
+module.exports.unlinkSingpassIdById = (id) => {
+    let sql = "UPDATE user_ SET singpass_id = NULL WHERE id = $1 RETURNING id;";
+    return query(sql, [id]).then(function (result) {
+        return result.rows;
+    });
+}
+
+module.exports.unlinkGoogleIdById = (id) => {
+    let sql = "UPDATE user_ SET google_id = NULL WHERE id = $1 RETURNING id;";
+    return query(sql, [id]).then(function (result) {
+        return result.rows;
+    });
+}
+
+module.exports.getUserById = (id) => {
+    let sql = "SELECT * FROM user_ u WHERE id = $1;";
+    return query(sql, [id]).then(function (result) {
         return result.rows;
     });
 }

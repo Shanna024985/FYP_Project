@@ -56,7 +56,7 @@ module.exports.verifyToken = (req, res, next) => {
     req.cookies?.jwt ||
     (req.headers.authorization?.startsWith("Bearer ")
       ? req.headers.authorization.substring(7)
-      : null);
+      : null) || (res.locals.token);
 
   console.log('Token extracted:', token ? 'Yes (starts with: ' + token.substring(0, 30) + '...)' : 'No');
   console.log('Token length:', token ? token.length : 0);
