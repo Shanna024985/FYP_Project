@@ -74,7 +74,7 @@ module.exports.getUserProfile = function getUserProfile(userId) {
 
 // READ - Check if user profile exists
 module.exports.userProfileExists = function userProfileExists(userId) {
-    let sql = "SELECT id FROM user_detail WHERE user_id = $1;";
+    let sql = "SELECT d.id, u.google_email FROM user_detail d JOIN user_ u on d.user_id = u.id WHERE user_id = $1;";
     return query(sql, [userId]).then(function(result) {
         return result.rows;
     });
@@ -173,9 +173,9 @@ module.exports.deleteProfilePhotoOld = function deleteProfilePhotoOld(userId) {
 
 // Create new user based on google email
 // When setting user details, google can also be used to log in (and also link with singpass)
-module.exports.insertNewUserByGoogleId = googleId => {
-    let sql = "INSERT INTO user_ (google_id) VALUES ($1) RETURNING id;";
-    return query(sql, [googleId]).then(function (result) {
+module.exports.insertNewUserByGoogleId = (googleId, googleEmail) => {
+    let sql = "INSERT INTO user_ (google_id, google_email) VALUES ($1, $2) RETURNING id;";
+    return query(sql, [googleId, googleEmail]).then(function (result) {
         return result.rows;
     });
 }
@@ -218,6 +218,13 @@ module.exports.unlinkGoogleIdById = (id) => {
 module.exports.getUserById = (id) => {
     let sql = "SELECT * FROM user_ u WHERE id = $1;";
     return query(sql, [id]).then(function (result) {
+        return result.rows;
+    });
+}
+
+module.exports.updateGoogleEmailById = (googleEmail, id) => {
+    let sql = "UPDATE user_ SET google_email = $1 WHERE id = $2;";
+    return query(sql, [googleEmail, id]).then(function (result) {
         return result.rows;
     });
 }

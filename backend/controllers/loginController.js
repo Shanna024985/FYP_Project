@@ -317,7 +317,7 @@ module.exports.checkSingpassIdExists = (req, res, next) => {
             return model.insertNewUser(res.locals.singpassId)
             .then((user) => {
                 res.locals.userId = user[0].id;
-                res.locals.status = 200;
+                res.locals.status = 201;
                 next();
             }).catch(function (error) {
                 console.error(error);
@@ -325,7 +325,7 @@ module.exports.checkSingpassIdExists = (req, res, next) => {
             });
         } else {
             res.locals.userId = user[0].id;
-            res.locals.status = 201;
+            res.locals.status = 200;
             next();
         }
     }).catch(function (error) {
@@ -431,6 +431,7 @@ module.exports.getGoogleToken = (req, res, next) => {
                 // clear session, this will no longer be needed
                 req.session.destroy((err) => {
                     res.locals.googleId = decoded.sub;
+                    res.locals.googleEmail = decoded.email;
                     next();
                 });
             }
@@ -443,7 +444,17 @@ module.exports.checkGoogleIdExists = (req, res, next) => {
     return model.getUserByGoogleId(res.locals.googleId)
     .then((user) => {
         if (user.length == 0) {
-            return model.insertNewUserByGoogleId(res.locals.googleId)
+            return model.insertNewUserByGoogleId(res.locals.googleId, res.locals.googleEmail)
+            .then((user) => {
+                res.locals.userId = user[0].id;
+                res.locals.status = 201;
+                next();
+            }).catch(function (error) {
+                console.error(error);
+                return res.status(500).json({ error: error.message });
+            });
+        } else {
+            return model.updateGoogleEmailById(res.locals.googleEmail, user[0].id)
             .then((user) => {
                 res.locals.userId = user[0].id;
                 res.locals.status = 200;
@@ -452,10 +463,6 @@ module.exports.checkGoogleIdExists = (req, res, next) => {
                 console.error(error);
                 return res.status(500).json({ error: error.message });
             });
-        } else {
-            res.locals.userId = user[0].id;
-            res.locals.status = 201;
-            next();
         }
     }).catch(function (error) {
         console.error(error);
