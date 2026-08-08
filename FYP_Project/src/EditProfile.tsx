@@ -37,7 +37,7 @@ export default function EditProfilePage({ currentUrl }: Props) {
   const emailRef = useRef<HTMLInputElement>(null);
   const phoneRef = useRef<HTMLInputElement>(null);
   const [profileImage, setProfileImage] = useState<string | null>(null);
-  const resumeInputRef = useRef<HTMLInputElement>(null);
+  const resumeInputRef = useRef<HTMLInputElement>(null); 
   const profileInputRef = useRef<HTMLInputElement>(null);
 
   const [profile, setProfile] = useState({
@@ -75,11 +75,8 @@ export default function EditProfilePage({ currentUrl }: Props) {
         github_profile: res.data.profile.github_profile || "",
       });
       const profileData = res.data.profile;
-
-      if (profileData.profile_picture_file_data) {
-        setProfileImage(
-          `data:image/jpeg;base64,${profileData.profile_picture_file_data}`,
-        );
+      if (profileData.profile_picture_url) {
+        setProfileImage(profileData.profile_picture_url);
       } else {
         setProfileImage(null);
       }
@@ -161,7 +158,7 @@ export default function EditProfilePage({ currentUrl }: Props) {
       );
 
       // Replace preview with Cloudinary URL
-      setProfileImage(res.data.profile.profile_picture_url);
+      setProfileImage(res.data.profile_picture_url);
 
       toast.success("Profile photo uploaded successfully.");
     } catch (err: any) {

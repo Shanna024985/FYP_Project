@@ -30,7 +30,6 @@ module.exports.createJob = (req, res, next) => {
         duration, deadline, experience, career_level, location, address,
         jobs_needed, reports 
     } = req.body;
-    
     let companyId = req.body.companyId;
     const userId = getUserIdFromReq(req, res);
     
@@ -49,21 +48,20 @@ module.exports.createJob = (req, res, next) => {
                     error: "Unauthorized: You don't own this company. Only company owners can post jobs." 
                 });
             }
-            
             if (!title || !description || !category || !type || !salary_range_from || !salary_range_to || !deadline) {
                 return res.status(400).json({ 
                     error: "Required fields missing: title, description, category, type, salary_range_from, salary_range_to, deadline" 
                 });
             }
             
-            if (salary_range_from > salary_range_to) {
+            if (parseInt(salary_range_from) > parseInt(salary_range_to) ){
                 return res.status(400).json({ error: "Minimum salary cannot be greater than maximum salary" });
             }
             
             if (new Date(deadline) < new Date()) {
                 return res.status(400).json({ error: "Deadline cannot be in the past" });
             }
-            
+            console.log(req.body)
             return jobModel.createJob({
                 title, description, category, type,
                 salary_range_from, salary_range_to, salary_type: salary_type || 'Negotiable',
@@ -87,7 +85,7 @@ module.exports.getAllJobs = (req, res, next) => {
     let filters = req.query;
     
     const page = parseInt(filters.page) || 1;
-    const limit = parseInt(filters.limit) || 50;
+    const limit = parseInt(filters.limit) || 1000;
     const offset = (page - 1) * limit;
     filters.limit = limit;
     filters.offset = offset;
@@ -118,7 +116,7 @@ module.exports.getAllJobs = (req, res, next) => {
 
 // READ - Get recommended jobs
 module.exports.getRecommendedJobs = (req, res, next) => {
-    let userId = req.query.userId || 1;
+    const userId = getUserIdFromReq(req, res);
     let limit = req.query.limit || 6;
     
     return jobModel.getRecommendedJobs(userId, limit)
@@ -184,7 +182,7 @@ module.exports.getEmployerDashboard = (req, res, next) => {
                     stats: { total: 0, active: 0, closed: 0, deleted: 0 }
                 });
             }
-            
+            console.log("done")
             let jobSql = `SELECT j.*, c.name as company_name
                          FROM job j
                          JOIN company c ON j.company_id = c.id
@@ -491,10 +489,11 @@ module.exports.openJob = (req, res, next) => {
 // ==================== APPLICATIONS ====================
 
 // CREATE - Apply for a job
-module.exports.applyForJob = (req, res, next) => {
+module.exports.applyForJob = async(req, res, next) => {
     const userId = getUserIdFromReq(req, res);
     let jobId = req.params.id;
     let resumeId = req.body.resumeId;
+    const { fullname, email, phone, proposal } = req.body;
     
     if (!userId) {
         return res.status(401).json({
@@ -726,6 +725,30 @@ module.exports.deleteApplication = (req, res, next) => {
         });
 }
 
+module.exports.checkApplication = async function (req, res) {
+    try {
+        const userId = getUserIdFromReq(req, res);
+
+        if (!userId) {
+            return res.status(401).json({
+                error: "Unauthorized: User not authenticated"
+            });
+        }
+
+        const jobId = req.params.jobId;
+
+        const applied = await jobModel.hasApplied(userId, jobId);
+
+        return res.json({ applied });
+
+    } catch (error) {
+        console.error(error);
+
+        return res.status(500).json({
+            error: "Failed to check application"
+        });
+    }
+};
 // ==================== SAVED JOBS ====================
 
 // CREATE - Save a job

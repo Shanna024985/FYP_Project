@@ -1,14 +1,12 @@
-import { useState } from "react";
+
 import { Toaster } from "@/components/ui/sonner";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "./assets/vite.svg";
-import heroImg from "./assets/hero.png";
 import "./App.css";
 import { Route, Routes } from "react-router-dom";
 import Employer from "./employer";
 import Homepage from "./Homepage";
 import JobPostings from "./JobPostings";
 import EditJobs from "./EditJobs";
+import EditCompany from "./EditCompanies";
 import ViewApplicants from "./ViewApplicants";
 import BrowseJobs from "./BrowseJobs";
 import Profile from "./EditProfile";
@@ -21,10 +19,15 @@ import ProtectedLayout from "./ProtectedLayout";
 import SavedJobs from "./SavedJobsPage";
 import ApplyJobPage from "./ApplyJobPage";
 import MyReviewsPage from "./MyReviewsPage";
-import JobSeekerRatingsPage from "./JobSeekerRating";
-const linkForBackend = "http://localhost:3000/api";
+// import JobSeekerRatingsPage from "./JobSeekerRating";
+import { CompanyPageRenderer } from "./CompanyPage";
+import CompanyReviews from "./CompanyReviews";
+import AddCompanies from "./AddCompanies";
+import Messages from "./Messages";
+import ViewMyCompanies from "./ViewMyCompanies";
+import Footer from "./Footer";
+const linkForBackend = "https://fyp-project-fkmo.onrender.com/api";
 function App() {
-  const [count, setCount] = useState(0);
 
   return (
     <>
@@ -33,7 +36,9 @@ function App() {
         <Route path="/browsejobs" element={<BrowseJobs currentUrl={linkForBackend}/>} />
         <Route path="/jobDetails" element={<JobDetails currentUrl={linkForBackend} />} />
         <Route path="/login" element={<LoginPage currentUrl={linkForBackend} />} />
-        <Route path="/login/callback" element={<LoginCallbackPage currentUrl={linkForBackend}/>} />
+        <Route path="/login/callback" element={<LoginCallbackPage/>} />
+        <Route path="/company" element={<CompanyPageRenderer  currentUrl={linkForBackend}/>}/>
+        <Route path="/companyreviews" element={<CompanyReviews currentUrl={linkForBackend}/>}/>
         {/* PROTECTED AREA */}
         <Route element={<ProtectedLayout />}>
           <Route
@@ -61,6 +66,10 @@ function App() {
             path="/jobSeeker/applications"
             element={<JobSeekerApplications currentUrl={linkForBackend} />}
           />
+          <Route path="/addcompanies" element={<AddCompanies currentUrl={linkForBackend}/>}/>
+          <Route path="/messages" element={<Messages currentUrl={linkForBackend}/>}/>
+          <Route path="/applyjob" element={<ApplyJobPage currentUrl={linkForBackend}/>} />
+          <Route path="/editCompany/:id" element={<EditCompany currentUrl={linkForBackend}/>}/>
           <Route
             path="/jobSeeker/savedJobs"
             element={<SavedJobs currentUrl={linkForBackend} />}
@@ -69,13 +78,15 @@ function App() {
             path="/jobSeeker/myReviews"
             element={<MyReviewsPage currentUrl={linkForBackend} />}
           />
-          <Route
+          {/* <Route
             path="/jobSeeker/ratings"
-            element={<JobSeekerRatingsPage currentUrl={linkForBackend} />}
-          />
+            element={<JobSeekerRatingsPage/>}
+          /> */}
           <Route path="/applyjob" element={<ApplyJobPage currentUrl={linkForBackend}/>} />
+          <Route path="/viewMyCompanies" element={<ViewMyCompanies currentUrl={linkForBackend}/>}/>
         </Route>
       </Routes>
+      <Footer />
       <Toaster position="top-center" />
     </>
   );

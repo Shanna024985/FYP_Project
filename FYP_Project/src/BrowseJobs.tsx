@@ -5,9 +5,10 @@ import JobFilters from "../src/components/common sections/jobFilters";
 import JobListItem from "../src/components/common sections/JobListItem";
 import { Button } from "@/components/ui/button";
 import Sidebar from "./Sidebar";
-import { useLocation, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 
 import type { Job } from "../src/types/job";
+
 type Props = {
   currentUrl: string;
 };
@@ -60,7 +61,8 @@ export default function BrowseJobs({ currentUrl }: Props) {
   // MAP API → UI FORMAT
   const mappedJobs = currentJobs.map((job) => ({
     currentUrl,
-    jobId: job.id, 
+    jobId: job.id,
+
     title: job.title,
     description: job.description,
 
@@ -69,78 +71,85 @@ export default function BrowseJobs({ currentUrl }: Props) {
     salaryType: job.salary_type,
     salaryPeriod: job.salary_period,
 
-    location: `${job.location}, ${job.company_city}`,
+    location: job.location,
+    address: job.address,
 
     tags: [job.type, job.category],
 
     date: new Date(job.deadline).toLocaleDateString(),
 
-    companyLogo: "https://via.placeholder.com/50",
+    companyLogo: job.logo_url || "/default-company.png",
   }));
 
   // LOADING / ERROR STATES
   if (loading) return <p className="p-4">Loading jobs...</p>;
   if (error) return <p className="p-4 text-red-500">{error}</p>;
   return (
-    <div className="flex">
+    <div className="flex min-h-screen">
       {token && <Sidebar />}
-      <div className="flex-1 p-4">
-        <NavigationMenus />
-        <JobFilters currentUrl={currentUrl} />
 
-        {/* RESULTS */}
-        <div className="space-y-4">
-          {mappedJobs.length === 0 ? (
-            <div className="text-center py-10 text-muted-foreground">
-              No jobs found. Try different filters.
-            </div>
-          ) : (
-            mappedJobs.map((job, i) => (
-              <div key={i} className="space-y-4">
-                <JobListItem {...job} />
-                <div className="h-px bg-border" />
+      {/* Main Container - Added max-w-7xl and mx-auto */}
+      <div className="flex-1 p-4 md:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto space-y-6">
+          <NavigationMenus />
+          <JobFilters />
+
+          {/* RESULTS */}
+          <div className="space-y-4">
+            {mappedJobs.length === 0 ? (
+              <div className="text-center py-10 text-muted-foreground">
+                No jobs found. Try different filters.
               </div>
-            ))
-          )}
-        </div>
-
-        {/* PAGINATION */}
-        <div className="flex items-center justify-center gap-2 pt-6">
-          {/* Previous */}
-          <Button
-            variant="outline"
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage((p) => p - 1)}
-          >
-            Prev
-          </Button>
-
-          {/* Page Numbers */}
-          <div className="flex items-center gap-1">
-            {Array.from({ length: totalPages }).map((_, i) => {
-              const page = i + 1;
-
-              return (
-                <Button
-                  key={page}
-                  variant={currentPage === page ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setCurrentPage(page)}
-                >
-                  {page}
-                </Button>
-              );
-            })}
+            ) : (
+              mappedJobs.map((job) => (
+                <div key={job.jobId} className="space-y-4">
+                  <JobListItem {...job} />
+                  <div className="h-px bg-border" />
+                </div>
+              ))
+            )}
           </div>
 
-          {/* Next */}
-          <Button
-            variant="outline"
-            disabled={currentPage === totalPages}
-            onClick={() => setCurrentPage((p) => p + 1)}
-          >
-            Next
-          </Button>
+          {/* PAGINATION */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 pt-6">
+              {/* Previous */}
+              <Button
+                variant="outline"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((p) => p - 1)}
+              >
+                Prev
+              </Button>
+
+              {/* Page Numbers */}
+              <div className="flex items-center gap-1">
+                {Array.from({ length: totalPages }).map((_, i) => {
+                  const page = i + 1;
+
+                  return (
+                    <Button
+                      key={page}
+                      variant={currentPage === page ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setCurrentPage(page)}
+                    >
+                      {page}
+                    </Button>
+                  );
+                })}
+              </div>
+
+              {/* Next */}
+              <Button
+                variant="outline"
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((p) => p + 1)}
+              >
+                Next
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </div>

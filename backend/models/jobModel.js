@@ -301,7 +301,6 @@ module.exports.createJob = function createJob(jobData, companyId) {
     
     console.log('=== createJob ===');
     console.log('address received:', address);
-    
     const normalizedCategory = normalizeCategory(category);
     const normalizedType = normalizeType(type);
     const normalizedSalaryType = normalizeSalaryType(salary_type);
@@ -422,6 +421,11 @@ module.exports.getAllJobs = function getAllJobs(filters = {}) {
     if (conditions.length > 0) {
         sql += " AND" + conditions.join(" AND");
     }
+    if (filters.address) {
+      conditions.push(`j.address ILIKE $${paramIndex}`);
+      params.push(`%${filters.address}%`);
+      paramIndex++;
+    }
 
     const limit = filters.limit ? parseInt(filters.limit) : 10;
     const offset = filters.offset ? parseInt(filters.offset) : 0;
@@ -432,6 +436,7 @@ module.exports.getAllJobs = function getAllJobs(filters = {}) {
         return result.rows;
     });
 }
+
 
 // READ - Get total job count for pagination
 module.exports.getTotalJobCount = function getTotalJobCount(filters = {}) {
@@ -543,14 +548,37 @@ module.exports.getRecommendedJobs = function getRecommendedJobs(userId, limit = 
         const categories = historyResult.rows.map(row => row.category);
         const types = historyResult.rows.map(row => row.type);
 
-        let sql = `SELECT j.*, c.name as company_name, c.city as company_city, c.logo_url,
-                   (SELECT COUNT(*) FROM saved_job WHERE job_id = j.id) as saved_count
-                   FROM job j 
-                   JOIN company c ON j.company_id = c.id 
-                   WHERE j.status = 'Active' AND j.deleted_at IS NULL
-                   AND (j.category = ANY($1) OR j.type = ANY($2))
-                   ORDER BY j.id DESC 
-                   LIMIT $3`;
+        let sql = `
+SELECT
+    j.*,
+    c.name AS company_name,
+    c.city AS company_city,
+    c.logo_url,
+    (SELECT COUNT(*) FROM saved_job WHERE job_id = j.id) AS saved_count,
+
+    (
+        CASE WHEN j.category = ANY($1) THEN 2 ELSE 0 END +
+        CASE WHEN j.type = ANY($2) THEN 1 ELSE 0 END
+    ) AS score
+
+FROM job j
+JOIN company c
+ON j.company_id = c.id
+
+WHERE
+    j.status = 'Active'
+    AND j.deleted_at IS NULL
+    AND (
+        j.category = ANY($1)
+        OR j.type = ANY($2)
+    )
+
+ORDER BY
+    score DESC,
+    j.created_at DESC
+
+LIMIT $3;
+`;
 
         return query(sql, [categories, types, limit]).then(function (result) {
             return result.rows;
@@ -560,14 +588,19 @@ module.exports.getRecommendedJobs = function getRecommendedJobs(userId, limit = 
 
 // READ - Get single job by ID with full details
 module.exports.getJobById = function getJobById(jobId, userId = null) {
-    let sql = `SELECT j.*, c.name as company_name, c.city, 
-               c.description as company_description, c.contact_email as company_email,
-               c.logo_url, c.tagline as company_tagline, c.url as company_url,
-               (SELECT COUNT(*) FROM application WHERE job_id = j.id) as application_count,
-               (SELECT COUNT(*) FROM saved_job WHERE job_id = j.id) as saved_count
-               FROM job j 
-               JOIN company c ON j.company_id = c.id 
-               WHERE j.id = $1 AND j.deleted_at IS NULL`;
+    let sql = `SELECT j.*,
+       c.name AS company_name,
+       c.description AS company_description,
+       c.contact_email AS company_email,
+       c.logo_url,
+       c.tagline AS company_tagline,
+       c.url AS company_url,
+       (SELECT COUNT(*) FROM application WHERE job_id = j.id) AS application_count,
+       (SELECT COUNT(*) FROM saved_job WHERE job_id = j.id) AS saved_count
+FROM job j
+JOIN company c ON j.company_id = c.id
+WHERE j.id = $1
+  AND j.deleted_at IS NULL`;
 
     const params = [jobId];
 
@@ -602,8 +635,8 @@ module.exports.updateJob = function updateJob(jobId, jobData, companyId) {
     const {
         title, description, category, type,
         salary_range_from, salary_range_to, salary_type, salary_period,
-        duration, deadline, experience, career_level, location, address,
-        jobs_needed, reports 
+        duration, deadline, experience, career_level, location, 
+        jobs_needed, reports, status, address 
     } = jobData;
     
     console.log('=== updateJob ===');
@@ -632,17 +665,18 @@ module.exports.updateJob = function updateJob(jobId, jobData, companyId) {
                    experience = COALESCE($11, experience),
                    career_level = COALESCE($12, career_level),
                    location = COALESCE($13, location),
-                   address = COALESCE($14, address),
-                   jobs_needed = COALESCE($15, jobs_needed),
-                   reports = COALESCE($16, reports)
-               WHERE id = $17 AND company_id = $18 AND deleted_at IS NULL
+                   jobs_needed = COALESCE($14, jobs_needed),
+                   reports = COALESCE($15, reports),
+                   status = COALESCE($16, status), 
+                   address = COALESCE($19, address)
+               WHERE id = $17 AND company_id = $18
                RETURNING *;`;
 
     return query(sql, [
         title, description, normalizedCategory, normalizedType,
         salary_range_from, salary_range_to, normalizedSalaryType,
         normalizedSalaryPeriod, normalizedDuration, deadline, normalizedExperience, 
-        normalizedCareerLevel, normalizedLocation, address, jobs_needed, reports, jobId, companyId
+        normalizedCareerLevel, normalizedLocation, jobs_needed, reports,status, jobId, companyId, address
     ]).then(function(result) {
         return result.rows;
     });
@@ -823,6 +857,20 @@ module.exports.updateApplicationStatus = function updateApplicationStatus(applic
         return result.rows;
     });
 }
+module.exports.hasApplied = function hasApplied(userId, jobId) {
+    let sql = `
+        SELECT EXISTS (
+            SELECT 1
+            FROM application
+            WHERE user_id = $1
+            AND job_id = $2
+        ) AS applied;
+    `;
+
+    return query(sql, [userId, jobId]).then(function (result) {
+        return result.rows[0].applied;
+    });
+};
 
 // ==================== SAVED JOBS ====================
 

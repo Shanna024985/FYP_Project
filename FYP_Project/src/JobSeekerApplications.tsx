@@ -1,52 +1,37 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import axios from "axios";
 import { Button } from "@/components/ui/button";
 import NavigationMenus from "./NavigationMenu";
 import { Card, CardContent } from "@/components/ui/card";
 import "./title.css";
 import { useNavigate } from "react-router-dom";
-type ApplicationStatus = "Reviewing" | "Accepted" | "Rejected";
+import { BriefcaseBusiness } from "lucide-react";
+type ApplicationStatus =
+  | "Offer"
+  | "Rejected"
+  | "Reviewing"
+  | "Interview"
+  | "Screening";
 
 interface Application {
   id: number;
-  job: {
-    id: number;
-    title: string;
-  };
-  company: {
-    name: string;
-    logoUrl: string;
-  };
-  appliedDate: string;
-  resumeName: string;
+  job_id: number;
+  title: string;
+  company_name: string;
+  logo_url: string | null;
+  resume_file_name: string;
   status: ApplicationStatus;
+  time_applied: string;
 }
 
-const mockApplications: Application[] = [
-  {
-    id: 1,
-    job: { id: 101, title: "Frontend Developer" },
-    company: {
-      name: "Google",
-      logoUrl: "https://placehold.co/80x80/png",
-    },
-    appliedDate: "2026-05-20",
-    resumeName: "resume.pdf",
-    status: "Reviewing",
-  },
-  {
-    id: 2,
-    job: { id: 102, title: "Backend Developer" },
-    company: {
-      name: "Microsoft",
-      logoUrl: "https://placehold.co/80x80/png",
-    },
-    appliedDate: "2026-05-18",
-    resumeName: "resume_v2.pdf",
-    status: "Accepted",
-  },
-];
-
-const tabs = ["All", "Reviewing", "Accepted", "Rejected"] as const;
+const tabs = [
+  "All",
+  "Offer",
+  "Rejected",
+  "Reviewing",
+  "Interview",
+  "Screening",
+] as const;
 
 const ITEMS_PER_PAGE = 9;
 type Props = {
@@ -54,23 +39,51 @@ type Props = {
 };
 export default function MyApplicationsPage({ currentUrl }: Props) {
   const navigate = useNavigate();
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedTab, setSelectedTab] = useState<(typeof tabs)[number]>("All");
 
   const [currentPage, setCurrentPage] = useState(1);
 
   const filteredApplications = useMemo(() => {
-    if (selectedTab === "All") return mockApplications;
+    if (selectedTab === "All") return applications;
 
-    return mockApplications.filter((app) => app.status === selectedTab);
-  }, [selectedTab]);
+    return applications.filter((app) => app.status === selectedTab);
+  }, [applications, selectedTab]);
+  useEffect(() => {
+    const fetchApplications = async () => {
+      try {
+        const token = localStorage.getItem("token");
 
+        const res = await axios.get(`${currentUrl}/jobs/applications/my`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        setApplications(res.data.applications);
+        console.log(res.data.applications);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchApplications();
+  }, [currentUrl]);
   const totalPages = Math.ceil(filteredApplications.length / ITEMS_PER_PAGE);
 
   const paginatedApplications = filteredApplications.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE,
   );
-
+  if (loading) {
+    return (
+      <div className="flex justify-center py-10">Loading applications...</div>
+    );
+  }
+  console.log(applications);
   return (
     <div className="flex flex-col gap-6">
       <NavigationMenus />
@@ -107,73 +120,112 @@ export default function MyApplicationsPage({ currentUrl }: Props) {
         </div>
 
         {/* APPLICATION CARDS */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {paginatedApplications.map((application) => (
-            <Card key={application.id} className="rounded-2xl border">
-              <CardContent className="space-y-4 p-6 text-left">
-                {/* ROW 1: logo + job title */}
-                <div className="flex items-center gap-4">
-                  <img
-                    src={application.company.logoUrl}
-                    alt={application.company.name}
-                    className="h-12 w-12 rounded-lg object-cover"
-                  />
+        {applications.length === 0 ? (
+          // Never applied for any jobs
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center gap-4 py-12 text-center">
+              <BriefcaseBusiness className="h-12 w-12 text-muted-foreground" />
 
-                  <h2 className="text-lg font-semibold title-black">
-                    {application.job.title}
-                  </h2>
-                </div>
+              <div>
+                <h3 className="text-lg font-semibold">No applications yet</h3>
 
-                {/* ROW 2: company */}
-                <p className="text-sm text-muted-foreground">
-                  From{" "}
-                  <span className="text-foreground font-medium">
-                    {application.company.name}
-                  </span>
+                <p className="text-muted-foreground">
+                  You haven't applied for any jobs yet. Browse available jobs
+                  and submit your first application.
                 </p>
+              </div>
 
-                {/* ROW 3: applied date */}
-                <p className="text-sm text-muted-foreground">
-                  Applied on{" "}
-                  <span className="text-foreground">
-                    {application.appliedDate}
-                  </span>
-                </p>
+              <Button onClick={() => navigate("/browsejobs")}>
+                Browse Jobs
+              </Button>
+            </CardContent>
+          </Card>
+        ) : filteredApplications.length === 0 ? (
+          // Applied before, but none in this tab
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+              <h3 className="text-lg font-semibold">
+                No {selectedTab.toLowerCase()} applications
+              </h3>
 
-                {/* ROW 4: resume */}
-                <p className="text-sm text-muted-foreground">
-                  Resume used:{" "}
-                  <span className="text-foreground">
-                    {application.resumeName}
-                  </span>
-                </p>
+              <p className="text-muted-foreground">
+                You don't have any {selectedTab.toLowerCase()} applications.
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {paginatedApplications.map((application) => (
+              <Card key={application.id} className="rounded-2xl border">
+                <CardContent className="space-y-4 p-6 text-left">
+                  {/* Your existing card content */}
+                  <div className="flex items-center gap-4">
+                    <img
+                      src={
+                        application.logo_url || "https://placehold.co/80x80/png"
+                      }
+                      alt={application.company_name}
+                      className="h-12 w-12 rounded-lg object-cover"
+                    />
 
-                {/* ROW 5: status */}
-                <p className="text-sm">
-                  Status:{" "}
-                  <span
-                    className={`font-semibold ${
-                      application.status === "Accepted"
-                        ? "text-green-600"
-                        : application.status === "Rejected"
-                          ? "text-red-600"
-                          : "text-yellow-600"
-                    }`}
+                    <h2 className="text-lg font-semibold title-black">
+                      {application.title}
+                    </h2>
+                  </div>
+
+                  <p className="text-sm text-muted-foreground">
+                    From{" "}
+                    <span className="font-medium text-foreground">
+                      {application.company_name}
+                    </span>
+                  </p>
+
+                  <p className="text-sm text-muted-foreground">
+                    Applied on{" "}
+                    <span className="text-foreground">
+                      {new Date(application.time_applied).toLocaleDateString()}
+                    </span>
+                  </p>
+
+                  <p className="text-sm text-muted-foreground">
+                    Resume used{" "}
+                    <span className="text-foreground">
+                      {application.resume_file_name}
+                    </span>
+                  </p>
+
+                  <p className="text-sm">
+                    Status{" "}
+                    <span
+                      className={`font-semibold ${
+                        application.status === "Offer"
+                          ? "text-green-600"
+                          : application.status === "Rejected"
+                            ? "text-red-600"
+                            : application.status === "Interview"
+                              ? "text-blue-600"
+                              : application.status === "Screening"
+                                ? "text-purple-600"
+                                : "text-yellow-600" // Reviewing
+                      }`}
+                    >
+                      {application.status}
+                    </span>
+                  </p>
+
+                  <Button
+                    className="w-full"
+                    onClick={() =>
+                      navigate(`/jobDetails?id=${application.job_id}`)
+                    }
                   >
-                    {application.status}
-                  </span>
-                </p>
-
-                {/* ROW 6: button */}
-                <div className="pt-2">
-                  <Button className="w-full" onClick={() => navigate(`/jobDetails`)}>
                     View Job
                   </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
 
         {/* PAGINATION */}
         {totalPages > 1 && (

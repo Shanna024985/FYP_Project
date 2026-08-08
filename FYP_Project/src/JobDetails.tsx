@@ -1,11 +1,12 @@
 import { useSearchParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
-  Eye,
   BriefcaseBusiness,
   Clock3,
   GraduationCap,
   Users,
   CalendarDays,
+  MapPin,
 } from "lucide-react";
 import BookmarkButton from "@/components/common sections/BookmarkButton";
 import "./title.css";
@@ -112,8 +113,8 @@ export default function JobDetailsPage({ currentUrl }: Props) {
                 {/* LOGO */}
                 <div className="flex justify-center rounded-2xl border bg-muted/30 p-6">
                   <img
-                    src={`data:image/png;base64,${company?.logo_base64}`}
-                    alt={company?.name}
+                    src={company.logo_url}
+                    alt={company.name}
                     className="h-32 w-32 rounded-2xl object-cover"
                   />
                 </div>
@@ -159,9 +160,12 @@ export default function JobDetailsPage({ currentUrl }: Props) {
 
                   <p className="mt-2 text-lg text-muted-foreground">
                     From{" "}
-                    <span className="font-medium text-foreground">
+                    <Link
+                      to={`/company?id=${company.id}`}
+                      className="font-medium text-blue-600 hover:underline"
+                    >
                       {company?.name}
-                    </span>
+                    </Link>
                   </p>
                 </div>
 
@@ -238,6 +242,15 @@ export default function JobDetailsPage({ currentUrl }: Props) {
                           <span className="font-medium">Apply Before:</span>{" "}
                           <span className="text-muted-foreground">
                             {new Date(job.deadline).toLocaleDateString("en-SG")}
+                          </span>
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <MapPin className="size-4 text-muted-foreground" />
+                        <p>
+                          <span className="font-medium">Location:</span>{" "}
+                          <span className="text-muted-foreground">
+                            {job.address}, {job.location}
                           </span>
                         </p>
                       </div>

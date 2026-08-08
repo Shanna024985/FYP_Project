@@ -1,4 +1,4 @@
-import { MapPin, Eye } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ type JobListItemProps = {
   salaryRangeTo: number;
   salaryType: string;
   location: string;
+  address: string;
   tags: string[];
   date: string;
   companyLogo: string;
@@ -28,6 +29,7 @@ export default function JobListItem({
   salaryRangeTo,
   salaryType,
   location,
+  address,
   tags,
   date,
   companyLogo,
@@ -35,64 +37,73 @@ export default function JobListItem({
 }: JobListItemProps) {
   const navigate = useNavigate();
   return (
-    <Card className="relative flex gap-4 p-4 hover:shadow-md transition">
-      {/* LEFT: LOGO */}
-      <img src={companyLogo} className="h-12 w-12 rounded-md object-cover" />
+    <Card className="relative p-4 hover:shadow-md transition">
+  {/* Top Row: Logo + Title */}
+  <div className="flex items-center gap-4">
+    <img
+      src={companyLogo}
+      className="h-16 w-16 rounded-md object-cover shrink-0"
+    />
 
-      {/* RIGHT CONTENT */}
-      <div className="flex-1 space-y-2">
-        {/* LINE 1: TITLE */}
-        <h3 className="font-semibold text-base">{title}</h3>
+    <h3 className="text-lg font-semibold">{title}</h3>
+  </div>
 
-        {/* LINE 2: DESCRIPTION (3 lines clamp) */}
-        <p className="text-sm text-muted-foreground line-clamp-3">
-          {description}
-        </p>
+  {/* Description */}
+  <p className="mt-4 text-sm text-muted-foreground line-clamp-3 text-left">
+    {description}
+  </p>
 
-        {/* LINE 3: SALARY + LOCATION */}
-        <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-          <span>
-            {salaryType?.toLowerCase() === "negotiable"
-              ? `${salaryRangeFrom} - ${salaryRangeTo} / ${salaryPeriod?.toLowerCase()} (Negotiable)`
-              : salaryRangeFrom && salaryRangeTo
-                ? salaryRangeFrom === salaryRangeTo
-                  ? `${salaryRangeFrom} / ${salaryPeriod?.toLowerCase()}`
-                  : `${salaryRangeFrom} - ${salaryRangeTo} / ${salaryPeriod?.toLowerCase()}`
-                : "Not specified"}
-          </span>
+  {/* Salary + Location */}
+  <div className="mt-3 flex flex-wrap justify-center items-center gap-4 text-sm text-muted-foreground text-center">
+    <span>
+      {salaryType?.toLowerCase() === "negotiable"
+        ? `${salaryRangeFrom} - ${salaryRangeTo} / ${salaryPeriod?.toLowerCase()} (Negotiable)`
+        : salaryRangeFrom && salaryRangeTo
+          ? salaryRangeFrom === salaryRangeTo
+            ? `${salaryRangeFrom} / ${salaryPeriod?.toLowerCase()}`
+            : `${salaryRangeFrom} - ${salaryRangeTo} / ${salaryPeriod?.toLowerCase()}`
+          : "Not specified"}
+    </span>
 
-          <span className="flex items-center gap-1">
-            <MapPin size={14} />
-            {location}
-          </span>
-        </div>
+    <span className="flex items-center gap-1">
+      <MapPin size={14} />
+      {address}, {location}
+    </span>
+  </div>
 
-        {/* LINE 4: TAGS */}
-        <div className="flex flex-wrap gap-2">
-          {tags.map((tag) => (
-            <span key={tag} className="text-xs px-2 py-1 rounded-full bg-muted">
-              {tag}
-            </span>
-          ))}
-        </div>
+  {/* Tags */}
+  <div className="mt-3 flex flex-wrap justify-center gap-2">
+    {tags.map((tag) => (
+      <span
+        key={tag}
+        className="rounded-full bg-muted px-2 py-1 text-xs"
+      >
+        {tag}
+      </span>
+    ))}
+  </div>
 
-        {/* LINE 5: DATE */}
-        <p className="text-xs text-muted-foreground">Posted on {date}</p>
-      </div>
+  {/* Date */}
+  <p className="mt-3 text-xs text-muted-foreground">
+    Posted on {date}
+  </p>
 
-      {/* TOP RIGHT: BOOKMARK */}
-      <BookmarkButton
-        currentUrl={currentUrl}
-        jobId={jobId}
-        className="absolute top-3 right-3"
-      />
+  {/* Bookmark */}
+  <BookmarkButton
+    currentUrl={currentUrl}
+    jobId={jobId}
+    className="absolute top-3 right-3"
+  />
 
-      {/* BOTTOM RIGHT: VIEW BUTTON */}
-      <div className="absolute bottom-3 right-3">
-        <Button size="sm" onClick={() => navigate(`/jobDetails?id=${jobId}`)}>
-          View
-        </Button>
-      </div>
-    </Card>
+  {/* View Button */}
+  <div className="absolute bottom-3 right-3">
+    <Button
+      size="sm"
+      onClick={() => navigate(`/jobDetails?id=${jobId}`)}
+    >
+      View
+    </Button>
+  </div>
+</Card>
   );
 }
