@@ -195,7 +195,7 @@ export default function AIChatbot(props: Props) {
             {isLoading && (
               <div className="flex justify-start">
                 <div className="rounded-lg bg-muted px-3 py-2 text-sm text-muted-foreground">
-                  Typing...
+                  Thinking...
                 </div>
               </div>
             )}
