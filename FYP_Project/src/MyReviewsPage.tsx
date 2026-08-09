@@ -17,7 +17,7 @@ import {StarIcon} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
-import "./title.css";
+
 import NavigationMenus from "./NavigationMenu";
 type Props = {
   currentUrl: string;
@@ -131,7 +131,7 @@ export default function MyReviewsPage({ currentUrl }: Props) {
         >
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle className="title-black">Edit Review</DialogTitle>
+              <DialogTitle className="text-black! dark:text-white!">Edit Review</DialogTitle>
               <DialogDescription>Update your review.</DialogDescription>
             </DialogHeader>
 

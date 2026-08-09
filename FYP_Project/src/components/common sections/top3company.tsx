@@ -69,7 +69,7 @@
 //   return (
 //     <section className="mt-12 space-y-6">
 //       {/* Title */}
-//       <h2 className="text-center text-2xl font-semibold title-black">
+//       <h2 className="text-center text-2xl font-semibold text-black! dark:text-white!">
 //         Top Rated Companies
 //       </h2>
 

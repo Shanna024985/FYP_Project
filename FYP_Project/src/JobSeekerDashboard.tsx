@@ -2,7 +2,7 @@
 import NavigationMenus from "./NavigationMenu";
 import { useNavigate } from "react-router-dom";
 import { Bookmark, Pencil } from "lucide-react";
-import "./title.css";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -330,7 +330,7 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
         {/* ========================================= */}
         <section className="space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-semibold title-black">
+            <h2 className="text-2xl font-semibold text-black! dark:text-white!">
               Recommended Jobs
             </h2>
           </div>
@@ -369,7 +369,7 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
         {/* ========================================= */}
         <section className="space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-semibold title-black">Jobs Applied</h2>
+            <h2 className="text-2xl font-semibold text-black! dark:text-white!">Jobs Applied</h2>
 
             <Button
               variant="outline"
@@ -509,7 +509,7 @@ export default function JobSeekerDashboard({ currentUrl }: Props) {
         {/* ========================================= */}
         <section className="space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-semibold title-black">Saved Jobs</h2>
+            <h2 className="text-2xl font-semibold text-black! dark:text-white!">Saved Jobs</h2>
 
             {savedJobs.length > 0 && (
               <Button

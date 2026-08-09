@@ -3,7 +3,7 @@ import axios from "axios";
 import { Button } from "@/components/ui/button";
 import NavigationMenus from "./NavigationMenu";
 import { Card, CardContent } from "@/components/ui/card";
-import "./title.css";
+
 import { useNavigate } from "react-router-dom";
 import { BriefcaseBusiness } from "lucide-react";
 type ApplicationStatus =
@@ -168,7 +168,7 @@ export default function MyApplicationsPage({ currentUrl }: Props) {
                       className="h-12 w-12 rounded-lg object-cover"
                     />
 
-                    <h2 className="text-lg font-semibold title-black">
+                    <h2 className="text-lg font-semibold text-black! dark:text-white!">
                       {application.title}
                     </h2>
                   </div>
