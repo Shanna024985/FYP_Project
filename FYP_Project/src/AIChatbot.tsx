@@ -58,27 +58,39 @@ export default function AIChatbot(props: Props) {
     };
 
     setMessages((prev) => [...prev, userMessage]);
-
+    
     // Clear input immediately
     setInput("");
-
     setIsLoading(true);
 
     try {
       const token = localStorage.getItem("token");
 
-      const response = await axios.post<ChatResponse>(
-        `${props.currentUrl}/ai/chat`,
-        {
-          message: trimmedMessage,
-          type: "faq",
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
+      let response;
+
+      if (token) {
+        // Logged-in user
+        response = await axios.post<ChatResponse>(
+          `${props.currentUrl}/ai/chat`,
+          {
+            message: trimmedMessage,
+            type: "faq",
           },
-        },
-      );
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      } else {
+        // Guest user
+        response = await axios.post<ChatResponse>(
+          `${props.currentUrl}/ai/guest-chat`,
+          {
+            message: trimmedMessage,
+          }
+        );
+      }
 
       const botMessage: Message = {
         id: Date.now() + 1,
@@ -86,8 +98,8 @@ export default function AIChatbot(props: Props) {
         text: response.data.response,
       };
 
-      // Add bot response without refreshing
       setMessages((prev) => [...prev, botMessage]);
+
     } catch (error) {
       console.error("AI Chatbot Error:", error);
 
@@ -98,6 +110,7 @@ export default function AIChatbot(props: Props) {
       };
 
       setMessages((prev) => [...prev, errorMessage]);
+
     } finally {
       setIsLoading(false);
     }
@@ -116,8 +129,8 @@ export default function AIChatbot(props: Props) {
       {isOpen && (
         <div
           className={`fixed bottom-6 right-6 z-50 flex flex-col rounded-xl border bg-background shadow-xl transition-all duration-300 ${isExpanded
-              ? "h-[80vh] w-[70vw]"
-              : "h-[600px] w-[400px]"
+            ? "h-[80vh] w-[70vw]"
+            : "h-[600px] w-[400px]"
             }`}
         >
           {/* Header */}
@@ -181,8 +194,8 @@ export default function AIChatbot(props: Props) {
                   {/* Message bubble */}
                   <div
                     className={`rounded-lg px-3 py-2 text-left text-sm ${message.sender === "user"
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted"
                       }`}
                   >
                     <ReactMarkdown>{message.text}</ReactMarkdown>
