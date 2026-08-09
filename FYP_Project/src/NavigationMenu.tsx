@@ -89,15 +89,18 @@ const NavigationMenus = ({ currentUrl }: Props) => {
       {/* RIGHT SIDE */}
       {!token ? (
         // NOT LOGGED IN
-        <Link
-          to="/login"
-          className="
+        <div className="flex items-center gap-4">
+          <Link
+            to="/login"
+            className="
             font-semibold
             hover:underline
           "
-        >
-          Login With Singpass
-        </Link>
+          >
+            Login/Register
+          </Link>
+          <DarkModeButton />
+        </div>
       ) : (
         // LOGGED IN
         <div className="flex items-center gap-4">
@@ -117,7 +120,7 @@ const NavigationMenus = ({ currentUrl }: Props) => {
             </DropdownMenuContent>
           </DropdownMenu>
           <NavigationMenuItem className="flex">
-            <DarkModeButton/>
+            <DarkModeButton />
           </NavigationMenuItem>
         </div>
       )}
