@@ -336,7 +336,7 @@ export default function ApplyJobPage({ currentUrl }: Props) {
           address={job.address}
           tags={[job.category, job.type]}
           date={new Date(job.created_at).toLocaleDateString("en-SG")}
-          companyLogo={`data:image/png;base64,${company?.logo_base64 ?? ""}`}
+          companyLogo={company?.logo_url || "/default-company.png"}
         />
         {checkingApplication ? (
           <div className="p-6 text-center">
