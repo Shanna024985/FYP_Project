@@ -9,7 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { SavedJob } from "@/types/saved-job";
-import "./title.css";
+
 type Props = {
   currentUrl: string;
 };

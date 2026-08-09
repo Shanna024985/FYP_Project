@@ -105,7 +105,7 @@ export default function JobSeekerRatingsPage() {
         {/* <NavigationMenus currentUrl={}/> */}
       {/* HEADER */}
       <div>
-        <h1 className="text-3xl font-bold title-black">My Ratings</h1>
+        <h1 className="text-3xl font-bold text-black! dark:text-white!">My Ratings</h1>
         <p className="text-muted-foreground">
           Feedback from employers who worked with you
         </p>
@@ -116,7 +116,7 @@ export default function JobSeekerRatingsPage() {
         <CardContent className="p-6 space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold flex items-center gap-2 title-black">
+              <h2 className="text-2xl font-bold flex items-center gap-2 text-black! dark:text-white!">
                 <Star className="text-yellow-500 fill-yellow-500" />
                 {avgRating.toFixed(1)} Overall Rating
               </h2>
