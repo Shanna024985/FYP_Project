@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import axios from "axios";
-import { Bot, X, Send, User } from "lucide-react";
+import { Bot, X, Send, User, Maximize2, Minimize2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,7 @@ type Props = {
 };
 export default function AIChatbot(props: Props) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -113,7 +114,12 @@ export default function AIChatbot(props: Props) {
     <>
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-24 right-6 z-50 w-[360px] h-[500px] rounded-xl border bg-background shadow-2xl flex flex-col overflow-hidden">
+        <div
+          className={`fixed bottom-6 right-6 z-50 flex flex-col rounded-xl border bg-background shadow-xl transition-all duration-300 ${isExpanded
+              ? "h-[80vh] w-[70vw]"
+              : "h-[600px] w-[400px]"
+            }`}
+        >
           {/* Header */}
           <div className="flex items-center justify-between border-b px-4 py-3">
             <div className="flex items-center gap-2">
@@ -128,13 +134,27 @@ export default function AIChatbot(props: Props) {
               </div>
             </div>
 
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsOpen(false)}
-            >
-              <X size={18} />
-            </Button>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsExpanded((prev) => !prev)}
+              >
+                {isExpanded ? (
+                  <Minimize2 size={18} />
+                ) : (
+                  <Maximize2 size={18} />
+                )}
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsOpen(false)}
+              >
+                <X size={18} />
+              </Button>
+            </div>
           </div>
 
           {/* Messages */}
@@ -142,14 +162,12 @@ export default function AIChatbot(props: Props) {
             {messages.map((message) => (
               <div
                 key={message.id}
-                className={`flex ${
-                  message.sender === "user" ? "justify-end" : "justify-start"
-                }`}
+                className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"
+                  }`}
               >
                 <div
-                  className={`flex max-w-[80%] gap-2 ${
-                    message.sender === "user" ? "flex-row-reverse" : "flex-row"
-                  }`}
+                  className={`flex max-w-[80%] gap-2 ${message.sender === "user" ? "flex-row-reverse" : "flex-row"
+                    }`}
                 >
                   {/* Icon */}
                   <div className="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted">
@@ -162,11 +180,10 @@ export default function AIChatbot(props: Props) {
 
                   {/* Message bubble */}
                   <div
-                    className={`rounded-lg px-3 py-2 text-left text-sm ${
-                      message.sender === "user"
+                    className={`rounded-lg px-3 py-2 text-left text-sm ${message.sender === "user"
                         ? "bg-primary text-primary-foreground"
                         : "bg-muted"
-                    }`}
+                      }`}
                   >
                     <ReactMarkdown>{message.text}</ReactMarkdown>
                   </div>
