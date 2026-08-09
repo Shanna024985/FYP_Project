@@ -444,7 +444,7 @@ module.exports.checkGoogleIdExists = (req, res, next) => {
     return model.getUserByGoogleId(res.locals.googleId)
     .then((user) => {
         if (user.length == 0) {
-            return model.insertNewUserByGoogleId(res.locals.googleId, res.locals.googleEmail)
+            return model.insertNewUserByGoogleId(res.locals.googleId)
             .then((user) => {
                 res.locals.userId = user[0].id;
                 res.locals.status = 201;
@@ -454,35 +454,31 @@ module.exports.checkGoogleIdExists = (req, res, next) => {
                 return res.status(500).json({ error: error.message });
             });
         } else {
-            return model.userProfileExists(user[0].id)
-            .then((userProfile) => {
-                if (userProfile.length == 0) {
-                    return model.updateGoogleEmailById(res.locals.googleEmail, user[0].id)
-                    .then((user) => {
-                        res.locals.userId = user[0].id;
-                        res.locals.status = 200;
-                        next();
-                    }).catch(function (error) {
-                        console.error(error);
-                        return res.status(500).json({ error: error.message });
-                    });
-                } else {
-                    return model.updateGoogleEmailById(null, user[0].id)
-                    .then((user) => {
-                        return model.updateEmailByUserId(res.locals.googleEmail, user[0].id)
-                        .then((user) => {
-                            res.locals.userId = user[0].user_id;
-                            res.locals.status = 200;
-                            next();
-                        }).catch(function (error) {
-                            console.error(error);
-                            return res.status(500).json({ error: error.message });
-                        });
-                    }).catch(function (error) {
-                        console.error(error);
-                        return res.status(500).json({ error: error.message });
-                    });
-                }
+            res.locals.userId = user[0].id;
+            res.locals.status = 200;
+            next();
+        }
+    }).catch(function (error) {
+        console.error(error);
+        return res.status(500).json({ error: error.message });
+    });
+};
+
+module.exports.updateProfileEmailByUserId = (req, res, next) => {
+    return model.userProfileExists(res.locals.userId)
+    .then((userProfile) => {
+        if (userProfile.length == 0) {
+            return model.createProfileFromGoogleEmail(res.locals.googleEmail, res.locals.userId)
+            .then((user) => {
+                next();
+            }).catch(function (error) {
+                console.error(error);
+                return res.status(500).json({ error: error.message });
+            });
+        } else {
+            return model.updateEmailByUserId(res.locals.googleEmail, user[0].id)
+            .then((user) => {
+                next();
             }).catch(function (error) {
                 console.error(error);
                 return res.status(500).json({ error: error.message });
@@ -492,7 +488,7 @@ module.exports.checkGoogleIdExists = (req, res, next) => {
         console.error(error);
         return res.status(500).json({ error: error.message });
     });
-};
+}
 
 // allow user to link google account with singpass (and vice versa)
 // if account has already been created with google and user links google account with that email,

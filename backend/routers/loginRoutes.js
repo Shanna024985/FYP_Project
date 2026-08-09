@@ -6,7 +6,7 @@ const router = express.Router();
 router.get('/', loginController.createSingpassURL);
 router.get('/token', loginController.checkRedirectIsValid, loginController.getSingpassToken, loginController.checkSingpassIdExists, jwtMiddleware.generateToken, loginController.processJSON, loginController.redirectUserToLogin);
 router.get('/google', loginController.redirectUserToGoogleLogin);
-router.get('/google/token', loginController.getGoogleToken, loginController.checkGoogleIdExists, jwtMiddleware.generateToken, loginController.processJSON, loginController.redirectUserToLogin);
+router.get('/google/token', loginController.getGoogleToken, loginController.checkGoogleIdExists, loginController.updateProfileEmailByUserId, jwtMiddleware.generateToken, loginController.processJSON, loginController.redirectUserToLogin);
 
 router.get('/link', loginController.setTokenFromQuery, jwtMiddleware.verifyToken, loginController.changeRedirectURIToLink, loginController.createSingpassURL);
 router.get('/link/google', loginController.setTokenFromQuery, jwtMiddleware.verifyToken, loginController.changeRedirectURIToLink, loginController.redirectUserToGoogleLogin);
