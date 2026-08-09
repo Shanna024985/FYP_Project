@@ -558,3 +558,41 @@ module.exports.salaryNegotiation = async function(req, res, next) {
         });
     }
 };
+
+// ==================== GUEST CHAT ====================
+module.exports.guestChat = async function(req, res) {
+    const { message } = req.body;
+
+    if (!message || !message.trim()) {
+        return res.status(400).json({
+            error: "Message is required"
+        });
+    }
+
+    const timeout = setTimeout(() => {
+        return res.status(504).json({
+            error: "AI service is taking too long. Please try again."
+        });
+    }, 25000);
+
+    try {
+        const response = await geminiService.getFAQAnswer(message);
+
+        clearTimeout(timeout);
+
+        return res.json({
+            message: "AI response generated successfully",
+            response,
+            type: "faq"
+        });
+
+    } catch (error) {
+        clearTimeout(timeout);
+
+        console.error("Guest Chat Error:", error);
+
+        return res.status(500).json({
+            error: "Failed to generate AI response"
+        });
+    }
+};
