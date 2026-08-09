@@ -4,6 +4,7 @@ import { Bot, X, Send, User } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import ReactMarkdown from "react-markdown";
 
 type Message = {
   id: number;
@@ -161,13 +162,13 @@ export default function AIChatbot(props: Props) {
 
                   {/* Message bubble */}
                   <div
-                    className={`rounded-lg px-3 py-2 text-sm ${
+                    className={`rounded-lg px-3 py-2 text-left text-sm ${
                       message.sender === "user"
                         ? "bg-primary text-primary-foreground"
                         : "bg-muted"
                     }`}
                   >
-                    {message.text}
+                    <ReactMarkdown>{message.text}</ReactMarkdown>
                   </div>
                 </div>
               </div>
