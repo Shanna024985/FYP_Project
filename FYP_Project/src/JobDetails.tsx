@@ -9,7 +9,7 @@ import {
   MapPin,
 } from "lucide-react";
 import BookmarkButton from "@/components/common sections/BookmarkButton";
-import "./title.css";
+
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -154,7 +154,7 @@ export default function JobDetailsPage({ currentUrl }: Props) {
               <div className="space-y-8 lg:col-span-3">
                 {/* TITLE */}
                 <div>
-                  <h1 className="text-3xl font-bold tracking-tight title-black">
+                  <h1 className="text-3xl font-bold tracking-tight text-black! dark:text-white!">
                     {job.title}
                   </h1>
 
@@ -186,7 +186,7 @@ export default function JobDetailsPage({ currentUrl }: Props) {
                 <div className="grid gap-6 lg:grid-cols-3">
                   {/* JOB INFO */}
                   <div className="rounded-2xl border bg-muted/20 p-6 lg:col-span-2">
-                    <h2 className="mb-5 text-xl font-semibold title-black">
+                    <h2 className="mb-5 text-xl font-semibold text-black! dark:text-white!">
                       Job Info
                     </h2>
 
@@ -259,7 +259,7 @@ export default function JobDetailsPage({ currentUrl }: Props) {
 
                   {/* SALARY */}
                   <div className="rounded-2xl border bg-muted/20 p-6">
-                    <h2 className="mb-4 text-xl font-semibold title-black">
+                    <h2 className="mb-4 text-xl font-semibold text-black! dark:text-white!">
                       Salary
                     </h2>
 
@@ -273,7 +273,7 @@ export default function JobDetailsPage({ currentUrl }: Props) {
 
                 {/* DESCRIPTION */}
                 <div>
-                  <h2 className="mb-4 text-2xl font-semibold title-black">
+                  <h2 className="mb-4 text-2xl font-semibold text-black! dark:text-white!">
                     Job Description
                   </h2>
 

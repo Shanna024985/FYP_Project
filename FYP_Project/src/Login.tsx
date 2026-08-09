@@ -1,7 +1,7 @@
 import singpassLogin from "./assets/singpass_logo.png";
 import { Button } from "./components/ui/button";
 import NavigationMenus from "./NavigationMenu";
-import "./title.css";
+
 type Props = {
   currentUrl: string;
 };

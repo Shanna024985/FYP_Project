@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { Save, Upload, Plus } from "lucide-react";
-import "./title.css";
+
 import { Button } from "@/components/ui/button";
 import NavigationMenus from "./NavigationMenu";
 import { toast } from "sonner";
@@ -599,7 +599,7 @@ export default function EditProfilePage({ currentUrl }: Props) {
           {/* Education */}
           {/* <div className="mt-10 border-t pt-8">
             <div className="mb-6 flex items-center justify-center gap-3">
-              <h2 className="text-2xl font-bold title-black">Education</h2>
+              <h2 className="text-2xl font-bold text-black! dark:text-white!">Education</h2>
 
               <Button variant="outline" size="icon-sm" className="rounded-full">
                 <Plus className="size-4" />
