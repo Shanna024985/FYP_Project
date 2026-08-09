@@ -95,7 +95,7 @@ export default function JobDetailsPage({ currentUrl }: Props) {
     <div className="flex">
       {token && <Sidebar />}
       <div className="flex-1 p-4">
-        <NavigationMenus />
+        <NavigationMenus currentUrl={currentUrl}/>
         <div className="mx-auto max-w-7xl">
           {/* MAIN CARD */}
           <div className="relative rounded-3xl border bg-background p-8 shadow-sm">

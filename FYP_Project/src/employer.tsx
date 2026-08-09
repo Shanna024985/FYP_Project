@@ -30,7 +30,7 @@ import { toast, Toaster } from "sonner";
 import { useEffect, useState } from "react";
 import Error from "./Error";
 type Props = {
-  currentUrl: String;
+  currentUrl: string;
 };
 type JobsObject = {
   id: number;
@@ -160,7 +160,7 @@ let EmployerPage = (props: Props) => {
   return (
     <>
       <div>
-        <NavigationMenus />
+        <NavigationMenus currentUrl={props.currentUrl}/>
         <div className="mt-5 ml-2">
           <p className="text-2xl font-bold text-left">Employer Dashboard</p>
           <hr className="mt-3" />
@@ -287,7 +287,7 @@ let EmployerPage = (props: Props) => {
                             navigate("/jobApplicants?id=" + value.id);
                           }}
                         >
-                          <FileUserIcon color="black" />
+                          <FileUserIcon className="text-black dark:text-white" />
                         </Button>
                       </TableCell>
                       <TableCell>
@@ -297,7 +297,7 @@ let EmployerPage = (props: Props) => {
                             navigate("/editjobs?id=" + value.id);
                           }}
                         >
-                          <SquarePenIcon color="black" />
+                          <SquarePenIcon className="text-black dark:text-white" />
                         </Button>
                       </TableCell>
                       <TableCell>

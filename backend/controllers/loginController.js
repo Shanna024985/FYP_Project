@@ -54,7 +54,7 @@ const generateRandomHex = length => {
     return hex;
 };
 
-const generateUUIDV4 = () => generateRandomHex(8) + '-' + generateRandomHex(4) + '-' + generateRandomHex(4) + '-' + generateRandomHex(12);
+// const generateUUIDV4 = () => generateRandomHex(8) + '-' + generateRandomHex(4) + '-' + generateRandomHex(4) + '-' + generateRandomHex(12);
 
 const singpassAppID = process.env.SINGPASS_APP_ID;
 const options = {
@@ -70,7 +70,7 @@ const publicKeySingpassPem = crypto.createPublicKey({ key: publicKeySingpass, fo
 const generateCode = () => {
     let codeVerifier = '';
     for (let i = 0; i < 128; i++) {
-        codeVerifier += 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_'.charAt(Math.floor(Math.random() * 64));
+        codeVerifier += 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_'.charAt(crypto.randomInt(64));
     }
     let codeChallenge = crypto.createHash('sha256').update(codeVerifier).digest('base64').replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '');
     return { codeVerifier, codeChallenge };
@@ -86,7 +86,8 @@ const generateClientAssertion = endpoint => jwt.sign({
     iss: singpassAppID,
     iat: timeInSeconds(),
     exp: timeInSeconds() + 120,
-    jti: generateUUIDV4()
+    // jti: generateUUIDV4()
+    jti: crypto.randomUUID()
 }, privateKeyPem, {
     ...options,
     header: {
@@ -101,7 +102,8 @@ const generateDpopJkt = endpoint => jwt.sign({
     htu: `https://stg-id.singpass.gov.sg/fapi/${endpoint}`,
     iat: timeInSeconds(),
     exp: timeInSeconds() + 120,
-    jti: generateUUIDV4()
+    // jti: generateUUIDV4()
+    jti: crypto.randomUUID()
 }, privateKeyPem, {
     ...options,
     header: {
@@ -119,8 +121,10 @@ const generateHeaders = endpoint => {
 
 // 1: Redirect user to Singpass login
 module.exports.createSingpassURL = (req, res, next) => {
-    const state = generateUUIDV4();
-    const nonce = generateUUIDV4();
+    // const state = generateUUIDV4();
+    const state = crypto.randomUUID();
+    // const nonce = generateUUIDV4();
+    const nonce = crypto.randomUUID();
     const code = generateCode();
     
     console.log('=== createSingpassURL ===');
@@ -136,7 +140,7 @@ module.exports.createSingpassURL = (req, res, next) => {
             state,
             nonce,
             client_id: singpassAppID,
-            redirect_uri: redirectURI,
+            redirect_uri: (res.locals.redirectURI) ? res.locals.redirectURI : redirectURI,
             client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
             client_assertion: generateClientAssertion('par'),
             code_challenge: code.codeChallenge,
@@ -280,6 +284,10 @@ module.exports.getSingpassToken = (req, res, next) => {
                 } else if (decoded.nonce != req.session.singpassSessionData.nonce) {
                     res.status(403).json({ message: 'ID Token is invalid' });
                 } else {
+                    if (req.session.userId) {
+                        res.locals.userId = req.session.userId;
+                    }
+                    
                     // clear session, this will no longer be needed
                     req.session.destroy((err) => {
                         res.locals.singpassId = decoded.sub;
@@ -309,7 +317,7 @@ module.exports.checkSingpassIdExists = (req, res, next) => {
             return model.insertNewUser(res.locals.singpassId)
             .then((user) => {
                 res.locals.userId = user[0].id;
-                res.locals.status = 200;
+                res.locals.status = 201;
                 next();
             }).catch(function (error) {
                 console.error(error);
@@ -317,7 +325,7 @@ module.exports.checkSingpassIdExists = (req, res, next) => {
             });
         } else {
             res.locals.userId = user[0].id;
-            res.locals.status = 201;
+            res.locals.status = 200;
             next();
         }
     }).catch(function (error) {
@@ -350,5 +358,265 @@ module.exports.debugSession = (req, res) => {
         sessionId: req.session?.id || 'No session',
         sessionData: req.session?.singpassSessionData || 'No session data',
         cookies: req.headers.cookie || 'No cookie header'
+    });
+};
+
+// login with google
+const googleClientId = process.env.GOOGLE_CLIENT_ID;
+const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
+const googleRedirectURI = process.env.GOOGLE_REDIRECT_URI;
+
+module.exports.redirectUserToGoogleLogin = (req, res, next) => {
+    // const state = generateUUIDV4();
+    const state = crypto.randomUUID();
+    // const nonce = generateUUIDV4();
+    const nonce = crypto.randomUUID();
+    req.session.googleSessionData = {state, nonce};
+
+    res.redirect('https://accounts.google.com/o/oauth2/v2/auth?' + new URLSearchParams({
+        client_id: googleClientId,
+        response_type: 'code',
+        scope: 'openid email',
+        redirect_uri: (res.locals.googleRedirectURI) ? res.locals.googleRedirectURI : googleRedirectURI,
+        state,
+        nonce
+    }).toString());
+};
+
+module.exports.getGoogleToken = (req, res, next) => {
+    if (req.query.state != req.session.googleSessionData.state) {
+        return res.status(403).json({message: 'state does not match'});
+    }
+
+    fetch('https://oauth2.googleapis.com/token', {
+        method: "POST",
+        body: new URLSearchParams({
+            code: req.query.code,
+            client_id: googleClientId,
+            client_secret: googleClientSecret,
+            redirect_uri: (res.locals.googleRedirectURI) ? res.locals.googleRedirectURI : googleRedirectURI,
+            grant_type: 'authorization_code'
+        })
+    })
+    .then((response) => {
+        if (response.status != 200) {
+            console.log('Error!');
+            console.log(response);
+            return response.json();
+        } else {
+            return response.json();
+        }
+    })
+    .then((value) => {
+        if (value.error) {
+            console.log(value);
+            res.status(500).json({ message: 'Something wrong happened with the server!', errorDetails: value });
+        } else {
+            // Decrypt the ID Token
+            const decoded = jwt.decode(value.id_token);
+
+            if (decoded.iss != 'https://accounts.google.com' && decoded.iss != 'accounts.google.com') {
+                res.status(403).json({ message: 'ID Token is invalid' });
+            } else if (decoded.aud != googleClientId) {
+                res.status(403).json({ message: 'ID Token is invalid' });
+            } else if (decoded.exp < timeInSeconds()) {
+                res.status(403).json({ message: 'ID Token is invalid' });
+            } else if (decoded.nonce != req.session.googleSessionData.nonce) {
+                res.status(403).json({ message: 'ID Token is invalid' });
+            } else {
+                if (req.session.userId) {
+                    res.locals.userId = req.session.userId;
+                }
+
+                // clear session, this will no longer be needed
+                req.session.destroy((err) => {
+                    res.locals.googleId = decoded.sub;
+                    res.locals.googleEmail = decoded.email;
+                    next();
+                });
+            }
+        }
+    })
+    .catch((error) => console.error(error));
+};
+
+module.exports.checkGoogleIdExists = (req, res, next) => {
+    return model.getUserByGoogleId(res.locals.googleId)
+    .then((user) => {
+        if (user.length == 0) {
+            return model.insertNewUserByGoogleId(res.locals.googleId, res.locals.googleEmail)
+            .then((user) => {
+                res.locals.userId = user[0].id;
+                res.locals.status = 201;
+                next();
+            }).catch(function (error) {
+                console.error(error);
+                return res.status(500).json({ error: error.message });
+            });
+        } else {
+            return model.userProfileExists(user[0].id)
+            .then((userProfile) => {
+                if (userProfile.length == 0) {
+                    return model.updateGoogleEmailById(res.locals.googleEmail, user[0].id)
+                    .then((user) => {
+                        res.locals.userId = user[0].id;
+                        res.locals.status = 200;
+                        next();
+                    }).catch(function (error) {
+                        console.error(error);
+                        return res.status(500).json({ error: error.message });
+                    });
+                } else {
+                    return model.updateGoogleEmailById(null, user[0].id)
+                    .then((user) => {
+                        return model.updateEmailByUserId(res.locals.googleEmail, user[0].id)
+                        .then((user) => {
+                            res.locals.userId = user[0].user_id;
+                            res.locals.status = 200;
+                            next();
+                        }).catch(function (error) {
+                            console.error(error);
+                            return res.status(500).json({ error: error.message });
+                        });
+                    }).catch(function (error) {
+                        console.error(error);
+                        return res.status(500).json({ error: error.message });
+                    });
+                }
+            }).catch(function (error) {
+                console.error(error);
+                return res.status(500).json({ error: error.message });
+            });
+        }
+    }).catch(function (error) {
+        console.error(error);
+        return res.status(500).json({ error: error.message });
+    });
+};
+
+// allow user to link google account with singpass (and vice versa)
+// if account has already been created with google and user links google account with that email,
+// the system rejects the linking
+module.exports.checkSingpassIdExistsLink = (req, res, next) => {
+    return model.getUserBySingpassId(res.locals.singpassId)
+    .then((user) => {
+        if (user.length == 1) {
+            if (user[0].id != res.locals.userId) {
+                res.redirect('https://fyp-project-fawn.vercel.app/profile?linkError=Another user has linked to this Singpass account');
+            } else {
+                res.redirect('https://fyp-project-fawn.vercel.app/profile?linkError=You have already linked to this Singpass account');
+            }
+        } else {
+            next();
+        }
+    }).catch(function (error) {
+        console.error(error);
+        return res.status(500).json({ error: error.message });
+    });
+};
+
+module.exports.checkGoogleIdExistsLink = (req, res, next) => {
+    return model.getUserByGoogleId(res.locals.googleId)
+    .then((user) => {
+        if (user.length == 1) {
+            if (user[0].id != res.locals.userId) {
+                res.redirect('https://fyp-project-fawn.vercel.app/profile?linkError=Another user has linked to this Google account');
+            } else {
+                res.redirect('https://fyp-project-fawn.vercel.app/profile?linkError=You have already linked to this Google account');
+            }
+        } else {
+            next();
+        }
+    }).catch(function (error) {
+        console.error(error);
+        return res.status(500).json({ error: error.message });
+    });
+};
+
+module.exports.linkSingpassIdById = (req, res, next) => {
+    return model.linkSingpassIdById(res.locals.singpassId, res.locals.userId)
+    .then((user) => {
+        res.redirect('https://fyp-project-fawn.vercel.app/profile?linkSuccess=Singpass account successfully linked');
+    }).catch(function (error) {
+        console.error(error);
+        return res.status(500).json({ error: error.message });
+    });
+};
+
+module.exports.linkGoogleIdById = (req, res, next) => {
+    return model.linkGoogleIdById(res.locals.googleId, res.locals.userId)
+    .then((user) => {
+        res.redirect('https://fyp-project-fawn.vercel.app/profile?linkSuccess=Google account successfully linked');
+    }).catch(function (error) {
+        console.error(error);
+        return res.status(500).json({ error: error.message });
+    });
+};
+
+const singpassRedirectURILink = process.env.GOOGLE_REDIRECT_URI_LINK;
+const googleRedirectURILink = process.env.GOOGLE_REDIRECT_URI_LINK;
+module.exports.changeRedirectURIToLink = (req, res, next) => {
+    res.locals.redirectURI = singpassRedirectURILink;
+    res.locals.googleRedirectURI = googleRedirectURILink;
+    if (res.locals.userId) {
+        req.session.userId = res.locals.userId;
+    }
+    next();
+}
+
+module.exports.setTokenFromQuery = (req, res, next) => {
+    res.locals.token = req.query.token;
+    next();
+}
+
+module.exports.checkSingpassIdExistsUnlink = (req, res, next) => {
+    return model.getUserById(res.locals.id)
+    .then((user) => {
+        if (!user[0].singpass_id) {
+            return res.status(403).json({message: 'Singpass account is not linked to user'});
+        } else if (user[0].google_id) {
+            next();
+        } else {
+            return res.status(403).json({message: 'You cannot unlink your Singpass account from an account without a linked Google account'});
+        }
+    }).catch(function (error) {
+        console.error(error);
+        return res.status(500).json({ error: error.message });
+    });
+};
+
+module.exports.checkGoogleIdExistsUnlink = (req, res, next) => {
+    return model.getUserById(res.locals.id)
+    .then((user) => {
+        if (!user[0].google_id) {
+            return res.status(403).json({message: 'Google account is not linked to user'});
+        } else if (user[0].singpass_id) {
+            next();
+        } else {
+            return res.status(403).json({message: 'You cannot unlink your Google account from an account without a linked Singpass account'});
+        }
+    }).catch(function (error) {
+        console.error(error);
+        return res.status(500).json({ error: error.message });
+    });
+};
+
+module.exports.unlinkSingpassIdById = (req, res, next) => {
+    return model.unlinkSingpassIdById(res.locals.userId)
+    .then((user) => {
+        return res.status(200).json({message: 'Singpass account successfully unlinked'});
+    }).catch(function (error) {
+        console.error(error);
+        return res.status(500).json({ error: error.message });
+    });
+};
+
+module.exports.unlinkGoogleIdById = (req, res, next) => {
+    return model.unlinkGoogleIdById(res.locals.userId)
+    .then((user) => {
+        return res.status(200).json({message: 'Google account successfully unlinked'});
+    }).catch(function (error) {
+        console.error(error);
+        return res.status(500).json({ error: error.message });
     });
 };

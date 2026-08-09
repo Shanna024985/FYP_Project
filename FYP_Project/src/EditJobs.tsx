@@ -10,7 +10,7 @@ import { DatePickerNaturalLanguage } from "./DatePicker";
 import { Textarea } from "./components/ui/textarea";
 import { Button } from "./components/ui/button";
 type Props = {
-  currentUrl: String;
+  currentUrl: string;
 };
 type JobsObject = {
   id: number;
@@ -190,7 +190,7 @@ const EditJobs = (props: Props) => {
   }, []);
   return (
     <div>
-      <NavigationMenus />
+      <NavigationMenus currentUrl={props.currentUrl}/>
       <div className="mt-5 ml-2">
         <p className="text-2xl font-bold text-left">Edit Job</p>
         <FieldGroup className="mt-8">

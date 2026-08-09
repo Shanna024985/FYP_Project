@@ -18,7 +18,7 @@ import {
 import { CompanyPage } from "./CompanyPage";
 import { Spinner } from "./components/ui/spinner";
 type Props = {
-  currentUrl: String;
+  currentUrl: string;
 };
 const EditCompany = (prop: Props) => {
   let [overviewPage, setOverviewPage] = React.useState("");
@@ -300,7 +300,7 @@ const EditCompany = (prop: Props) => {
   }, [id]);
   return (
     <div>
-      <NavigationMenus />
+      <NavigationMenus currentUrl={prop.currentUrl}/>
       <p className="text-left text-3xl font-semibold">Edit company</p>
       <hr className="mt-4" />
       <div className="flex gap-4 mt-5">

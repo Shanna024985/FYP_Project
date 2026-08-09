@@ -114,7 +114,7 @@ module.exports.updateMessagesToRead = (senderUserId) => {
 }
 
 module.exports.getUnreadMessageCount = (receiverUserId) => {
-    let sql = `GET COUNT(id) unread_message_count FROM messages WHERE receiver_user_id = $1 AND read = FALSE;`;
+    let sql = `SELECT COUNT(id) unread_message_count FROM message WHERE receiver_user_id = $1 AND read = FALSE;`;
     return query(sql, [receiverUserId]).then(function (result) {
         return result.rows;
     });
@@ -128,7 +128,7 @@ module.exports.updateMessagesToRead = (senderUserId) => {
 }
 
 module.exports.getUnreadMessageCount = (receiverUserId) => {
-    let sql = `GET COUNT(id) unread_message_count FROM messages WHERE receiver_user_id = $1 AND read = FALSE;`;
+    let sql = `SELECT COUNT(id) unread_message_count FROM message WHERE receiver_user_id = $1 AND read = FALSE;`;
     return query(sql, [receiverUserId]).then(function (result) {
         return result.rows;
     });

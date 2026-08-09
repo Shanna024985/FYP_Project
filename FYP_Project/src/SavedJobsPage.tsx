@@ -117,9 +117,9 @@ export default function SavedJobsPage({ currentUrl }: Props) {
 
   return (
     <div className="flex flex-col gap-6">
-      <NavigationMenus />
+      <NavigationMenus currentUrl={currentUrl}/>
       {/* Row 1 */}
-      <h1 className="text-3xl font-bold title-black">Saved Jobs</h1>
+      <h1 className="text-3xl font-bold text-black! dark:text-white!">Saved Jobs</h1>
 
       {/* Row 2 */}
       <p className="mt-2 text-muted-foreground">
@@ -133,7 +133,7 @@ export default function SavedJobsPage({ currentUrl }: Props) {
             <Bookmark className="h-12 w-12 text-muted-foreground" />
 
             <div>
-              <h2 className="text-xl font-semibold title-black">No saved jobs yet</h2>
+              <h2 className="text-xl font-semibold text-black! dark:text-white!">No saved jobs yet</h2>
             </div>
 
             <Button onClick={() => navigate("/browsejobs")}>Browse Jobs</Button>

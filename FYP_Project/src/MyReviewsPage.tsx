@@ -104,9 +104,9 @@ export default function MyReviewsPage({ currentUrl }: Props) {
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-8">
-      <NavigationMenus />
+      <NavigationMenus currentUrl={currentUrl} />
       {/* Row 1 */}
-      <h1 className="mb-2 text-3xl font-bold title-black">My Reviews</h1>
+      <h1 className="mb-2 text-3xl font-bold text-black! dark:text-white!">My Reviews</h1>
 
       {/* Row 2 */}
       <p className="mb-8 text-muted-foreground">
