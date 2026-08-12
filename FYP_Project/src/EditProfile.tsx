@@ -158,7 +158,7 @@ export default function EditProfilePage({ currentUrl }: Props) {
       );
 
       // Replace preview with Cloudinary URL
-      setProfileImage(res.data.profile_picture_url);
+      setProfileImage(res.data.profile.profile_picture_url);
 
       toast.success("Profile photo uploaded successfully.");
     } catch (err: any) {
