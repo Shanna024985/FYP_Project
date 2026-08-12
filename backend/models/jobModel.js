@@ -668,7 +668,8 @@ module.exports.updateJob = function updateJob(jobId, jobData, companyId) {
                    jobs_needed = COALESCE($14, jobs_needed),
                    reports = COALESCE($15, reports),
                    status = COALESCE($16, status), 
-                   address = COALESCE($19, address)
+                   address = COALESCE($19, address),
+                   updated_at = NOW()
                WHERE id = $17 AND company_id = $18
                RETURNING *;`;
 
