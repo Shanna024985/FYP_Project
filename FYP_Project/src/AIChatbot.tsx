@@ -128,7 +128,7 @@ export default function AIChatbot(props: Props) {
       {/* Chat Window */}
       {isOpen && (
         <div
-          className={`fixed bottom-6 right-6 z-50 flex flex-col rounded-xl border bg-background shadow-xl transition-all duration-300 ${isExpanded
+          className={`fixed bottom-6 left-6 z-50 flex flex-col rounded-xl border bg-background shadow-xl transition-all duration-300 ${isExpanded
             ? "h-[80vh] w-[70vw]"
             : "h-[600px] w-[400px]"
             }`}
@@ -243,7 +243,7 @@ export default function AIChatbot(props: Props) {
       {!isOpen && (
         <Button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full shadow-lg"
+          className="fixed bottom-20 left-6 z-50 h-14 w-14 rounded-full shadow-lg"
           size="icon"
         >
           <Bot size={24} />
