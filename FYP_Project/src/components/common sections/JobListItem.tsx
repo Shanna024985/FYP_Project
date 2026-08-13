@@ -15,7 +15,8 @@ type JobListItemProps = {
   location: string;
   address: string;
   tags: string[];
-  date: string;
+  created_date: string;
+  updated_date: string;
   companyLogo: string;
   salaryPeriod: string;
 };
@@ -31,7 +32,8 @@ export default function JobListItem({
   location,
   address,
   tags,
-  date,
+  created_date,
+  updated_date,
   companyLogo,
   salaryPeriod,
 }: JobListItemProps) {
@@ -84,9 +86,23 @@ export default function JobListItem({
   </div>
 
   {/* Date */}
-  <p className="mt-3 text-xs text-muted-foreground">
-    Posted on {date}
-  </p>
+      {created_date && updated_date ? (
+        new Date(updated_date).getTime() > new Date(created_date).getTime() ? (
+          <p className="mt-3 text-xs text-muted-foreground">
+            Updated on {updated_date}
+          </p>
+        ) : (
+          <p className="mt-3 text-xs text-muted-foreground">
+            Posted on {created_date}
+          </p>
+        )
+      ) : (
+        created_date && (
+          <p className="mt-3 text-xs text-muted-foreground">
+            Posted on {created_date}
+          </p>
+        )
+      )}
 
   {/* Bookmark */}
   <BookmarkButton

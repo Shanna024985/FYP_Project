@@ -76,7 +76,8 @@ export default function BrowseJobs({ currentUrl }: Props) {
 
     tags: [job.type, job.category],
 
-    date: new Date(job.deadline).toLocaleDateString(),
+    created_date: new Date(job.created_at).toLocaleDateString(),
+    updated_date: new Date(job.updated_at).toLocaleDateString(),
 
     companyLogo: job.logo_url || "/default-company.png",
   }));

@@ -14,7 +14,8 @@ export default function JobResultsPage() {
     location: "Singapore",
     address: "Jurong East",
     tags: ["Urgent", "Freelance"],
-    date: "22 May 2026",
+    created_date: new Date().toLocaleDateString(),
+    updated_date: new Date().toLocaleDateString(),
     companyLogo: "https://via.placeholder.com/50",
   }));
 

@@ -37,7 +37,7 @@ export default function EditProfilePage({ currentUrl }: Props) {
   const emailRef = useRef<HTMLInputElement>(null);
   const phoneRef = useRef<HTMLInputElement>(null);
   const [profileImage, setProfileImage] = useState<string | null>(null);
-  const resumeInputRef = useRef<HTMLInputElement>(null); 
+  const resumeInputRef = useRef<HTMLInputElement>(null);
   const profileInputRef = useRef<HTMLInputElement>(null);
 
   const [profile, setProfile] = useState({
@@ -103,6 +103,10 @@ export default function EditProfilePage({ currentUrl }: Props) {
   };
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    // Phone number: allow numbers only
+    if (name === "phone_number" && !/^\d*$/.test(value)) {
+      return;
+    }
 
     setProfile((prev) => ({
       ...prev,
@@ -158,7 +162,7 @@ export default function EditProfilePage({ currentUrl }: Props) {
       );
 
       // Replace preview with Cloudinary URL
-      setProfileImage(res.data.profile_picture_url);
+      setProfileImage(res.data.profile.profile_picture_url);
 
       toast.success("Profile photo uploaded successfully.");
     } catch (err: any) {
@@ -417,7 +421,7 @@ export default function EditProfilePage({ currentUrl }: Props) {
   }
   return (
     <div>
-      <NavigationMenus currentUrl={currentUrl}/>
+      <NavigationMenus currentUrl={currentUrl} />
       <div className="min-h-screen bg-background px-6 py-8">
         <div className="mx-auto max-w-4xl rounded-3xl border bg-card p-8 shadow-sm">
           {/* Header */}
@@ -542,7 +546,7 @@ export default function EditProfilePage({ currentUrl }: Props) {
             )}
             <InputGroup>
               <InputGroupAddon>
-                <InputGroupText>Phone Number</InputGroupText>
+                <InputGroupText>Phone Number *</InputGroupText>
               </InputGroupAddon>
 
               <InputGroupInput
@@ -610,7 +614,7 @@ export default function EditProfilePage({ currentUrl }: Props) {
               No education added yet
             </div>
           </div> */}
-           
+
           {/* Resume */}
           <div className="mt-10 border-t pt-8">
             <div className="mb-6 flex items-center justify-center gap-3">

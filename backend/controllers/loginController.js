@@ -476,7 +476,7 @@ module.exports.updateProfileEmailByUserId = (req, res, next) => {
                 return res.status(500).json({ error: error.message });
             });
         } else {
-            return model.updateEmailByUserId(res.locals.googleEmail, user[0].id)
+            return model.updateEmailByUserId(res.locals.googleEmail, userProfile[0].id)
             .then((user) => {
                 next();
             }).catch(function (error) {
