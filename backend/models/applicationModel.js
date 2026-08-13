@@ -23,7 +23,7 @@ module.exports.getResponseDetailsByStage = jobId => {
 
 const responsesColumns = `SELECT a.id, first_name || ' ' || last_name candidate,
 time_applied, resume_file_name,
-resume_file_data, status, phone_number, d.email
+resume_file_data, status, phone_number, d.email, a.user_id
 FROM application a JOIN user_ u ON u.id = a.user_id
 JOIN user_detail d ON u.id = d.user_id
 `;

@@ -70,7 +70,8 @@ module.exports.createUserProfile = (req, res, next) => {
 
 // READ - Get user profile
 module.exports.getUserProfile = (req, res, next) => {
-    const userId = getUserIdFromReq(req, res);
+   
+    const userId = req.query.id || getUserIdFromReq(req, res);
 
     if (!userId) {
         return res.status(401).json({ error: "Unauthorized: User not authenticated" });
@@ -101,7 +102,9 @@ module.exports.getUserProfile = (req, res, next) => {
                     profile_picture_url: userProfile.profile_picture_url || null,
                     default_resume_id: userProfile.default_resume_id,
                     is_linked_with_singpass: (userProfile.singpass_id) ? true : false,
-                    is_linked_with_google: (userProfile.google_id) ? true : false
+                    is_linked_with_google: (userProfile.google_id) ? true : false,
+                    profile_picture_file_data: userProfile.profile_picture_file_data,
+                    profile_picture_file_name: userProfile.profile_picture_file_name
                 }
             });
         })

@@ -59,7 +59,8 @@ module.exports.getUserProfile = function getUserProfile(userId) {
     let sql = `SELECT ud.id, ud.user_id, ud.first_name, ud.last_name, 
                       ud.phone_number, ud.email, ud.linkedin_profile, ud.github_profile,
                       ud.profile_picture_file_url as profile_picture_url,
-                      ud.default_resume_id,
+                      ud.default_resume_id, ud.profile_picture_file_name,
+                      ud.profile_picture_file_data,
                       u.singpass_id, u.google_id, u.role,
                (SELECT json_agg(json_build_object('id', r.id, 'file_name', r.file_name)) 
                 FROM resume r WHERE r.user_id = u.id) as resumes
