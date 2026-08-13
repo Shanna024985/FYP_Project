@@ -119,39 +119,66 @@ const Messages = (props: Props) => {
         setProfileOfUserSelected(values[0]);
         setListOfpeople(values);
         if (id) {
-          fetch(props.currentUrl + "/user/profile?id=" + id, {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: "Bearer " + localStorage.getItem("token"),
-            },
-          })
-            .then((value) => {
-              return value.json();
+          let hasId = values.some((user: listOfMessages) => {
+            return user.user_id == id.toString();
+          });
+          console.log(hasId);
+          if (!hasId) {
+            fetch(props.currentUrl + "/user/profile?id=" + id, {
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + localStorage.getItem("token"),
+              },
             })
-            .then((things) => {
-              console.log("User");
-              console.log(things);
-              let date = new Date().toDateString();
-              let newListOfPeople = [
-                {
-                  profile_picture_file_url:
-                    things.profile.profile_picture_file_url,
-                  time_sent: date,
-                  most_recent_message: "",
-                  user_id: things.profile.user_id,
-                  profile_picture_file_data:
-                    things.profile.profile_picture_file_data,
-                  profile_picture_file_name:
-                    things.profile.profile_picture_file_name,
-                  user_name:
-                    things.profile.first_name + " " + things.profile.last_name,
-                },
-                ...values,
-              ];
-              setListOfpeople(newListOfPeople);
+              .then((value) => {
+                return value.json();
+              })
+              .then((things) => {
+                console.log("User");
+                console.log(things);
+                let date = new Date().toDateString();
+                let newListOfPeople = [
+                  {
+                    profile_picture_file_url:
+                      things.profile.profile_picture_file_url,
+                    time_sent: date,
+                    most_recent_message: "",
+                    user_id: things.profile.user_id,
+                    profile_picture_file_data:
+                      things.profile.profile_picture_file_data,
+                    profile_picture_file_name:
+                      things.profile.profile_picture_file_name,
+                    user_name:
+                      things.profile.first_name +
+                      " " +
+                      things.profile.last_name,
+                  },
+                  ...values,
+                ];
+                setListOfpeople(newListOfPeople);
 
-              setProfileOfUserSelected(newListOfPeople[0]);
+                setProfileOfUserSelected(newListOfPeople[0]);
+              });
+          } else {
+            values.forEach((valuesGotten: listOfMessages, index: number) => {
+              if (valuesGotten.user_id == id.toString()) {
+                setProfileOfUserSelected(values[index]);
+                fetch(props.currentUrl + "/message/" + values[index].user_id, {
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: "Bearer " + localStorage.getItem("token"),
+                  },
+                })
+                  .then((value) => {
+                    return value.json();
+                  })
+                  .then((messagesJson) => {
+                    setMessagesJson(messagesJson);
+                    console.log(messagesJson);
+                  });
+              }
             });
+          }
         } else {
           fetch(props.currentUrl + "/message/" + values[0].user_id, {
             headers: {
@@ -167,9 +194,10 @@ const Messages = (props: Props) => {
               console.log(messagesJson);
             });
         }
-      }).catch((reason)=>{
-        alert(reason)
       })
+      .catch((reason) => {
+        alert(reason);
+      });
   }, []);
   useEffect(() => {
     if (messageDiv.current) {
@@ -194,28 +222,29 @@ const Messages = (props: Props) => {
           </div>
           <div className="overflow-y-scroll mt-4 h-[80vh] flex flex-col gap-3">
             {listOfPeople?.map((values, index) => {
-              if (index == 0) {
+          
                 return (
                   <>
                     <div
-                      className="flex gap-3 bg-blue-100 dark:bg-[#172c67] p-2"
+                      className={`flex gap-3 p-2 ${
+                        profileOfUserSelected?.user_id === values.user_id
+                          ? "bg-blue-100 dark:bg-[#172c67]"
+                          : ""
+                      }`}
                       onClick={() => {
-                                    fetch(
-                          props.currentUrl + "/message/" + values.user_id,
-                          {
-                            headers: {
-                              "Content-Type": "application/json",
-                              Authorization:
-                                "Bearer " + localStorage.getItem("token"),
-                            },
+                        fetch(props.currentUrl + "/message/" + values.user_id, {
+                          headers: {
+                            "Content-Type": "application/json",
+                            Authorization:
+                              "Bearer " + localStorage.getItem("token"),
                           },
-                        )
+                        })
                           .then((value) => {
                             return value.json();
                           })
                           .then((messagesJson) => {
                             setMessagesJson(messagesJson);
-                            setProfileOfUserSelected(listOfPeople[index])
+                            setProfileOfUserSelected(listOfPeople[index]);
                             console.log(messagesJson);
                           });
                       }}
@@ -233,7 +262,7 @@ const Messages = (props: Props) => {
                           y1="3.5"
                           x2="3.5"
                           y2="88.5"
-                          stroke="#2A88E0"
+                          stroke={values.user_id == profileOfUserSelected?.user_id ? "#2A88E0": "#FFFFFF"}
                           stroke-width="7"
                           stroke-linecap="round"
                         />
@@ -260,73 +289,7 @@ const Messages = (props: Props) => {
                     </div>
                   </>
                 );
-              } else {
-                return (
-                  <>
-                    <div
-                      className="flex gap-3 p-2"
-                      onClick={() => {
-                        fetch(
-                          props.currentUrl + "/message/" + values.user_id,
-                          {
-                            headers: {
-                              "Content-Type": "application/json",
-                              Authorization:
-                                "Bearer " + localStorage.getItem("token"),
-                            },
-                          },
-                        )
-                          .then((value) => {
-                            return value.json();
-                          })
-                          .then((messagesJson) => {
-                            setMessagesJson(messagesJson);
-                            setProfileOfUserSelected(listOfPeople[index])
-                            console.log(messagesJson);
-                          });
-                      }}
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="7"
-                        height="fit"
-                        viewBox="0 0 7 92"
-                        fill="none"
-                        className="self-center"
-                      >
-                        <line
-                          x1="3.5"
-                          y1="3.5"
-                          x2="3.5"
-                          y2="88.5"
-                          stroke="#FFFFF"
-                          stroke-width="7"
-                          stroke-linecap="round"
-                        />
-                      </svg>
-                      <div className="flex">
-                        <Avatar className="size-15 self-center">
-                          <AvatarImage
-                            src={
-                              values.profile_picture_file_url ||
-                              `data:image/jpeg;base64,${values.profile_picture_file_data}`
-                            }
-                          />
-                          <AvatarFallback>Profile Picture</AvatarFallback>
-                        </Avatar>
-                      </div>
-                      <div className="flex flex-col self-center">
-                        <p className="font-bold text-lg text-left">
-                          {values.user_name}
-                        </p>
-                        <p className="text-left text-sm">
-                          {values.most_recent_message}
-                        </p>
-                      </div>
-                    </div>
-                  </>
-                );
-              }
+              
             })}
           </div>
         </div>
@@ -363,7 +326,6 @@ const Messages = (props: Props) => {
                   valueOfMessage.sender_user_id ==
                   profileOfUserSelected?.user_id
                 ) {
-                  
                   return (
                     <>
                       <Message>
