@@ -35,6 +35,7 @@ module.exports.updateMessagesToRead = (req, res, next) => {
 }
 
 module.exports.getUserList = (req, res, next) => {
+    console.log(res.locals.userId);
     return model.getUserList(res.locals.userId)
     .then((messages) => {
         return res.status(200).json(messages);
