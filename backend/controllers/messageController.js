@@ -2,7 +2,7 @@ let model = require("../models/messageModel");
 let userModel = require("../models/userModel");
 
 module.exports.getMessageWithUserByUserId = (req, res, next) => {
-    let pageIfNoQuery
+    let pageIfNoQuery = req.query.page;
     if (req.params.userId == undefined) {
         return res.status(400).json({ message: 'userId is undefined' });
     } else if (req.query.page == undefined) {
