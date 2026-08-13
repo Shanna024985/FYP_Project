@@ -26,6 +26,7 @@ type listOfMessages = {
   time_sent: string;
   user_name: string;
   profile_picture_file_data: File;
+  profile_picture_file_url: string;
 };
 type Message = {
   id: string;
@@ -76,7 +77,7 @@ const Messages = (props: Props) => {
       console.log("Connected");
     };
     socket.current.onmessage = (event) => {
-      console.log(event)
+      console.log(event);
       fetch(props.currentUrl + "/message/" + event.data, {
         headers: {
           "Content-Type": "application/json",
@@ -112,23 +113,63 @@ const Messages = (props: Props) => {
         return value.json();
       })
       .then((values) => {
+        let address = new URL(window.location.href);
+        let queryParameters = address.searchParams;
+        let id = queryParameters.get("id");
         setProfileOfUserSelected(values[0]);
         setListOfpeople(values);
-
-        fetch(props.currentUrl + "/message/" + values[0].user_id, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + localStorage.getItem("token"),
-          },
-        })
-          .then((value) => {
-            return value.json();
+        if (id) {
+          fetch(props.currentUrl + "/user/profile?id=" + id, {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + localStorage.getItem("token"),
+            },
           })
-          .then((messagesJson) => {
-            setMessagesJson(messagesJson);
-            console.log(messagesJson);
-          });
-      });
+            .then((value) => {
+              return value.json();
+            })
+            .then((things) => {
+              console.log("User");
+              console.log(things);
+              let date = new Date().toDateString();
+              let newListOfPeople = [
+                {
+                  profile_picture_file_url:
+                    things.profile.profile_picture_file_url,
+                  time_sent: date,
+                  most_recent_message: "",
+                  user_id: things.profile.user_id,
+                  profile_picture_file_data:
+                    things.profile.profile_picture_file_data,
+                  profile_picture_file_name:
+                    things.profile.profile_picture_file_name,
+                  user_name:
+                    things.profile.first_name + " " + things.profile.last_name,
+                },
+                ...values,
+              ];
+              setListOfpeople(newListOfPeople);
+
+              setProfileOfUserSelected(newListOfPeople[0]);
+            });
+        } else {
+          fetch(props.currentUrl + "/message/" + values[0].user_id, {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + localStorage.getItem("token"),
+            },
+          })
+            .then((value) => {
+              return value.json();
+            })
+            .then((messagesJson) => {
+              setMessagesJson(messagesJson);
+              console.log(messagesJson);
+            });
+        }
+      }).catch((reason)=>{
+        alert(reason)
+      })
   }, []);
   useEffect(() => {
     if (messageDiv.current) {
@@ -156,7 +197,29 @@ const Messages = (props: Props) => {
               if (index == 0) {
                 return (
                   <>
-                    <div className="flex gap-3 bg-blue-100 dark:bg-[#172c67] p-2">
+                    <div
+                      className="flex gap-3 bg-blue-100 dark:bg-[#172c67] p-2"
+                      onClick={() => {
+                                    fetch(
+                          props.currentUrl + "/message/" + values.user_id,
+                          {
+                            headers: {
+                              "Content-Type": "application/json",
+                              Authorization:
+                                "Bearer " + localStorage.getItem("token"),
+                            },
+                          },
+                        )
+                          .then((value) => {
+                            return value.json();
+                          })
+                          .then((messagesJson) => {
+                            setMessagesJson(messagesJson);
+                            setProfileOfUserSelected(listOfPeople[index])
+                            console.log(messagesJson);
+                          });
+                      }}
+                    >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="7"
@@ -178,7 +241,10 @@ const Messages = (props: Props) => {
                       <div className="flex">
                         <Avatar className="size-15 self-center">
                           <AvatarImage
-                            src={`data:image/jpeg;base64,${values.profile_picture_file_data}`}
+                            src={
+                              values.profile_picture_file_url ||
+                              `data:image/jpeg;base64,${values.profile_picture_file_data}`
+                            }
                           />
                           <AvatarFallback>Profile Picture</AvatarFallback>
                         </Avatar>
@@ -197,7 +263,29 @@ const Messages = (props: Props) => {
               } else {
                 return (
                   <>
-                    <div className="flex gap-3  p-2">
+                    <div
+                      className="flex gap-3 p-2"
+                      onClick={() => {
+                        fetch(
+                          props.currentUrl + "/message/" + values.user_id,
+                          {
+                            headers: {
+                              "Content-Type": "application/json",
+                              Authorization:
+                                "Bearer " + localStorage.getItem("token"),
+                            },
+                          },
+                        )
+                          .then((value) => {
+                            return value.json();
+                          })
+                          .then((messagesJson) => {
+                            setMessagesJson(messagesJson);
+                            setProfileOfUserSelected(listOfPeople[index])
+                            console.log(messagesJson);
+                          });
+                      }}
+                    >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="7"
@@ -219,7 +307,10 @@ const Messages = (props: Props) => {
                       <div className="flex">
                         <Avatar className="size-15 self-center">
                           <AvatarImage
-                            src={`data:image/jpeg;base64,${values.profile_picture_file_data}`}
+                            src={
+                              values.profile_picture_file_url ||
+                              `data:image/jpeg;base64,${values.profile_picture_file_data}`
+                            }
                           />
                           <AvatarFallback>Profile Picture</AvatarFallback>
                         </Avatar>
@@ -244,7 +335,10 @@ const Messages = (props: Props) => {
             <div className="flex gap-3">
               <Avatar className="size-15 self-center">
                 <AvatarImage
-                  src={`data:image/jpeg;base64,${profileOfUserSelected?.profile_picture_file_data}`}
+                  src={
+                    profileOfUserSelected?.profile_picture_file_url ||
+                    `data:image/jpeg;base64,${profileOfUserSelected?.profile_picture_file_data}`
+                  }
                 />
                 <AvatarFallback>Profile Picture</AvatarFallback>
               </Avatar>
@@ -264,12 +358,12 @@ const Messages = (props: Props) => {
               </p> */}
 
               {messagesJson?.map((valueOfMessage) => {
-                console.log(messagesJson);
-
+                console.log(valueOfMessage);
                 if (
                   valueOfMessage.sender_user_id ==
                   profileOfUserSelected?.user_id
                 ) {
+                  
                   return (
                     <>
                       <Message>
@@ -290,7 +384,7 @@ const Messages = (props: Props) => {
                         </MessageAvatar>
                         <MessageContent>
                           <Bubble variant={"muted"}>
-                            <BubbleContent>
+                            <BubbleContent className="text-left">
                               {valueOfMessage.message}
                             </BubbleContent>
                           </Bubble>
@@ -325,7 +419,7 @@ const Messages = (props: Props) => {
                             </MessageAvatar>
                             <MessageContent>
                               <Bubble>
-                                <BubbleContent>
+                                <BubbleContent className="text-left">
                                   {valueOfMessage.message}
                                 </BubbleContent>
                               </Bubble>

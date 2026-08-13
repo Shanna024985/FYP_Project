@@ -13,6 +13,8 @@ import {
   NativeSelectOption,
 } from "./components/ui/native-select";
 import jsPDF from "jspdf";
+import { Button } from "./components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const doc = new jsPDF();
 
@@ -28,6 +30,7 @@ interface dataOfApplicants {
   phoneNumber: string;
   email: string;
   id: string;
+  user_id: string;
 }
 interface dataType {
   month: String;
@@ -141,6 +144,7 @@ type activeCandidates = {
   status: string;
   phone_number: string;
   email: string;
+    user_id: string;
 };
 
 
@@ -162,6 +166,7 @@ function setUpArray(activeCandidates: activeCandidates[]) {
       email: value.email,
       resume: resume,
       id: value.id,
+      user_id: value.user_id
     };
     thingToSet.push(newObj);
   });
@@ -181,6 +186,7 @@ const TabsForApplicant = (props: Props) => {
       email: "testing@example.com",
       resume: new File([pdfBlob], "resume.pdf", { type: "application/pdf" }),
       id: "32",
+      user_id: "34"
     },
     {
       candidates: "ricks",
@@ -190,8 +196,10 @@ const TabsForApplicant = (props: Props) => {
       email: "testing@example.com",
       resume: new File([pdfBlob], "resume.pdf", { type: "application/pdf" }),
       id: "32",
+      user_id: "23"
     },
   ]);
+  let navigate = useNavigate()
   let [dataOfAwaitingCandidates, setDataOfAwaitingCandidates] = useState<
     dataOfApplicants[]
   >([
@@ -203,6 +211,7 @@ const TabsForApplicant = (props: Props) => {
       email: "testing@example.com",
       resume: new File([pdfBlob], "resume.pdf", { type: "application/pdf" }),
       id: "32",
+      user_id: '34'
     },
     {
       candidates: "Pearson",
@@ -212,6 +221,7 @@ const TabsForApplicant = (props: Props) => {
       email: "testing@example.com",
       resume: new File([pdfBlob], "resume.pdf", { type: "application/pdf" }),
       id: "32",
+      user_id: "43"
     },
   ]);
   useEffect(() => {
@@ -301,6 +311,11 @@ const TabsForApplicant = (props: Props) => {
                       >
                         {value.email}
                       </a>
+                    </TableCell>
+                    <TableCell>
+                      <Button onClick={()=>{
+                        navigate("/messages?id=" + value.user_id)
+                      }}>Message</Button>
                     </TableCell>
                   </TableRow>
                 );

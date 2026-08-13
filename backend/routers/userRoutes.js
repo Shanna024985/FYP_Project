@@ -11,7 +11,6 @@ router.post("/profile", jwtMiddleware.verifyToken, userController.createUserProf
 
 // Get user profile
 router.get("/profile", jwtMiddleware.verifyToken, userController.getUserProfile);
-
 // Update user profile
 router.put("/profile", jwtMiddleware.verifyToken, userController.updateUserProfile);
 
