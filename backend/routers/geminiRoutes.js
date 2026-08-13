@@ -44,4 +44,7 @@ router.post("/freelancer-advice", verifyToken, geminiController.freelancerAdvice
 // Salary negotiation
 router.post("/salary-negotiation", verifyToken, geminiController.salaryNegotiation);
 
+//for guest users (no token required)
+router.post("/guest-chat", geminiController.guestChat);
+
 module.exports = router;
