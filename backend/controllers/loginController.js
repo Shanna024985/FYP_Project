@@ -468,7 +468,7 @@ module.exports.updateProfileEmailByUserId = (req, res, next) => {
     return model.userProfileExists(res.locals.userId)
     .then((userProfile) => {
         if (userProfile.length == 0) {
-            return model.createProfileFromGoogleEmail(res.locals.googleEmail)
+            return model.createProfileFromGoogleEmail(userProfile[0].id, res.locals.googleEmail)
             .then((user) => {
                 next();
             }).catch(function (error) {

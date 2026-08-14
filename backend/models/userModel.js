@@ -230,9 +230,9 @@ module.exports.getUserById = (id) => {
 //     });
 // }
 
-module.exports.createProfileFromGoogleEmail = (googleEmail) => {
-    let sql = "INSERT INTO user_detail (email) VALUES ($1) RETURNING id;";
-    return query(sql, [googleEmail]).then(function (result) {
+module.exports.createProfileFromGoogleEmail = (userId, googleEmail) => {
+    let sql = "INSERT INTO user_detail (user_id, email) VALUES ($1, $2) RETURNING id;";
+    return query(sql, [userId, googleEmail]).then(function (result) {
         return result.rows;
     });
 }
