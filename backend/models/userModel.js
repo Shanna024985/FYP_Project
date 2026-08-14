@@ -175,7 +175,7 @@ module.exports.deleteProfilePhotoOld = function deleteProfilePhotoOld(userId) {
 // Create new user based on google email
 // When setting user details, google can also be used to log in (and also link with singpass)
 module.exports.insertNewUserByGoogleId = googleId => {
-    let sql = "INSERT INTO user_ google_id VALUES $1 RETURNING id;";
+    let sql = "INSERT INTO user_ (google_id) VALUES $1 RETURNING id;";
     return query(sql, [googleId]).then(function (result) {
         return result.rows;
     });
