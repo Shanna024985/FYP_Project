@@ -418,7 +418,7 @@ module.exports.getAllJobs = function getAllJobs(filters = {}) {
         paramIndex++;
     }
     if (filters.address) {
-      conditions.push(`j.address ILIKE $${paramIndex}`);
+      conditions.push(` j.address ILIKE $${paramIndex}`);
       params.push(`%${filters.address}%`);
       paramIndex++;
     }
