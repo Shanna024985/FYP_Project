@@ -338,7 +338,11 @@ module.exports.checkSingpassIdExists = (req, res, next) => {
 module.exports.processJSON = (req, res, next) => {
     return model.getUserDetailById(res.locals.userId)
     .then((user) => {
-        res.locals.onboardingNeeded = user.length == 0;
+        if (user.length == 0) {
+            res.locals.onboardingNeeded = true;
+        } else {
+            res.locals.onboardingNeeded = user[0].first_name == null || user[0].last_name == null || user[0].phone_number == null || user[0].email == null
+        }
         next();
     }).catch(function (error) {
         console.error(error);
