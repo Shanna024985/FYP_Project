@@ -18,6 +18,7 @@ import {
 type Props = {
   currentUrl: String;
 };
+import { useTheme } from "next-themes";
 
 type listOfMessages = {
   user_id: string;
@@ -56,6 +57,14 @@ type messageJson = {
   time_sent: string;
   id: string;
 };
+let themeColour = (theme: string) => {
+  console.log(theme);
+  if (theme == "light") {
+    return "#ffffff";
+  } else {
+    return "#000000";
+  }
+};
 const Messages = (props: Props) => {
   const socket = useRef<WebSocket | null>(null);
   let [listOfPeople, setListOfpeople] = useState<listOfMessages[]>();
@@ -68,6 +77,8 @@ const Messages = (props: Props) => {
   let [classNameForEditButton, setClassNameForEditButton] = useState("hidden");
   let inputRef = useRef<HTMLInputElement>(null);
   let [currentIdToEdit, setCurrentIdToEdit] = useState("");
+  const { theme } = useTheme();
+  const currentTheme = theme ?? "light";
   useEffect(() => {
     socket.current = new WebSocket(
       "wss://fyp-project-fkmo.onrender.com/?token=" +
@@ -222,74 +233,77 @@ const Messages = (props: Props) => {
           </div>
           <div className="overflow-y-scroll mt-4 h-[80vh] flex flex-col gap-3">
             {listOfPeople?.map((values, index) => {
-          
-                return (
-                  <>
-                    <div
-                      className={`flex gap-3 p-2 ${
-                        profileOfUserSelected?.user_id === values.user_id
-                          ? "bg-blue-100 dark:bg-[#172c67]"
-                          : ""
-                      }`}
-                      onClick={() => {
-                        fetch(props.currentUrl + "/message/" + values.user_id, {
-                          headers: {
-                            "Content-Type": "application/json",
-                            Authorization:
-                              "Bearer " + localStorage.getItem("token"),
-                          },
+              console.log(listOfPeople);
+              return (
+                <>
+                  <div
+                    className={`flex gap-3 p-2 ${
+                      profileOfUserSelected?.user_id === values.user_id
+                        ? "bg-blue-100 dark:bg-[#172c67]"
+                        : ""
+                    }`}
+                    onClick={() => {
+                      fetch(props.currentUrl + "/message/" + values.user_id, {
+                        headers: {
+                          "Content-Type": "application/json",
+                          Authorization:
+                            "Bearer " + localStorage.getItem("token"),
+                        },
+                      })
+                        .then((value) => {
+                          return value.json();
                         })
-                          .then((value) => {
-                            return value.json();
-                          })
-                          .then((messagesJson) => {
-                            setMessagesJson(messagesJson);
-                            setProfileOfUserSelected(listOfPeople[index]);
-                            console.log(messagesJson);
-                          });
-                      }}
+                        .then((messagesJson) => {
+                          setMessagesJson(messagesJson);
+                          setProfileOfUserSelected(listOfPeople[index]);
+                          console.log(messagesJson);
+                        });
+                    }}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="7"
+                      height="fit"
+                      viewBox="0 0 7 92"
+                      fill="none"
+                      className="self-center"
                     >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="7"
-                        height="fit"
-                        viewBox="0 0 7 92"
-                        fill="none"
-                        className="self-center"
-                      >
-                        <line
-                          x1="3.5"
-                          y1="3.5"
-                          x2="3.5"
-                          y2="88.5"
-                          stroke={values.user_id == profileOfUserSelected?.user_id ? "#2A88E0": "#FFFFFF"}
-                          stroke-width="7"
-                          stroke-linecap="round"
+                      <line
+                        x1="3.5"
+                        y1="3.5"
+                        x2="3.5"
+                        y2="88.5"
+                        stroke={
+                          values.user_id == profileOfUserSelected?.user_id
+                            ? "#2A88E0"
+                            : themeColour(currentTheme)
+                        }
+                        stroke-width="7"
+                        stroke-linecap="round"
+                      />
+                    </svg>
+                    <div className="flex">
+                      <Avatar className="size-15 self-center">
+                        <AvatarImage
+                          src={
+                            values.profile_picture_file_url ||
+                            `data:image/jpeg;base64,${values.profile_picture_file_data}`
+                          }
                         />
-                      </svg>
-                      <div className="flex">
-                        <Avatar className="size-15 self-center">
-                          <AvatarImage
-                            src={
-                              values.profile_picture_file_url ||
-                              `data:image/jpeg;base64,${values.profile_picture_file_data}`
-                            }
-                          />
-                          <AvatarFallback>Profile Picture</AvatarFallback>
-                        </Avatar>
-                      </div>
-                      <div className="flex flex-col self-center">
-                        <p className="font-bold text-lg text-left">
-                          {values.user_name}
-                        </p>
-                        <p className="text-left text-sm">
-                          {values.most_recent_message}
-                        </p>
-                      </div>
+                        <AvatarFallback>Profile Picture</AvatarFallback>
+                      </Avatar>
                     </div>
-                  </>
-                );
-              
+                    <div className="flex flex-col self-center">
+                      <p className="font-bold text-lg text-left">
+                        {values.user_name}
+                      </p>
+                      <p className="text-left text-sm">
+                        {values.most_recent_message}
+                      </p>
+                    </div>
+                  </div>
+                </>
+              );
             })}
           </div>
         </div>

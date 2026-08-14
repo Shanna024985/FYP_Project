@@ -171,7 +171,7 @@ const CompanyReviews = (prop: Props) => {
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
-                <DialogTitle className="text-black!">Add reviews</DialogTitle>
+                <DialogTitle className="text-black! dark:text-white!">Add reviews</DialogTitle>
                 <DialogDescription>
                   Help others learn what it’s like to work at this company by
                   sharing your experience

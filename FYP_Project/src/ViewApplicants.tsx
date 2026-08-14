@@ -65,7 +65,7 @@ const ViewApplicants = (props: Props) => {
         <p className="text-2xl font-bold text-left">Employer Dashboard</p>
         <hr className="mt-3" />
         <div className="flex mt-5 justify-between">
-          <div className="bg-[#2A88E0] text-white p-4 rounded-lg text-left w-[45%] flex flex-col justify-center">
+          <div className="bg-[#2A88E0] text-white p-4 rounded-lg text-left w-[45%] flex flex-col justify-center dark:bg-[#1f5f9b]">
             <ChartColumnIncreasing />
             <div className="mt-2">
               <p className="text-lg">Hello 👋</p>
@@ -80,7 +80,7 @@ const ViewApplicants = (props: Props) => {
             <ChartBarDefault data={data} />
           </div>
         </div>
-        <div className="text-left mt-6 p-4 rounded-2xl bg-[#F2E9D9]">
+        <div className="text-left mt-6 p-4 rounded-2xl bg-[#F2E9D9] dark:bg-[#bbab90]">
           <p className="text-2xl font-bold text-left">Candidate List</p>
           <TabsForApplicant currentUrl={props.currentUrl} setDataOfCandidates={setData} dataOfCandidates={data}/>
         </div>
