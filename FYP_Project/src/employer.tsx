@@ -142,17 +142,16 @@ let EmployerPage = (props: Props) => {
         jobs.forEach((element) => {
           let jobList: JobsObject[] = element.active_jobs_list;
           let companyId = element.id;
-          jobList.forEach((valuesOfJobsForShown, index) => {
+          jobList.forEach((valuesOfJobsForShown) => {
             if (valuesOfJobsForShown.deleted_at === null) {
               newDataOfJobs.push({
                 ...valuesOfJobsForShown,
                 company_id: companyId,
               });
             }
-            if (index == jobs.length - 1) {
               setDataOfJobs(newDataOfJobs);
               setToSearchDataOfJobs(newDataOfJobs);
-            }
+            
           });
         });
       });
