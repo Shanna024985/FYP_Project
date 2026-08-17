@@ -27,8 +27,8 @@ import Messages from "./Messages";
 import ViewMyCompanies from "./ViewMyCompanies";
 import Footer from "./Footer";
 import AiChatBot from "./AIChatbot";
-const linkForBackend = "https://fyp-project-fkmo.onrender.com/api";
 // const linkForBackend = "http://localhost:3000/api";
+const linkForBackend = "https://fyp-project-fkmo.onrender.com/api";
 function App() {
 
   return (
