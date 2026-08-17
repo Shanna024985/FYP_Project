@@ -103,8 +103,9 @@ export default function MyReviewsPage({ currentUrl }: Props) {
   };
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-8">
-      <NavigationMenus currentUrl={currentUrl} />
+    <div className="flex flex-col gap-6">
+      <NavigationMenus currentUrl={currentUrl}/>
+      <div className="mx-auto max-w-7xl space-y-6">
       {/* Row 1 */}
       <h1 className="mb-2 text-3xl font-bold text-black! dark:text-white!">My Reviews</h1>
 
@@ -228,6 +229,7 @@ export default function MyReviewsPage({ currentUrl }: Props) {
       )}
 
       <div className="hidden">{currentUrl}</div>
+    </div>
     </div>
   );
 }
