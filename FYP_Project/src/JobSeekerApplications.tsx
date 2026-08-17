@@ -87,7 +87,7 @@ export default function MyApplicationsPage({ currentUrl }: Props) {
   return (
     <div className="flex flex-col gap-6">
       <NavigationMenus currentUrl={currentUrl}/>
-      <div className="mx-auto max-w-7xl space-y-6">
+      <div className="mx-auto w-[95%] space-y-6">
         {/* PAGE TITLE */}
         <div>
           <h1 className="text-3xl font-bold text-black! dark:text-white!">My Applications</h1>
