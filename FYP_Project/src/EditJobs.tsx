@@ -1,4 +1,4 @@
-import  { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import NavigationMenus from "./NavigationMenu";
 import { Field, FieldGroup, FieldLabel } from "./components/ui/field";
 import { Input } from "./components/ui/input";
@@ -59,18 +59,55 @@ let StatusOfJob = (props: Statuses) => {
   );
 };
 let JobType = (props: Statuses) => {
-  let [options] = useState([
-    "Full-Time",
-    "Part-Time",
-    "Contract",
-    "GIG",
-  ]);
+  let [options] = useState(["Full-Time", "Part-Time", "Contract", "GIG"]);
   return (
     <>
       {options.map((value) => {
         return (
           <NativeSelectOption value={value} selected={value === props.status}>
             {value}
+          </NativeSelectOption>
+        );
+      })}
+    </>
+  );
+};
+let SalaryDuration = (props: Statuses) => {
+  let [options] = useState([{option: "Per Week", value: "Week"}, {option:"Per Month", value:"Month"}, {option:"Per Year",value:"Year"}]);
+  return (
+    <>
+      {options.map((value) => {
+        return (
+          <NativeSelectOption value={value.value} selected={value.value === props.status}>
+            {value.option}
+          </NativeSelectOption>
+        );
+      })}
+    </>
+  );
+};
+let PreferredDuration = (props: Statuses) => {
+  let [options] = useState([{option: "1 Week", value: "sevendays"}, {option:"1 Month", value:"thirtydays"}, {option:"6 Months",value:"sixmonth"}, {option: "1 Year", value: "oneyear"},{option: "More than 1 year", value: "greaterthanoneyear"}]);
+  return (
+    <>
+      {options.map((value) => {
+        return (
+          <NativeSelectOption value={value.value} selected={value.value === props.status}>
+            {value.option}
+          </NativeSelectOption>
+        );
+      })}
+    </>
+  );
+};
+let JobCategory = (props: Statuses) => {
+  let [options] = useState([{option: "Admin & Secretarial", value: "admin"}, {option:"Business & Finance", value:"business"}, {option:"Engineering",value:"engineering"}, {option: "Customer Support", value: "customersupport"},{option: "IT & Software", value: "it"},{option: "Design & Creatives", value: "design"},{option: "Education & Training", value: "education"},{option: "Healthcare & Science", value: "science"},{option: "Legal & Security", value: "security"},{option: "Logistics & Transportation", value:"transportation"},{option: "Marketing & Advertising", value: "marketing"}, {option: "Part-time & Freelance", value: "part-timer"}, {option: "Sales & Retail", value: "sales"}, {option: "Trades & Services", value: "trading"}, {option: "Writing & Translation", value: "writing"}]);
+  return (
+    <>
+      {options.map((value) => {
+        return (
+          <NativeSelectOption value={value.value} selected={value.value === props.status}>
+            {value.option}
           </NativeSelectOption>
         );
       })}
@@ -190,7 +227,7 @@ const EditJobs = (props: Props) => {
   }, []);
   return (
     <div>
-      <NavigationMenus currentUrl={props.currentUrl}/>
+      <NavigationMenus currentUrl={props.currentUrl} />
       <div className="mt-5 ml-2">
         <p className="text-2xl font-bold text-left">Edit Job</p>
         <FieldGroup className="mt-8">
@@ -245,6 +282,21 @@ const EditJobs = (props: Props) => {
             </NativeSelect>
           </Field>
           <Field>
+            <FieldLabel htmlFor="jobCategory">Job Category</FieldLabel>
+            <NativeSelect
+            id="jobCategory"
+            onChange={(e) => {
+                if (jobReturned) {
+                  setJobReturned({
+                    ...jobReturned,
+                    type: e.target.value,
+                  });
+                }
+              }}>
+              <JobCategory status={jobReturned?.category}/>
+            </NativeSelect>
+          </Field>
+          <Field>
             <FieldLabel htmlFor="statusDropdown">Status</FieldLabel>
             <NativeSelect
               id="statusDropdown"
@@ -278,14 +330,19 @@ const EditJobs = (props: Props) => {
           </Field>
           <Field>
             <FieldLabel htmlFor="address">Address</FieldLabel>
-            <Input id="address" placeholder="12 st abc, 123456" value={jobReturned?.address}     onChange={(e) => {
+            <Input
+              id="address"
+              placeholder="12 st abc, 123456"
+              value={jobReturned?.address}
+              onChange={(e) => {
                 if (jobReturned) {
                   setJobReturned({
                     ...jobReturned,
                     address: e.target.value,
                   });
                 }
-              }}/>
+              }}
+            />
           </Field>
           <Field>
             <FieldLabel htmlFor="date-optional">
@@ -295,10 +352,9 @@ const EditJobs = (props: Props) => {
               date={dateReturned(jobReturned?.deadline ?? "")}
               onChange={(newDates) => {
                 if (newDates && jobReturned) {
-                  
                   setJobReturned({
                     ...jobReturned,
-                    deadline: newDates.toLocaleDateString("en-CA")
+                    deadline: newDates.toLocaleDateString("en-CA"),
                   });
                 }
               }}
@@ -371,11 +427,40 @@ const EditJobs = (props: Props) => {
               />
             </div>
           </Field>
+          <Field>
+            <FieldLabel htmlFor="salaryDuration">Salary Duration</FieldLabel>
+            <NativeSelect
+              id="salaryDuration"
+              onChange={(e) => {
+                if (jobReturned) {
+                  setJobReturned({
+                    ...jobReturned,
+                    salary_period: e.target.value,
+                  });
+                }
+              }}>
+                <SalaryDuration status={jobReturned?.salary_period}/>
+              </NativeSelect>
+          </Field>
+          <Field>
+            <FieldLabel >Preferred Duration</FieldLabel>
+            <NativeSelect id="preferredDuration"
+              onChange={(e) => {
+                if (jobReturned) {
+                  setJobReturned({
+                    ...jobReturned,
+                    duration: e.target.value,
+                  });
+                }
+              }}>
+                <PreferredDuration status={jobReturned?.duration}/>
+            </NativeSelect>
+          </Field>
         </FieldGroup>
         <div className="flex mt-9">
           <Button
             onClick={() => {
-              let companyId = jobReturned?.company_id
+              let companyId = jobReturned?.company_id;
               let body = JSON.stringify({
                 companyId: companyId,
                 ...jobReturned,

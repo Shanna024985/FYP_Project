@@ -306,7 +306,7 @@ const ConditionalRendererForSalary = (props: condition) => {
     return (
       <>
         <Field>
-          <FieldLabel>Salary Range (per month)</FieldLabel>
+          <FieldLabel>Salary Range</FieldLabel>
           <div className="flex justify-between">
             <Input
               id="minsalary"
@@ -348,9 +348,7 @@ const ConditionalRendererForSalary = (props: condition) => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value={"Week"}>Per Week</SelectItem>
-
               <SelectItem value={"Month"}>Per Month</SelectItem>
-
               <SelectItem value={"Year"}>Per Year</SelectItem>
             </SelectContent>
           </Select>
