@@ -81,7 +81,9 @@ export default function BookmarkButton({
       <Bookmark
         size={size}
         className={
-          bookmarked ? "fill-black text-black" : "text-muted-foreground"
+          bookmarked
+            ? "fill-black text-black dark:fill-white dark:text-white"
+            : "text-muted-foreground dark:text-gray-400"
         }
       />
     </button>
