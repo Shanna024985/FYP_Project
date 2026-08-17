@@ -151,7 +151,7 @@ const Messages = (props: Props) => {
                 let newListOfPeople = [
                   {
                     profile_picture_file_url:
-                      things.profile.profile_picture_file_url,
+                      things.profile.profile_picture_url,
                     time_sent: date,
                     most_recent_message: "",
                     user_id: things.profile.user_id,
