@@ -147,6 +147,10 @@ const Messages = (props: Props) => {
               .then((things) => {
                 console.log("User");
                 console.log(things);
+                if (things.profile.user_name == undefined){
+                  alert("Please set up your profile before using the messaging services")
+                  window.location.href = "/profile"
+                }
                 let date = new Date().toDateString();
                 let newListOfPeople = [
                   {
